@@ -1,8 +1,6 @@
 <%@include file="/WEB-INF/jsp/taglibs.jsp" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 
-<stripes:useActionBean var="staticBean" beanclass="nl.b3p.dashboard.service.admin.stripes.StaticViewerActionBean" event="info"/>
-
 <ul class="nav navbar-nav">
     <li${menuitem == 'index' ? ' class="active"' : ''}><a href="${contextPath}/admin/index.jsp">Start</a></li>
     <li class="dropdown">
