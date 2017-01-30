@@ -1,7 +1,13 @@
 package nl.b3p.dashboard.service.admin.stripes;
 
+import java.sql.Array;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.naming.NamingException;
 import net.sourceforge.stripes.action.*;
 import net.sourceforge.stripes.validation.*;
 import nl.b3p.dashboard.service.server.db.DB;
@@ -164,11 +170,18 @@ public class DashboardJSONActionBean implements ActionBean {
         return new ForwardResolution(JSP);
     }
 
-    public Resolution houten() {
+    public Resolution houten() throws NamingException, SQLException {
+        
+        String geometryTable = "houten_pc6";
+        String assetsTable = "v_playmapping_assets_compleet";
+        final List<String> id = new ArrayList<>();
+//        id.add("Houten"); 
+        id.add("Schalkwijk"); 
+        Array toSelect = null;
+            toSelect = DB.getConnection().createArrayOf("text", id.toArray());
+
         JSONObject result = new JSONObject();
         try {
-//            List<Map<String,Object>> rows2 = DB.qr().query("select *, st_asgeojson(lg.the_geom,2,2) as geometry "
-//                    + "from houten_pc6 AS lg", new MapListHandler());
             
             List<Map<String,Object>> rows = DB.qr().query(""
 	      +" (                                                                                          "
@@ -182,6 +195,7 @@ public class DashboardJSONActionBean implements ActionBean {
               +"          FROM                                                                              "
               +"              (                                                                             "
               +"                  SELECT                                                                    "
+//              +"                      lg.*,                                                                 "
               +"                      lg.postcode  AS naam,                                                 "
               +"                      lg.woonplaa_1 AS woonplaats,                                          "
               +"                      lg.aantaladressen AS aantaladressen,                                  "
@@ -204,7 +218,7 @@ public class DashboardJSONActionBean implements ActionBean {
               +"                                              SUM(a.afschrijving)     AS afschrijving,      "
               +"                                              SUM(a.aanschafwaarde)*0.035 AS beheer         "
               +"                                          FROM                                              "
-              +"                                              v_playmapping_assets_compleet a               "
+              +"                                              " + assetsTable +           " a               "
               +"                                          WHERE                                             "
               +"                                              ST_Contains(lg.the_geom, a.the_geom)          "
               +"                                          AND a.type <> 'veiligheidsondergrond'             "
@@ -216,7 +230,7 @@ public class DashboardJSONActionBean implements ActionBean {
               +"                                              SUM(a.afschrijving)     AS afschrijving,      "
               +"                                              SUM(a.aanschafwaarde)*0.005 AS beheer         "
               +"                                          FROM                                              "
-              +"                                              v_playmapping_assets_compleet a               "
+              +"                                              " + assetsTable +           " a               "
               +"                                          WHERE                                             "
               +"                                              ST_Contains(lg.the_geom, a.the_geom)          "
               +"                                          AND a.type = 'veiligheidsondergrond') AS          "
@@ -232,7 +246,7 @@ public class DashboardJSONActionBean implements ActionBean {
               +"                                      SUM(a.onderhoudskosten)::INT AS onderhoud,            "
               +"                                      SUM(a.afschrijving)::INT     AS afschrijving          "
               +"                                  FROM                                                      "
-              +"                                      v_playmapping_assets_compleet a                       "
+              +"                                      " + assetsTable +           " a                       "
               +"                                  WHERE                                                     "
               +"                                      ST_Contains(lg.the_geom, a.the_geom)                  "
               +"                                  AND a.type <> 'veiligheidsondergrond'                     "
@@ -247,7 +261,7 @@ public class DashboardJSONActionBean implements ActionBean {
               +"                                      a.installedyear,                                      "
               +"                                      COUNT(a.id) AS aantal                                 "
               +"                                  FROM                                                      "
-              +"                                      v_playmapping_assets_compleet a                       "
+              +"                                      " + assetsTable +           " a                       "
               +"                                  WHERE                                                     "
               +"                                      a.type <> 'veiligheidsondergrond'                     "
               +"                                  AND ST_Contains(lg.the_geom, a.the_geom)                  "
@@ -271,7 +285,7 @@ public class DashboardJSONActionBean implements ActionBean {
               +"                                              COUNT(id)           AS aantal,                "
               +"                                              SUM(aanschafwaarde) AS aanschafwaarde         "
               +"                                          FROM                                              "
-              +"                                              v_playmapping_assets_compleet a1              "
+              +"                                              " + assetsTable +           " a1              "
               +"                                          WHERE                                             "
               +"                                              type <> 'veiligheidsondergrond'               "
               +"                                          AND ST_Contains(lg.the_geom, a1.the_geom)         "
@@ -284,7 +298,7 @@ public class DashboardJSONActionBean implements ActionBean {
               +"                                              COUNT(id)           AS aantal,                "
               +"                                              SUM(aanschafwaarde) AS aanschafwaarde         "
               +"                                          FROM                                              "
-              +"                                              v_playmapping_assets_compleet a2              "
+              +"                                              " + assetsTable +           " a2              "
               +"                                          WHERE                                             "
               +"                                              type <> 'veiligheidsondergrond'               "
               +"                                          AND ST_Contains(lg.the_geom, a2.the_geom)         "
@@ -297,7 +311,7 @@ public class DashboardJSONActionBean implements ActionBean {
               +"                                              COUNT(id)           AS aantal,                "
               +"                                              SUM(aanschafwaarde) AS aanschafwaarde         "
               +"                                          FROM                                              "
-              +"                                              v_playmapping_assets_compleet a3              "
+              +"                                              " + assetsTable +           " a3              "
               +"                                          WHERE                                             "
               +"                                              type <> 'veiligheidsondergrond'               "
               +"                                          AND ST_Contains(lg.the_geom, a3.the_geom)         "
@@ -320,7 +334,7 @@ public class DashboardJSONActionBean implements ActionBean {
               +"                                      COUNT(a.id)           AS aantal,                      "
               +"                                      SUM(a.aanschafwaarde) AS aanschafwaarde_toestel       "
               +"                                  FROM                                                      "
-              +"                                      v_playmapping_assets_compleet a                       "
+              +"                                      " + assetsTable +           " a                       "
               +"                                  WHERE                                                     "
               +"                                      type <> 'veiligheidsondergrond'                       "
               +"                                  AND a.endoflifeyear < (date_part('year'::text, now        "
@@ -340,16 +354,19 @@ public class DashboardJSONActionBean implements ActionBean {
               +"                                      COUNT(a.id) AS aantal,                                "
               +"                                      a.manufacturer                                        "
               +"                                  FROM                                                      "
-              +"                                      v_playmapping_assets_compleet a                       "
+              +"                                      " + assetsTable +           " a                       "
               +"                                  WHERE                                                     "
               +"                                      ST_Contains(lg.the_geom, a.the_geom)                  "
               +"                                  GROUP BY                                                  "
               +"                                      a.manufacturer ) wd ) AS leveranciers ) AS l ))       "
               +"      AS                                                       properties                   "
               +"  FROM                                                                                      "
-              +"      houten_pc6 AS lg                                                                      "
-              +"  )                                                                                         "                    
-                    + "", new MapListHandler());
+              +"      " + geometryTable + " AS lg                                                           "
+              +"  WHERE                                                                                     "
+              +"      lg.woonplaa_1 = ANY(?) )                                                              "                    
+                    , new MapListHandler()
+                    , toSelect
+            );
 
             result = rowsToGeoJSONFeatureCollection2(rows);
         } catch(Exception e) {
