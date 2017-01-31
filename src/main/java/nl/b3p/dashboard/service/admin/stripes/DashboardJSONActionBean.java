@@ -7,9 +7,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.faces.bean.CustomScoped;
 import javax.naming.NamingException;
 import net.sourceforge.stripes.action.*;
 import net.sourceforge.stripes.validation.*;
@@ -89,7 +86,7 @@ public class DashboardJSONActionBean implements ActionBean {
     static {
         fieldsLocationTables.put("buurten2015", Arrays.asList("\"GM_NAAM\":gemeente", "the_geom", "\"BU_NAAM\":naam", "\"AANT_INW\":inwoneraantal"));
         fieldsLocationTables.put("wijken2015", Arrays.asList("\"GM_NAAM\":gemeente", "the_geom", "\"WK_NAAM\":naam", "\"AANT_INW\":inwoneraantal"));
-        fieldsLocationTables.put("gemeenten2015", Arrays.asList("\"GM_NAAM\":gemeente", "the_geom", "\"AANT_INW\":inwoneraantal"));
+        fieldsLocationTables.put("gemeenten2015", Arrays.asList("\"GM_NAAM\":gemeente", "the_geom","\"GM_NAAM\":naam", "\"AANT_INW\":inwoneraantal"));
         fieldsLocationTables.put("houten_pc6", Arrays.asList("woonplaa_1:woonplaats", "the_geom", "postcode:naam", "aantaladressen:aantaladressen"));
     }
 
@@ -168,11 +165,11 @@ public class DashboardJSONActionBean implements ActionBean {
         JSONObject result = new JSONObject();
         try {
             
-            List<Map<String,Object>> rows = getSpelenAggregatie(getLocationTable(), getLocationValue());
+            List<Map<String,Object>> rows = getBomenAggregatie(getLocationTable(), getLocationValue());
             
             if (!"gemeenten2015".equalsIgnoreCase(getLocationTable())) {
                 //voeg gemeenteoverzicht toe als detail is gevraagd
-                rows.addAll(getSpelenAggregatie("gemeenten2015", getLocationValue()));
+                rows.addAll(getBomenAggregatie("gemeenten2015", getLocationValue()));
             }
 
             result = rowsToGeoJSONFeatureCollection(rows);
