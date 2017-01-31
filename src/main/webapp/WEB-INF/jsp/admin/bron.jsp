@@ -24,56 +24,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         
         <jsp:include page="/WEB-INF/jsp/common/messages.jsp"/>
         <stripes:form beanclass="nl.b3p.dashboard.service.admin.stripes.DashboardJSONActionBean" class="form-horizontal">
-                <stripes:submit name="houten" class="btn btn-primary">houten</stripes:submit>
-                <stripes:submit name="wbbk" class="btn btn-primary">wbbk</stripes:submit>
+                <stripes:submit name="spelen" class="btn btn-primary">spelen</stripes:submit>
+                <stripes:submit name="bomen" class="btn btn-primary">bomen</stripes:submit>
                 <stripes:submit name="cancel" class="btn btn-default">Annuleren</stripes:submit>
 
-                <%--div class="form-group">
-                    <label class="col-sm-2 control-label">Tabblad:</label>
-                    <div class="col-sm-10">
-                        <stripes:text class="form-control" name="tab"/>
-                        <p class="help-block">Het tabblad in het kaartlagen scherm waar de laag kan worden in/uitgeschakeld.</p>
-                    </div>
+               
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Gemeentenaam:</label>
+                    <div class="col-sm-10"><stripes:text class="form-control" name="locationValue"/></div>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-2 control-label">Naam:</label>
-                    <div class="col-sm-10"><stripes:text class="form-control" name="name"/></div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-2 control-label">Inzetbalk knop: </label>
+                    <label class="col-sm-2 control-label">Aggregatieniveau: </label>
                     <div class="col-sm-10">
-                        <stripes:select name="layerToggleKey" class="form-control">
+                        <stripes:select name="locationTable" class="form-control">
+                            <c:forEach var="s" items="${actionBean.availableLocationTables}">
+                                <stripes:option value="${s}" label="${s}"/>
+                            </c:forEach>
+<%--                        
                             <stripes:option value="">Geen</stripes:option>
-                            <stripes:option value="Basis">Basis (groen)</stripes:option>
-                            <stripes:option value="Brandweer">Brandweer (rood)</stripes:option>
-                            <stripes:option value="Water">Water (blauw)</stripes:option>
-                            <stripes:option value="Gebouw">Gebouw (zwart)</stripes:option>
+--%>
                         </stripes:select>
-                        <p class="help-block">Indien de laag niet gekoppeld is aan een inzetbalk knop kan de laag worden in- en uitgeschakeld via het kaartlagen scherm. Als de laag gekoppeld is aan een knop kan de laag alleen worden geschakeld via de knop.</p>
                     </div>
                 </div>                
-                <div class="form-group">
-                    <label class="col-sm-2 control-label">Instellingen:</label>                    
-                    <div class="col-sm-10">
-                        <div class="checkbox">
-                            <label><stripes:checkbox name="layer.enabled"/>Beschikbaar</label>
-                        </div>
 
-                        <div class="checkbox">
-                            <label><stripes:checkbox name="visible"/>Standaard ingeschakeld</label>
-                        </div>                        
-                        <div class="checkbox">
-                            <label><stripes:checkbox name="dpiConversionEnabled"/>ArcGIS naar MapServer DPI conversie</label>
-                        </div>                        
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-2 control-label">Index:</label>
-                    <div class="col-sm-10">
-                        <stripes:text class="form-control" name="layer.index" size="3" maxlength="3"/>
-                        <p class="help-block">De index bepaalt of een laag bovenop of onderop een andere laag wordt getoond (een hogere index tov andere laag betekent bovenop)</p>
-                    </div>
-                </div --%>
 
          </stripes:form>
     </stripes:layout-component>
