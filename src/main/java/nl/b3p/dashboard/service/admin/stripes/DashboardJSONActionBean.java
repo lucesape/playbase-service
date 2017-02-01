@@ -19,54 +19,7 @@ import org.json.JSONObject;
 import org.postgresql.util.PGobject;
 
 /**
- * 
- * {
- *   "type": "FeatureCollection",
- *   "features": [
- *     {
- *       "type": "Feature",
- *       "geometry": {
- *         "type": "MultiPolygon",
- *         "crs": {
- *           "type": "name",
- *           "properties": {
- *             "name": "EPSG:28992"
- *           }
- *         },
- *         "coordinates": [
- *           [
- *             [
- *               [
- *                 140418.72,
- *                 448788.34
- *               ],
- *               [
- *                 140406.04,
- *                 448759.82
- *               ]
- *             ]
- *           ]
- *         ]
- *       },
- *       "properties": {
- *         "naam": "3994DJ",
- *         "woonplaats": "Houten",
- *         "aantaladressen": 4,
- *         "budget": {
- *           "aantal": 0,
- *           "onderhoud80": null,
- *           "afschrijving": null,
- *           "beheer": null
- *         },
- *         "groepaantal": null,
- *         "installedyear": null,
- *         "vervangjaar": null,
- *         "endoflifeyear": null,
- *         "leveranciers": null
- *       }
- *     }
- *   ]
- * }
+ * Export van JSON files voor gebruik in dashboard
  * 
  *
  * @author Chris van Lith
@@ -80,6 +33,8 @@ public class DashboardJSONActionBean implements ActionBean {
     private static final Log log = LogFactory.getLog(DashboardJSONActionBean.class);
     
     private static final String JSP = "/WEB-INF/jsp/admin/bron.jsp";
+    private static final String SPELEN = "spelen";
+    private static final String BOMEN = "bomen";
     
     private final static List availableLocationTables = Arrays.asList("buurten2015", "wijken2015", "gemeenten2015", "houten_pc6");
     private final static Map<String, List> fieldsLocationTables = new HashMap<>();
@@ -101,10 +56,11 @@ public class DashboardJSONActionBean implements ActionBean {
     
     @ValidationMethod()
     public void validateLocations(ValidationErrors errors) {
-        if(!"Houten".equals(locationValue)) {
-            errors.add("locationValue", new SimpleError(("Geen geldige location ingevuld!")));
-        }
+//        if(!"Houten".equals(locationValue)) {
+//            errors.add("locationValue", new SimpleError(("Geen geldige location ingevuld!")));
+//        }
     }
+    
     @Override
     public ActionBeanContext getContext() {
         return context;
@@ -139,51 +95,40 @@ public class DashboardJSONActionBean implements ActionBean {
     }
 
     public Resolution spelen() throws NamingException, SQLException {
-                
-        JSONObject result = new JSONObject();
-        try {
-            
-            List<Map<String,Object>> rows = getSpelenAggregatie(getLocationTable(), getLocationValue());
-            
-            if (!"gemeenten2015".equalsIgnoreCase(getLocationTable())) {
-                //voeg gemeenteoverzicht toe als detail is gevraagd
-                rows.addAll(getSpelenAggregatie("gemeenten2015", getLocationValue()));
-            }
-
-            result = rowsToGeoJSONFeatureCollection(rows);
-        } catch(Exception e) {
-            log.error("Error getting spelen data", e);
-            result.put("error", "Fout ophalen spelen data: " + e.getClass() + ": " + e.getMessage());
-
-        }
-        context.getResponse().addHeader("Access-Control-Allow-Origin", "*");
-        return new StreamingResolution("application/json", result.toString(4));
+        return writeAggregatie (SPELEN);
     }
     
     public Resolution bomen() throws NamingException, SQLException {
-        
+        return writeAggregatie (BOMEN);
+    }
+
+    private Resolution writeAggregatie (String aggregatie) {
         JSONObject result = new JSONObject();
         try {
             
-            List<Map<String,Object>> rows = getBomenAggregatie(getLocationTable(), getLocationValue());
+            List<Map<String,Object>> rows = getAggregatie(aggregatie, "snaptogrid", getLocationTable(), getLocationValue());
             
             if (!"gemeenten2015".equalsIgnoreCase(getLocationTable())) {
                 //voeg gemeenteoverzicht toe als detail is gevraagd
-                rows.addAll(getBomenAggregatie("gemeenten2015", getLocationValue()));
+                rows.addAll(getAggregatie(aggregatie, "centroid", "gemeenten2015", getLocationValue()));
             }
 
             result = rowsToGeoJSONFeatureCollection(rows);
         } catch(Exception e) {
-            log.error("Error getting bomen data", e);
-            result.put("error", "Fout ophalen bomen data: " + e.getClass() + ": " + e.getMessage());
+            log.error("Error getting " + aggregatie, e);
+            result.put("error", "Fout ophalen "+ aggregatie+ ": " 
+                    + e.getClass() + ": " + e.getMessage());
 
         }
         context.getResponse().addHeader("Access-Control-Allow-Origin", "*");
-        return new StreamingResolution("application/json", result.toString(4));
+        String name = aggregatie + "_" + getLocationTable() + "_" + getLocationValue()+ ".json";
+        StreamingResolution res =  new StreamingResolution("application/json", result.toString(4));
+        res.setFilename(name);
+        res.setAttachment(true);
+        return res;        
     }
     
-    protected List<Map<String,Object>> getSpelenAggregatie(String locTable, String locValue) throws NamingException, SQLException {
-        String assetsTable = "v_playmapping_assets_compleet";
+    private List<Map<String,Object>> getAggregatie(String aggregatie, String geomConverter, String locTable, String locValue) throws NamingException, SQLException {
         final List<String> id = new ArrayList<>();
         id.add(locValue); 
         Array toSelect = DB.getConnection().createArrayOf("text", id.toArray());
@@ -194,18 +139,27 @@ public class DashboardJSONActionBean implements ActionBean {
         
         StringBuilder sb = new StringBuilder();
 
-        sb.append(""
-          +"  SELECT                                                                                    "
-          +"      'Feature'                       AS type,                                              "
-          +"      ST_AsGeoJSON(lg." + geomColumn + ",2,2)::json AS geometry,                            "
-          +"      row_to_json(                                                                          "
-          +"      (                                                                                     "
-          +"          SELECT                                                                            "
-          +"              l                                                                             "
-          +"          FROM                                                                              "
-          +"              (                                                                             "
-          +"                  SELECT                                                                    ");
-
+        sb.append("SELECT ");
+        sb.append("'Feature' AS type,");
+        //geometrie als json
+        sb.append("ST_AsGeoJSON(");
+        if (geomConverter==null) {
+            sb.append("lg.").append(geomColumn);
+        } else if ("centroid".equalsIgnoreCase(geomConverter)) {
+            sb.append("ST_Centroid(");
+            sb.append("lg.").append(geomColumn);
+            sb.append(")");
+        } else if ("snaptogrid".equalsIgnoreCase(geomConverter)) {
+            sb.append("ST_SnapToGrid(");
+            sb.append("lg.").append(geomColumn);
+            sb.append(",1)");
+        }
+        sb.append(",2,2)::json AS geometry,");
+        // properties als json
+        sb.append("row_to_json((SELECT l FROM ");
+        // begin subselects
+        sb.append("(SELECT ");
+        // velden hoofdtabel
         for (String field : locationFields) {
             if (field.equalsIgnoreCase(locationFields.get(1))) {
                 //skip geometry field
@@ -213,320 +167,356 @@ public class DashboardJSONActionBean implements ActionBean {
             }
             sb.append(" lg.").append(field.split(":")[0]).append(" As ").append(field.split(":")[1]).append(", ");
         }
-
-        sb.append(""        
-          +"                      (                                                                     "
-          +"                          SELECT                                                            "
-          +"                              (row_to_json(budgetd) )                                       "
-          +"                          FROM                                                              "
-          +"                              (                                                             "
-          +"                                  SELECT                                                    "
-          +"                                      SUM(aantal)            AS aantal,                     "
-          +"                                      SUM(onderhoud)::INT    AS onderhoud80,                "
-          +"                                      SUM(afschrijving)::INT AS afschrijving,               "
-          +"                                      SUM(beheer)::INT       AS beheer                      "
-          +"                                  FROM                                                      "
-          +"                                      (                                                     "
-          +"                                          SELECT                                            "
-          +"                                              COUNT(a.id)                 AS aantal,        "
-          +"                                              SUM(a.onderhoudskosten)*0.8 AS                "
-          +"                                                                            onderhoud,      "
-          +"                                              SUM(a.afschrijving)     AS afschrijving,      "
-          +"                                              SUM(a.aanschafwaarde)*0.035 AS beheer         "
-          +"                                          FROM                                              "
-          +"                                              " + assetsTable +           " a               "
-          +"                                          WHERE                                             "
-          +"                                              ST_Contains(lg." + geomColumn + ", a.the_geom)"
-          +"                                          AND a.type <> 'veiligheidsondergrond'             "
-          +"                                          UNION                                             "
-          +"                                          SELECT                                            "
-          +"                                              COUNT(a.id)                 AS aantal,        "
-          +"                                              SUM(a.onderhoudskosten)*0.8 AS                "
-          +"                                                                            onderhoud,      "
-          +"                                              SUM(a.afschrijving)     AS afschrijving,      "
-          +"                                              SUM(a.aanschafwaarde)*0.005 AS beheer         "
-          +"                                          FROM                                              "
-          +"                                              " + assetsTable +           " a               "
-          +"                                          WHERE                                             "
-          +"                                              ST_Contains(lg." + geomColumn + ", a.the_geom)"
-          +"                                          AND a.type = 'veiligheidsondergrond') AS          "
-          +"                                      foo ) AS budgetd ) AS budget ,                        "
-          +"                      (                                                                     "
-          +"                          SELECT                                                            "
-          +"                              array_to_json(array_agg(row_to_json(groepaantald) ))          "
-          +"                          FROM                                                              "
-          +"                              (                                                             "
-          +"                                  SELECT                                                    "
-          +"                                      a.\"group\",                                          "
-          +"                                      COUNT(a.id)                  AS aantal,               "
-          +"                                      SUM(a.onderhoudskosten)::INT AS onderhoud,            "
-          +"                                      SUM(a.afschrijving)::INT     AS afschrijving          "
-          +"                                  FROM                                                      "
-          +"                                      " + assetsTable +           " a                       "
-          +"                                  WHERE                                                     "
-          +"                                      ST_Contains(lg." + geomColumn + ", a.the_geom)        "
-          +"                                  AND a.type <> 'veiligheidsondergrond'                     "
-          +"                                  GROUP BY                                                  "
-          +"                                      a.\"group\" ) AS groepaantald ) AS groepaantal ,      "
-          +"                      (                                                                     "
-          +"                          SELECT                                                            "
-          +"                              array_to_json(array_agg(row_to_json(installedyeard)))         "
-          +"                          FROM                                                              "
-          +"                              (                                                             "
-          +"                                  SELECT                                                    "
-          +"                                      a.installedyear,                                      "
-          +"                                      COUNT(a.id) AS aantal                                 "
-          +"                                  FROM                                                      "
-          +"                                      " + assetsTable +           " a                       "
-          +"                                  WHERE                                                     "
-          +"                                      a.type <> 'veiligheidsondergrond'                     "
-          +"                                  AND ST_Contains(lg." + geomColumn + ", a.the_geom)        "
-          +"                                  GROUP BY                                                  "
-          +"                                      a.installedyear ) AS installedyeard ) AS              "
-          +"                      installedyear ,                                                       "
-          +"                      (                                                                     "
-          +"                          SELECT                                                            "
-          +"                              array_to_json(array_agg(row_to_json(vervangjaard)))           "
-          +"                          FROM                                                              "
-          +"                              (                                                             "
-          +"                                  SELECT                                                    "
-          +"                                      vervangjaar              AS vervangjaar,              "
-          +"                                      SUM(aantal)              AS aantal,                   "
-          +"                                      SUM(aanschafwaarde)*1.35 AS aanschafwaarde            "
-          +"                                  FROM                                                      "
-          +"                                      (                                                     "
-          +"                                      (                                                     "
-          +"                                          SELECT                                            "
-          +"                                              vervangjaar1        AS vervangjaar,           "
-          +"                                              COUNT(id)           AS aantal,                "
-          +"                                              SUM(aanschafwaarde) AS aanschafwaarde         "
-          +"                                          FROM                                              "
-          +"                                              " + assetsTable +           " a1              "
-          +"                                          WHERE                                             "
-          +"                                              type <> 'veiligheidsondergrond'               "
-          +"                                          AND ST_Contains(lg." +geomColumn+ ", a1.the_geom) "
-          +"                                          GROUP BY                                          "
-          +"                                              vervangjaar1)                                 "
-          +"                                  UNION                                                     "
-          +"                                      (                                                     "
-          +"                                          SELECT                                            "
-          +"                                              vervangjaar2        AS vervangjaar,           "
-          +"                                              COUNT(id)           AS aantal,                "
-          +"                                              SUM(aanschafwaarde) AS aanschafwaarde         "
-          +"                                          FROM                                              "
-          +"                                              " + assetsTable +           " a2              "
-          +"                                          WHERE                                             "
-          +"                                              type <> 'veiligheidsondergrond'               "
-          +"                                          AND ST_Contains(lg." +geomColumn+ ", a2.the_geom) "
-          +"                                          GROUP BY                                          "
-          +"                                              vervangjaar2)                                 "
-          +"                                  UNION                                                     "
-          +"                                      (                                                     "
-          +"                                          SELECT                                            "
-          +"                                              vervangjaar3        AS vervangjaar,           "
-          +"                                              COUNT(id)           AS aantal,                "
-          +"                                              SUM(aanschafwaarde) AS aanschafwaarde         "
-          +"                                          FROM                                              "
-          +"                                              " + assetsTable +           " a3              "
-          +"                                          WHERE                                             "
-          +"                                              type <> 'veiligheidsondergrond'               "
-          +"                                          AND ST_Contains(lg." +geomColumn+ ", a3.the_geom) "
-          +"                                          GROUP BY                                          "
-          +"                                              vervangjaar3) ) AS foo                        "
-          +"                                  WHERE                                                     "
-          +"                                      vervangjaar < (date_part('year'::text, now()) +       "
-          +"                                      11)                                                   "
-          +"                                  GROUP BY                                                  "
-          +"                                      vervangjaar                                           "
-          +"                                  ORDER BY                                                  "
-          +"                                      vervangjaar ) AS vervangjaard ) AS vervangjaar,       "
-          +"                      (                                                                     "
-          +"                          SELECT                                                            "
-          +"                              array_to_json(array_agg(row_to_json(endoflifeyeard)))         "
-          +"                          FROM                                                              "
-          +"                              (                                                             "
-          +"                                  SELECT                                                    "
-          +"                                      a.endoflifeyear       AS endoflifeyear,               "
-          +"                                      COUNT(a.id)           AS aantal,                      "
-          +"                                      SUM(a.aanschafwaarde) AS aanschafwaarde_toestel       "
-          +"                                  FROM                                                      "
-          +"                                      " + assetsTable +           " a                       "
-          +"                                  WHERE                                                     "
-          +"                                      type <> 'veiligheidsondergrond'                       "
-          +"                                  AND a.endoflifeyear < (date_part('year'::text, now        "
-          +"                                      ()) + 11)                                             "
-          +"                                  AND ST_Contains(lg." + geomColumn + ", a.the_geom)        "
-          +"                                  GROUP BY                                                  "
-          +"                                      a.endoflifeyear                                       "
-          +"                                  ORDER BY                                                  "
-          +"                                      a.endoflifeyear ) AS endoflifeyeard ) AS              "
-          +"                      endoflifeyear,                                                        "
-          +"                      (                                                                     "
-          +"                          SELECT                                                            "
-          +"                              array_to_json(array_agg(row_to_json(wd)))                     "
-          +"                          FROM                                                              "
-          +"                              (                                                             "
-          +"                                  SELECT                                                    "
-          +"                                      COUNT(a.id) AS aantal,                                "
-          +"                                      a.manufacturer                                        "
-          +"                                  FROM                                                      "
-          +"                                      " + assetsTable +           " a                       "
-          +"                                  WHERE                                                     "
-          +"                                      ST_Contains(lg." + geomColumn + ", a.the_geom)        "
-          +"                                  GROUP BY                                                  "
-          +"                                      a.manufacturer ) wd ) AS leveranciers ) AS l ))       "
-          +"      AS                                                       properties                   "
-          +"  FROM                                                                                      "
-          +"      " + locTable + " AS lg                                                                "
-          +"  WHERE                                                                                     "
-          +"      lg." + checkColumn + " = ANY(?)                                                       ");
+        // velden aggregaties
+        String assetsTable;
+        switch (aggregatie) {
+            case SPELEN:
+                assetsTable = "v_pm_assets_compleet"; //v_playmapping_assets_compleet
+                sb.append(spelenBudgetSubselect(assetsTable, geomColumn)).append(",");
+                sb.append(spelenGroepaantalSubselect(assetsTable, geomColumn)).append(",");
+                sb.append(spelenInstalledyearSubselect(assetsTable, geomColumn)).append(",");
+                sb.append(spelenVervangjaarSubselect(assetsTable, geomColumn)).append(",");
+                sb.append(spelenEndoflifeyearSubselect(assetsTable, geomColumn)).append(",");
+                sb.append(spelenLeveranciersSubselect(assetsTable, geomColumn));
+                
+                break;
+            case BOMEN:
+                assetsTable = "v_bomen_jaarverloop";
+                sb.append(bomenBomenaantalSubselect(assetsTable, geomColumn)).append(",");
+                sb.append(bomenKostenSubselect(assetsTable, geomColumn)).append(",");
+                sb.append(bomenEindbeeldSubselect(assetsTable, geomColumn)).append(",");
+                sb.append(bomenMaatregelenKortSubselect(assetsTable, geomColumn)).append(",");
+                sb.append(bomenBoomhoogteSubselect(assetsTable, geomColumn));
+                break;
+            default:
+                throw new UnsupportedOperationException();
+        }
+        
+        // einde subselects
+        sb.append(") AS l )) AS properties ");
+        
+        sb.append("FROM ").append(locTable).append(" AS lg ");
+        sb.append("WHERE lg.").append(checkColumn).append(" = ANY(?) ");
 
         List<Map<String,Object>> rows = DB.qr().query(sb.toString(), new MapListHandler(), toSelect);
-
+        
         return rows;
     }
     
-    protected List<Map<String,Object>> getBomenAggregatie(String locTable, String locValue) throws NamingException, SQLException {
-        String assetsTable = "v_bomen_jaarverloop";
-        final List<String> id = new ArrayList<>();
-        id.add(locValue); 
-        Array toSelect = DB.getConnection().createArrayOf("text", id.toArray());
-        
-        List<String> locationFields = fieldsLocationTables.get(locTable);
-        String checkColumn = locationFields.get(0).split(":")[0];
-        String geomColumn = locationFields.get(1).split(":")[0];
-        
+    private String spelenBudgetSubselect(String assetsTable, String geomColumn) {
         StringBuilder sb = new StringBuilder();
+        sb.append("( ");
+        sb.append(" SELECT ");
+        sb.append("     (row_to_json(budgetd) ) ");
+        sb.append(" FROM ");
+        sb.append("     ( ");
+        sb.append("         SELECT ");
+        sb.append("             SUM(aantal)            AS aantal, ");
+        sb.append("             SUM(onderhoud)::INT    AS onderhoud80, ");
+        sb.append("             SUM(afschrijving)::INT AS afschrijving, ");
+        sb.append("             SUM(beheer)::INT       AS beheer ");
+        sb.append("         FROM ");
+        sb.append("             ( ");
+        sb.append("                 SELECT ");
+        sb.append("                     COUNT(a.id)                 AS aantal, ");
+        sb.append("                     SUM(a.onderhoudskosten)*0.8 AS ");
+        sb.append("                                                   onderhoud, ");
+        sb.append("                     SUM(a.afschrijving)     AS afschrijving, ");
+        sb.append("                     SUM(a.aanschafwaarde)*0.035 AS beheer ");
+        sb.append("                 FROM ");
+        sb.append("                     ").append(assetsTable).append(" a ");
+        sb.append("                 WHERE ");
+        sb.append("                     ST_Contains(lg.").append(geomColumn).append(", a.the_geom) ");
+        sb.append("                 AND a.type <> 'veiligheidsondergrond' ");
+        sb.append("                 UNION ");
+        sb.append("                 SELECT ");
+        sb.append("                     COUNT(a.id)                 AS aantal, ");
+        sb.append("                     SUM(a.onderhoudskosten)*0.8 AS ");
+        sb.append("                                                   onderhoud, ");
+        sb.append("                     SUM(a.afschrijving)     AS afschrijving, ");
+        sb.append("                     SUM(a.aanschafwaarde)*0.005 AS beheer ");
+        sb.append("                 FROM ");
+        sb.append("                     ").append(assetsTable).append(" a ");
+        sb.append("                 WHERE ");
+        sb.append("                     ST_Contains(lg.").append(geomColumn).append(", a.the_geom) ");
+        sb.append("                 AND a.type = 'veiligheidsondergrond') AS ");
+        sb.append("             foo ) AS budgetd ) AS budget ");
+        return sb.toString();
+    }
+    
+    private String spelenGroepaantalSubselect(String assetsTable, String geomColumn) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("(  ");
+        sb.append(" SELECT ");
+        sb.append("        array_to_json(array_agg(row_to_json(groepaantald) ))  ");
+        sb.append(" FROM ");
+        sb.append("        (  ");
+        sb.append("            SELECT ");
+        sb.append("                a.groep, ");
+        sb.append("                COUNT(a.id)                  AS aantal, ");
+        sb.append("                SUM(a.onderhoudskosten)::INT AS onderhoud,  ");
+        sb.append("                SUM(a.afschrijving)::INT     AS afschrijving  ");
+        sb.append("            FROM  ");
+        sb.append("                ").append(assetsTable).append(" a ");
+        sb.append("            WHERE  ");
+        sb.append("                ST_Contains(lg.").append(geomColumn).append(", a.the_geom) ");
+        sb.append("            AND a.type <> 'veiligheidsondergrond' ");
+        sb.append("            GROUP BY ");
+        sb.append("                a.groep ) AS groepaantald ) AS groepaantal ");
+        return sb.toString();
+    }
+ 
+    private String spelenInstalledyearSubselect(String assetsTable, String geomColumn) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("(  ");
+        sb.append(" SELECT ");
+        sb.append("    array_to_json(array_agg(row_to_json(installedyeard))) ");
+        sb.append(" FROM ");
+        sb.append("    ( ");
+        sb.append("     SELECT ");
+        sb.append("         a.installedyear, ");
+        sb.append("         COUNT(a.id) AS aantal ");
+        sb.append("     FROM  ");
+        sb.append("          ").append(assetsTable).append(" a  ");
+        sb.append("     WHERE ");
+        sb.append("          a.type <> 'veiligheidsondergrond'  ");
+        sb.append("     AND ST_Contains(lg.").append(geomColumn).append(", a.the_geom) ");
+        sb.append("     GROUP BY ");
+        sb.append("        a.installedyear ) AS installedyeard ) AS installedyear ");
+        return sb.toString();
+    }
+    
+    private String spelenVervangjaarSubselect(String assetsTable, String geomColumn) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("(  ");
+        sb.append(" SELECT ");
+        sb.append("     array_to_json(array_agg(row_to_json(vervangjaard))) ");
+        sb.append(" FROM ");
+        sb.append("     ( ");
+        sb.append("         SELECT ");
+        sb.append("             vervangjaar              AS vervangjaar, ");
+        sb.append("             SUM(aantal)              AS aantal, ");
+        sb.append("             SUM(aanschafwaarde)*1.35 AS aanschafwaarde ");
+        sb.append("         FROM ");
+        sb.append("             ( ");
+        sb.append("             ( ");
+        sb.append("                 SELECT ");
+        sb.append("                     vervangjaar1        AS vervangjaar, ");
+        sb.append("                     COUNT(id)           AS aantal, ");
+        sb.append("                     SUM(aanschafwaarde) AS aanschafwaarde ");
+        sb.append("                 FROM  ");
+        sb.append("                     ").append(assetsTable).append(" a1 ");
+        sb.append("                 WHERE ");
+        sb.append("                     type <> 'veiligheidsondergrond' ");
+        sb.append("                 AND ST_Contains(lg.").append(geomColumn).append(", a1.the_geom) ");
+        sb.append("                 GROUP BY ");
+        sb.append("                     vervangjaar1) ");
+        sb.append("         UNION ");
+        sb.append("             ( ");
+        sb.append("                 SELECT ");
+        sb.append("                     vervangjaar2        AS vervangjaar, ");
+        sb.append("                     COUNT(id)           AS aantal, ");
+        sb.append("                     SUM(aanschafwaarde) AS aanschafwaarde ");
+        sb.append("                 FROM ");
+        sb.append("                     ").append(assetsTable).append(" a2 ");
+        sb.append("                 WHERE ");
+        sb.append("                     type <> 'veiligheidsondergrond' ");
+        sb.append("                 AND ST_Contains(lg.").append(geomColumn).append(", a2.the_geom) ");
+        sb.append("                 GROUP BY ");
+        sb.append("                     vervangjaar2) ");
+        sb.append("         UNION ");
+        sb.append("             ( ");
+        sb.append("                 SELECT ");
+        sb.append("                     vervangjaar3        AS vervangjaar, ");
+        sb.append("                     COUNT(id)           AS aantal, ");
+        sb.append("                     SUM(aanschafwaarde) AS aanschafwaarde ");
+        sb.append("                 FROM ");
+        sb.append("                     ").append(assetsTable).append(" a3 ");
+        sb.append("                 WHERE ");
+        sb.append("                     type <> 'veiligheidsondergrond'  ");
+        sb.append("                 AND ST_Contains(lg.").append(geomColumn).append(", a3.the_geom) ");
+        sb.append("                 GROUP BY ");
+        sb.append("                     vervangjaar3) ) AS foo  ");
+        sb.append("         WHERE ");
+        sb.append("             vervangjaar < (date_part('year'::text, now()) + 11) ");
+        sb.append("         GROUP BY ");
+        sb.append("             vervangjaar ");
+        sb.append("         ORDER BY ");
+        sb.append("             vervangjaar ) AS vervangjaard ) AS vervangjaar ");
+        return sb.toString();
+    }
 
-        sb.append(""
-          +"  SELECT 'Feature' As type                                                                              "
-          +"		    , ST_AsGeoJSON(lg." +geomColumn+ ",2,2)::json As geometry                               "
-          +"		    , row_to_json((SELECT l FROM (                                                          "
-          +"                      SELECT                                                                            ");
+    private String spelenEndoflifeyearSubselect(String assetsTable, String geomColumn) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("(  ");
+        sb.append(" SELECT ");
+        sb.append("         array_to_json(array_agg(row_to_json(endoflifeyeard))) ");
+        sb.append(" FROM ");
+        sb.append("         ( ");
+        sb.append("             SELECT ");
+        sb.append("                 a.endoflifeyear       AS endoflifeyear, ");
+        sb.append("                 COUNT(a.id)           AS aantal, ");
+        sb.append("                 SUM(a.aanschafwaarde) AS aanschafwaarde_toestel ");
+        sb.append("             FROM ");
+        sb.append("                 ").append(assetsTable).append(" a ");
+        sb.append("             WHERE ");
+        sb.append("                 type <> 'veiligheidsondergrond' ");
+        sb.append("             AND a.endoflifeyear < (date_part('year'::text, now()) + 11) ");
+        sb.append("             AND ST_Contains(lg.").append(geomColumn).append(", a.the_geom) ");
+        sb.append("             GROUP BY ");
+        sb.append("                 a.endoflifeyear ");
+        sb.append("             ORDER BY  ");
+        sb.append("                 a.endoflifeyear ) AS endoflifeyeard ) AS endoflifeyear ");
+    
+       return sb.toString();
+    }
 
-        for (String field : locationFields) {
-            if (field.equalsIgnoreCase(locationFields.get(1))) {
-                //skip geometry field
-                continue;
-            }
-            sb.append(" lg.").append(field.split(":")[0]).append(" As ").append(field.split(":")[1]).append(", ");
-        }
+    private String spelenLeveranciersSubselect(String assetsTable, String geomColumn) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("(  ");
+        sb.append(" SELECT ");
+        sb.append("          array_to_json(array_agg(row_to_json(wd))) ");
+        sb.append("      FROM ");
+        sb.append("          ( ");
+        sb.append("              SELECT ");
+        sb.append("                  COUNT(a.id) AS aantal, ");
+        sb.append("                  a.manufacturer ");
+        sb.append("              FROM   ");
+        sb.append("                  ").append(assetsTable).append(" a ");
+        sb.append("              WHERE ");
+        sb.append("                  ST_Contains(lg.").append(geomColumn).append(", a.the_geom) ");
+        sb.append("              GROUP BY ");
+        sb.append("                  a.manufacturer ) wd ) AS leveranciers ");
+        return sb.toString();
+    }
+                  
+    private String bomenBomenaantalSubselect(String assetsTable, String geomColumn) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(" (SELECT COUNT(a.boomid) ");
+        sb.append("  FROM ");
+        sb.append("      ").append(assetsTable).append(" a  ");
+        sb.append("  WHERE ");
+        sb.append("      ST_Contains(lg.").append(geomColumn).append(", a.the_geom) ");
+        sb.append("      and a.jaarnr=0 ");
+        sb.append(" ) AS bomenaantal ");
+        return sb.toString();
+    }
 
-        sb.append(""        
-          +"                      (SELECT COUNT(a.boomid)                                                           "
-          +"                                          FROM                                                          "
-          +"                                              " + assetsTable + " a                                     "
-          +"                                          WHERE                                                         "
-          +"                                              ST_Contains(lg." +geomColumn+ ", a.the_geom)              "
-          +"                                              and a.jaarnr=0                                            "
-          +"                                          ) AS bomenaantal,                                             "
-          +"		      (                                                                                     "
-          +"                          SELECT                                                                        "
-          +"                              array_to_json(array_agg(row_to_json(kostend)))                            "
-          +"                          FROM                                                                          "
-          +"                              (                                                                         "
-          +"                                  SELECT                                                                "
-          +"                                      jaar            AS jaar,                                          "
-          +"                                      SUM(kosten)::INT       AS kosten                                  "
-          +"                                  FROM                                                                  "
-          +"                                      (                                                                 "
-          +"                                          SELECT                                                        "
-          +"                                              (date_part('year'::text, now()) + a.jaarnr) AS jaar,      "
-          +"                                              SUM(a.prijs) AS kosten                                    "
-          +"                                          FROM                                                          "
-          +"                                              " + assetsTable + " a                                     "
-          +"                                          WHERE                                                         "
-          +"                                              ST_Contains(lg." +geomColumn+ ", a.the_geom)              "
-          +"                                          GROUP BY a.jaarnr) AS foo                                     "
-          +"                                      GROUP BY                                                          "
-          +"                                      jaar                                                              "
-          +"                                  ORDER BY                                                              "
-          +"                                      jaar) AS kostend ) AS kosten,                                     "
-          +"	              (                                                                                     "
-          +"                          SELECT                                                                        "
-          +"                              array_to_json(array_agg(row_to_json(eindbeeldd)))                         "
-          +"                          FROM                                                                          "
-          +"                              (                                                                         "
-          +"                                  SELECT                                                                "
-          +"                                      trim(trailing from eindbeeld, ' ') AS eindbeeld,                  "
-          +"                                      SUM(kosten)::INT       AS kosten,                                 "
-          +"                                      SUM(aantal)	AS aantal                                           "
-          +"                                  FROM                                                                  "
-          +"                                      (                                                                 "
-          +"                                          SELECT                                                        "
-          +"                                              a.eindbeeld            AS eindbeeld,                      "
-          +"                                              SUM(a.prijs) AS kosten,                                   "
-          +"                                              COUNT(a.boomid) as aantal                                 "
-          +"                                          FROM                                                          "
-          +"                                              " + assetsTable + " a                                     "
-          +"                                          WHERE                                                         "
-          +"                                              ST_Contains(lg." +geomColumn+ ", a.the_geom)              "
-          +"                                              and a.jaarnr = 0                                          "
-          +"                                          GROUP BY a.eindbeeld) AS foo                                  "
-          +"                                      GROUP BY                                                          "
-          +"                                      eindbeeld                                                         "
-          +"                                  ORDER BY                                                              "
-          +"                                      eindbeeld) AS eindbeeldd ) AS eindbeeld,                          "
-          +"		      (                                                                                     "
-          +"                          SELECT                                                                        "
-          +"                              array_to_json(array_agg(row_to_json(maatregelen_kortd)))                  "
-          +"                          FROM                                                                          "
-          +"                              (                                                                         "
-          +"                                  SELECT                                                                "
-          +"                                      trim(trailing from maatregelen_kort, ' ') AS maatregelen_kort,    "
-          +"                                      SUM(kosten)::INT       AS kosten,                                 "
-          +"                                      SUM(aantal)	AS aantal                                           "
-          +"                                  FROM                                                                  "
-          +"                                      (                                                                 "
-          +"                                          SELECT                                                        "
-          +"                                              a.maatregelen_kort AS maatregelen_kort,                   "
-          +"                                              SUM(a.prijs) AS kosten,                                   "
-          +"                                              COUNT(a.boomid) as aantal                                 "
-          +"                                          FROM                                                          "
-          +"                                              " + assetsTable + " a                                     "
-          +"                                          WHERE                                                         "
-          +"                                              ST_Contains(lg." +geomColumn+ ", a.the_geom)              "
-          +"                                              and a.jaarnr = 0                                          "
-          +"                                          GROUP BY a.maatregelen_kort) AS foo                           "
-          +"                                      GROUP BY                                                          "
-          +"                                      maatregelen_kort                                                  "
-          +"                                  ORDER BY                                                              "
-          +"                                      maatregelen_kort) AS maatregelen_kortd ) AS maatregelen_kort,     "
-          +"		      (                                                                                     "
-          +"                          SELECT                                                                        "
-          +"                              array_to_json(array_agg(row_to_json(boomhoogted)))                        "
-          +"                          FROM                                                                          "
-          +"                              (                                                                         "
-          +"                                  SELECT                                                                "
-          +"                                      trim(trailing from boomhoogte, ' ') AS boomhoogte,                "
-          +"                                      SUM(kosten)::INT       AS kosten,                                 "
-          +"                                      SUM(aantal)	AS aantal                                           "
-          +"                                  FROM                                                                  "
-          +"                                      (                                                                 "
-          +"                                          SELECT                                                        "
-          +"                                              a.boomhoogte            AS boomhoogte,                    "
-          +"                                              SUM(a.prijs) AS kosten,                                   "
-          +"                                              COUNT(a.boomid) as aantal                                 "
-          +"                                          FROM                                                          "
-          +"                                              " + assetsTable + " a                                     "
-          +"                                          WHERE                                                         "
-          +"                                              ST_Contains(lg." +geomColumn+ ", a.the_geom)              "
-          +"                                              and a.jaarnr = 0                                          "
-          +"                                          GROUP BY a.boomhoogte) AS foo                                 "
-          +"                                      GROUP BY                                                          "
-          +"                                      boomhoogte                                                        "
-          +"                                  ORDER BY                                                              "
-          +"                                      boomhoogte) AS boomhoogted ) AS boomhoogte                        "
-          +"                                                                                                        "
-          +"                    ) AS l )) AS  properties                                                            "
-          +"  FROM                                                                                                  "
-          +"      " + locTable + " AS lg                                                                            "
-          +"  WHERE                                                                                                 "
-          +"      lg." + checkColumn + " = ANY(?)                                                                   ");
+    private String bomenKostenSubselect(String assetsTable, String geomColumn) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("(  ");
+        sb.append(" SELECT ");
+        sb.append("     array_to_json(array_agg(row_to_json(kostend))) ");
+        sb.append(" FROM ");
+        sb.append("     (  ");
+        sb.append("         SELECT  ");
+        sb.append("             jaar            AS jaar, ");
+        sb.append("             SUM(kosten)::INT       AS kosten  ");
+        sb.append("         FROM ");
+        sb.append("             ( ");
+        sb.append("                 SELECT ");
+        sb.append("                     (date_part('year'::text, now()) + a.jaarnr) AS jaar, ");
+        sb.append("                     SUM(a.prijs) AS kosten ");
+        sb.append("                 FROM ");
+        sb.append("                     ").append(assetsTable).append(" a ");
+        sb.append("                 WHERE ");
+        sb.append("                     ST_Contains(lg.").append(geomColumn).append(", a.the_geom) ");
+        sb.append("                 GROUP BY a.jaarnr) AS foo ");
+        sb.append("             GROUP BY ");
+        sb.append("             jaar  ");
+        sb.append("         ORDER BY  ");
+        sb.append("             jaar) AS kostend ) AS kosten ");
+        return sb.toString();
+    }
 
-        List<Map<String,Object>> rows = DB.qr().query(sb.toString(), new MapListHandler(), toSelect);
+    private String bomenEindbeeldSubselect(String assetsTable, String geomColumn) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("(  ");
+        sb.append(" SELECT ");
+        sb.append("     array_to_json(array_agg(row_to_json(eindbeeldd))) ");
+        sb.append(" FROM  ");
+        sb.append("     (  ");
+        sb.append("         SELECT  ");
+        sb.append("             trim(trailing from eindbeeld, ' ') AS eindbeeld, ");
+        sb.append("             SUM(kosten)::INT       AS kosten,  ");
+        sb.append("             SUM(aantal)	AS aantal ");
+        sb.append("         FROM ");
+        sb.append("             ( ");
+        sb.append("                 SELECT ");
+        sb.append("                     a.eindbeeld            AS eindbeeld,  ");
+        sb.append("                     SUM(a.prijs) AS kosten, ");
+        sb.append("                     COUNT(a.boomid) as aantal  ");
+        sb.append("                 FROM  ");
+        sb.append("                     ").append(assetsTable).append(" a  ");
+        sb.append("                 WHERE  ");
+        sb.append("                     ST_Contains(lg.").append(geomColumn).append(", a.the_geom) ");
+        sb.append("                     and a.jaarnr = 0 ");
+        sb.append("                 GROUP BY a.eindbeeld) AS foo ");
+        sb.append("             GROUP BY ");
+        sb.append("             eindbeeld ");
+        sb.append("         ORDER BY ");
+        sb.append("             eindbeeld) AS eindbeeldd ) AS eindbeeld ");
+        return sb.toString();
+    }
 
-        return rows;
+    private String bomenMaatregelenKortSubselect(String assetsTable, String geomColumn) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("(  ");
+        sb.append(" SELECT ");
+        sb.append("     array_to_json(array_agg(row_to_json(maatregelen_kortd))) ");
+        sb.append(" FROM  ");
+        sb.append("     ( ");
+        sb.append("         SELECT ");
+        sb.append("             trim(trailing from maatregelen_kort, ' ') AS maatregelen_kort, ");
+        sb.append("             SUM(kosten)::INT       AS kosten,  ");
+        sb.append("             SUM(aantal)	AS aantal ");
+        sb.append("         FROM  ");
+        sb.append("             (  ");
+        sb.append("                 SELECT ");
+        sb.append("                     a.maatregelen_kort AS maatregelen_kort, ");
+        sb.append("                     SUM(a.prijs) AS kosten, ");
+        sb.append("                     COUNT(a.boomid) as aantal ");
+        sb.append("                 FROM ");
+        sb.append("                     ").append(assetsTable).append(" a ");
+        sb.append("                 WHERE ");
+        sb.append("                     ST_Contains(lg.").append(geomColumn).append(", a.the_geom) ");
+        sb.append("                     and a.jaarnr = 0 ");
+        sb.append("                 GROUP BY a.maatregelen_kort) AS foo ");
+        sb.append("             GROUP BY ");
+        sb.append("             maatregelen_kort ");
+        sb.append("         ORDER BY ");
+        sb.append("             maatregelen_kort) AS maatregelen_kortd ) AS maatregelen_kort ");
+        return sb.toString();
+    }
+
+    private String bomenBoomhoogteSubselect(String assetsTable, String geomColumn) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("(  ");
+        sb.append(" SELECT ");
+        sb.append("     array_to_json(array_agg(row_to_json(boomhoogted))) ");
+        sb.append(" FROM  ");
+        sb.append("     ( ");
+        sb.append("         SELECT ");
+        sb.append("             trim(trailing from boomhoogte, ' ') AS boomhoogte,  ");
+        sb.append("             SUM(kosten)::INT       AS kosten,  ");
+        sb.append("             SUM(aantal)	AS aantal ");
+        sb.append("         FROM  ");
+        sb.append("             (  ");
+        sb.append("                 SELECT ");
+        sb.append("                     a.boomhoogte            AS boomhoogte,  ");
+        sb.append("                     SUM(a.prijs) AS kosten, ");
+        sb.append("                     COUNT(a.boomid) as aantal ");
+        sb.append("                 FROM ");
+        sb.append("                     ").append(assetsTable).append(" a ");
+        sb.append("                 WHERE ");
+        sb.append("                     ST_Contains(lg.").append(geomColumn).append(", a.the_geom) ");
+        sb.append("                     and a.jaarnr = 0  ");
+        sb.append("                 GROUP BY a.boomhoogte) AS foo  ");
+        sb.append("             GROUP BY ");
+        sb.append("             boomhoogte ");
+        sb.append("         ORDER BY ");
+        sb.append("             boomhoogte) AS boomhoogted ) AS boomhoogte ");
+        return sb.toString();
     }
     
     private JSONObject rowsToGeoJSONFeatureCollection(List<Map<String, Object>> rows) {
