@@ -214,7 +214,8 @@ public class DashboardJSONActionBean implements ActionBean {
         sb.append("             SUM(aantal)            AS aantal, ");
         sb.append("             SUM(onderhoud)::INT    AS onderhoud80, ");
         sb.append("             SUM(afschrijving)::INT AS afschrijving, ");
-        sb.append("             SUM(beheer)::INT       AS beheer ");
+        sb.append("             SUM(beheer)::INT       AS beheer, ");
+        sb.append("             SUM(aanschafwaarde)::INT       AS aanschafwaarde ");
         sb.append("         FROM ");
         sb.append("             ( ");
         sb.append("                 SELECT ");
@@ -222,7 +223,8 @@ public class DashboardJSONActionBean implements ActionBean {
         sb.append("                     SUM(a.onderhoudskosten)*0.8 AS ");
         sb.append("                                                   onderhoud, ");
         sb.append("                     SUM(a.afschrijving)     AS afschrijving, ");
-        sb.append("                     SUM(a.aanschafwaarde)*0.035 AS beheer ");
+        sb.append("                     SUM(a.aanschafwaarde)*0.035 AS beheer, ");
+        sb.append("                     SUM(a.aanschafwaarde) AS aanschafwaarde ");
         sb.append("                 FROM ");
         sb.append("                     ").append(assetsTable).append(" a ");
         sb.append("                 WHERE ");
@@ -234,7 +236,8 @@ public class DashboardJSONActionBean implements ActionBean {
         sb.append("                     SUM(a.onderhoudskosten)*0.8 AS ");
         sb.append("                                                   onderhoud, ");
         sb.append("                     SUM(a.afschrijving)     AS afschrijving, ");
-        sb.append("                     SUM(a.aanschafwaarde)*0.005 AS beheer ");
+        sb.append("                     SUM(a.aanschafwaarde)*0.005 AS beheer, ");
+        sb.append("                     SUM(a.aanschafwaarde) AS aanschafwaarde ");
         sb.append("                 FROM ");
         sb.append("                     ").append(assetsTable).append(" a ");
         sb.append("                 WHERE ");
@@ -255,7 +258,8 @@ public class DashboardJSONActionBean implements ActionBean {
         sb.append("                a.groep, ");
         sb.append("                COUNT(a.id)                  AS aantal, ");
         sb.append("                SUM(a.onderhoudskosten)::INT AS onderhoud,  ");
-        sb.append("                SUM(a.afschrijving)::INT     AS afschrijving  ");
+        sb.append("                SUM(a.afschrijving)::INT     AS afschrijving,  ");
+        sb.append("                SUM(a.aanschafwaarde)::INT     AS aanschafwaarde  ");
         sb.append("            FROM  ");
         sb.append("                ").append(assetsTable).append(" a ");
         sb.append("            WHERE  ");
