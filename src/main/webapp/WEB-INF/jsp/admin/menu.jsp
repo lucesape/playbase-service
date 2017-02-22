@@ -9,5 +9,11 @@
             <li${menuitem == 'json' ? ' class="active"' : ''}><stripes:link beanclass="nl.b3p.dashboard.service.admin.stripes.DashboardJSONActionBean">JSON</stripes:link></li>
         </ul>
     </li>
+    <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Importeren <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li${menuitem == 'apijson' ? ' class="active"' : ''}><stripes:link beanclass="nl.b3p.dashboard.service.admin.stripes.PlaymappingApiJSONActionBean">API JSON</stripes:link></li>
+        </ul>
+    </li>
   
 </ul>

@@ -171,7 +171,8 @@ public class DashboardJSONActionBean implements ActionBean {
         String assetsTable;
         switch (aggregatie) {
             case SPELEN:
-                assetsTable = "v_pm_assets_compleet"; //v_playmapping_assets_compleet
+                //assetsTable = "v_pm_assets_compleet"; //v_playmapping_assets_compleet
+                assetsTable = "v_pm_assets_api_compleet"; 
                 sb.append(spelenBudgetSubselect(assetsTable, geomColumn)).append(",");
                 sb.append(spelenGroepaantalSubselect(assetsTable, geomColumn)).append(",");
                 sb.append(spelenInstalledyearSubselect(assetsTable, geomColumn)).append(",");
