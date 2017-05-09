@@ -18,38 +18,22 @@
             <param-name>ActionResolver.Packages</param-name>
             <param-value>nl.b3p.dashboard.service.admin.stripes</param-value>
         </init-param>
-        <!--init-param>
-            <param-name>Extension.Packages</param-name>
-            <param-value>org.stripesstuff.stripersist,org.stripesstuff.plugin.session,org.stripesstuff.plugin.security</param-value>
-        </init-param-->
         <init-param>
             <param-name>MultipartWrapper.Class</param-name>
             <param-value>net.sourceforge.stripes.controller.multipart.CommonsMultipartWrapper</param-value>
         </init-param>
-        <!--init-param>
-            <param-name>CoreInterceptor.Classes</param-name>
-            <param-value>
-                org.stripesstuff.plugin.waitpage.WaitPageInterceptor,
-                net.sourceforge.stripes.controller.BeforeAfterMethodInterceptor,
-                net.sourceforge.stripes.controller.HttpCacheInterceptor
-            </param-value>
-        </init-param-->
         <init-param>
             <param-name>LocalePicker.Locales</param-name>
             <param-value>en_US,nl_NL</param-value>
         </init-param>
         <init-param>
             <param-name>LocalizationBundleFactory.ErrorMessageBundle</param-name>
-            <param-value>SafetymapsServerResources</param-value>
+            <param-value>DashboardServiceResources</param-value>
         </init-param>
         <init-param>
             <param-name>LocalizationBundleFactory.FieldNameBundle</param-name>
-            <param-value>SafetymapsServerResources</param-value>
+            <param-value>DashboardServiceResources</param-value>
         </init-param>
-        <!--init-param>
-            <param-name>SecurityManager.Class</param-name>
-            <param-value>org.stripesstuff.plugin.security.J2EESecurityManager</param-value>
-        </init-param-->
     </filter>
     <filter-mapping>
         <filter-name>StripesFilter</filter-name>
@@ -78,23 +62,11 @@
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>StripesDispatcher</servlet-name>
-        <url-pattern>/api/edit/*</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>StripesDispatcher</servlet-name>
         <url-pattern>/admin/action/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>StripesDispatcher</servlet-name>
         <url-pattern>*.wait</url-pattern>
-    </servlet-mapping>
-    <servlet>
-        <servlet-name>Features</servlet-name>
-        <servlet-class>nl.b3p.dashboard.service.server.dbk.DBKAPI</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>Features</servlet-name>
-        <url-pattern>/api/*</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
