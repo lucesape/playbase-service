@@ -5,10 +5,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.naming.NamingException;
 import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
@@ -22,9 +18,7 @@ import net.sourceforge.stripes.action.UrlBinding;
 import net.sourceforge.stripes.validation.Validate;
 import net.sourceforge.stripes.validation.ValidationErrors;
 import net.sourceforge.stripes.validation.ValidationMethod;
-import nl.b3p.commons.services.B3PCredentials;
 import nl.b3p.dashboard.service.server.db.DB;
-import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
@@ -336,6 +330,7 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
         return retval;
     }
     
+    // <editor-fold desc="Getters and setters" defaultstate="collapsed">
     /**
      * @return the locationGuid
      */
@@ -402,5 +397,5 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
         this.apiurl = apiurl;
     }
 
- 
+    // </editor-fold> 
 }

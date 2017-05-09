@@ -36,12 +36,12 @@ public class DashboardJSONActionBean implements ActionBean {
     private static final String SPELEN = "spelen";
     private static final String BOMEN = "bomen";
     
-    private final static List availableLocationTables = Arrays.asList("buurten2015", "wijken2015", "gemeenten2015", "houten_pc6");
+    private final static List availableLocationTables = Arrays.asList("buurt_2016", "wijk_2016", "gemeent_2016", "houten_pc6");
     private final static Map<String, List> fieldsLocationTables = new HashMap<>();
     static {
-        fieldsLocationTables.put("buurten2015", Arrays.asList("\"GM_NAAM\":gemeente", "the_geom", "\"BU_NAAM\":naam", "\"AANT_INW\":inwoneraantal"));
-        fieldsLocationTables.put("wijken2015", Arrays.asList("\"GM_NAAM\":gemeente", "the_geom", "\"WK_NAAM\":naam", "\"AANT_INW\":inwoneraantal"));
-        fieldsLocationTables.put("gemeenten2015", Arrays.asList("\"GM_NAAM\":gemeente", "the_geom","\"GM_NAAM\":naam", "\"AANT_INW\":inwoneraantal"));
+        fieldsLocationTables.put("buurt_2016", Arrays.asList("\"GM_NAAM\":gemeente", "the_geom", "\"BU_NAAM\":naam", "\"AANT_INW\":inwoneraantal"));
+        fieldsLocationTables.put("wijk_2016", Arrays.asList("\"GM_NAAM\":gemeente", "the_geom", "\"WK_NAAM\":naam", "\"AANT_INW\":inwoneraantal"));
+        fieldsLocationTables.put("gemeent_2016", Arrays.asList("\"GM_NAAM\":gemeente", "the_geom","\"GM_NAAM\":naam", "\"AANT_INW\":inwoneraantal"));
         fieldsLocationTables.put("houten_pc6", Arrays.asList("woonplaa_1:woonplaats", "the_geom", "postcode:naam", "aantaladressen:aantaladressen"));
     }
 

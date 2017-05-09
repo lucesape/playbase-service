@@ -1,17 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Context antiJARLocking="true" path="/dashboard-service">
-        <Resource 
-            name="jdbc/dashboard-service"
-            auth="Container"
-            type="javax.sql.DataSource"
-            username="digitree"
-            password="04zIYpUKFLUgAU0op"
-            driverClassName="org.postgresql.Driver"
-            url="jdbc:postgresql://x19.b3p.nl:5432/digitree_gis_test"
-            maxActive="40"
-            validationQuery="select 1"
-            timeBetweenEvictionRunsMillis="30000"
-            minEvictableIdleTimeMillis="5000"
-        />
-
+  <!--Resource auth="Container" 
+            driverClassName="org.postgresql.Driver" 
+            maxActive="40" minEvictableIdleTimeMillis="5000" 
+            name="jdbc/dashboard-service" password="04zIYpUKFLUgAU0op" 
+            timeBetweenEvictionRunsMillis="30000" type="javax.sql.DataSource" 
+            url="jdbc:postgresql://x19.b3p.nl:5432/digitree_gis_test" 
+            username="digitree" validationQuery="select 1"/-->
 </Context>
