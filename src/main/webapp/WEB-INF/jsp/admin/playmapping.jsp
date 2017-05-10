@@ -24,25 +24,32 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         
         <jsp:include page="/WEB-INF/jsp/common/messages.jsp"/>
         <stripes:form beanclass="nl.b3p.dashboard.service.admin.stripes.PlaymappingApiJSONActionBean" class="form-horizontal">
-                <stripes:submit name="spelen" class="btn btn-primary">spelen</stripes:submit>
+                <stripes:submit name="importPM" class="btn btn-primary">Importeer</stripes:submit>
                 <stripes:submit name="cancel" class="btn btn-default">Annuleren</stripes:submit>
 
                
                 <div class="form-group">
                     <label class="col-sm-2 control-label">Klant GUID</label>
-                    <div class="col-sm-10"><stripes:text class="form-control" name="locationGuid"/></div>
+                    <div class="col-sm-10"><stripes:text class="form-control" value="pietje" name="locationGuid"/></div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-2 control-label">API URL</label>
-                    <div class="col-sm-10"><stripes:text class="form-control" name="apiurl"/></div>
+                    <div class="col-sm-10">
+                        <stripes:select name="apiurl" >
+                            <stripes:option value="https://api.playmapping.com/CustomerAsset/GetAll" label="Assets"/>
+                            <stripes:option value="https://api.playmapping.com/CustomerLocation/GetAll" label="Locations"/>
+                        </stripes:select>
+                        
+                        <%--stripes:text class="form-control" name="apiurl"/--%>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-2 control-label">username</label>
-                    <div class="col-sm-10"><stripes:text class="form-control" name="username"/></div>
+                    <div class="col-sm-10"><stripes:text class="form-control" value="Chrisvanlith" name="username"/></div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-2 control-label">password</label>
-                    <div class="col-sm-10"><stripes:text class="form-control" name="password"/></div>
+                    <div class="col-sm-10"><stripes:text class="form-control" value="Chris.234!" name="password"/></div>
                 </div>
 
          </stripes:form>

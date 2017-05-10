@@ -1,6 +1,5 @@
-<%@include file="/WEB-INF/jsp/taglibs.jsp" %>
-<%@page errorPage="/WEB-INF/jsp/common/errorPage.jsp"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@include file="/WEB-INF/jsp/taglibs.jsp" %>
 
 <stripes:layout-definition>
     <c:set scope="request" var="menuitem" value="${menuitem}"/>

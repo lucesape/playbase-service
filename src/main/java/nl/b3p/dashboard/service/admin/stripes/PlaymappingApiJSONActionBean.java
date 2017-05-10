@@ -12,9 +12,10 @@ import net.sourceforge.stripes.action.DefaultHandler;
 import net.sourceforge.stripes.action.DontValidate;
 import net.sourceforge.stripes.action.ForwardResolution;
 import net.sourceforge.stripes.action.Resolution;
-import net.sourceforge.stripes.action.StreamingResolution;
+import net.sourceforge.stripes.action.SimpleMessage;
 import net.sourceforge.stripes.action.StrictBinding;
 import net.sourceforge.stripes.action.UrlBinding;
+import net.sourceforge.stripes.validation.SimpleError;
 import net.sourceforge.stripes.validation.Validate;
 import net.sourceforge.stripes.validation.ValidationErrors;
 import net.sourceforge.stripes.validation.ValidationMethod;
@@ -49,6 +50,7 @@ import org.apache.http.impl.client.HttpClients;
  * 
  *
  * @author Chris van Lith
+ * @author Meine Toonen
  */
 @StrictBinding
 @UrlBinding("/action/apijson")
@@ -59,25 +61,15 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
     private static final Log log = LogFactory.getLog(PlaymappingApiJSONActionBean.class);
     
     private static final String JSP = "/WEB-INF/jsp/admin/playmapping.jsp";
-    private static final String SPELEN = "spelen";
 
-
+    @Validate
+    private String locationGuid;
     @Validate(required=true)
-    private String locationGuid = "";
+    private String username;
     @Validate(required=true)
-    private String username = "";
+    private String password;
     @Validate(required=true)
-    private String password = "";
-    @Validate(required=true)
-    private String apiurl = "https://api.playmapping.com/CustomerAsset/GetAll";
-    
-    @ValidationMethod()
-    public void validateLocations(ValidationErrors errors) {
-//        if(!"???".equals(locationGuid)) {
-//            errors.add("locationGuid", new SimpleError(("Geen geldige location GUID ingevuld!")));
-//        }
-    }
-    
+    private String apiurl;
     
     @DefaultHandler
     @DontValidate
@@ -85,11 +77,11 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
         return new ForwardResolution(JSP);
     }
 
-    public Resolution spelen() throws NamingException, SQLException {
-        return collectJSON (SPELEN);
+    public Resolution importPM() throws NamingException, SQLException {
+        return collectJSON ();
     }
     
-    private Resolution collectJSON (String aggregatie) throws SQLException, NamingException {
+    private Resolution collectJSON () throws SQLException, NamingException {
         
         RequestConfig defaultRequestConfig = RequestConfig.custom()
             .setStaleConnectionCheckEnabled(false)
@@ -101,7 +93,7 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
         HttpClientBuilder hcb = HttpClients.custom()
                 .setDefaultRequestConfig(defaultRequestConfig);
         
-        HttpClientContext context = HttpClientContext.create();
+        HttpClientContext httpContext = HttpClientContext.create();
         if (getUsername() != null && getPassword() != null) {
             String hostname = null; //any
             int port = -1; //any
@@ -134,8 +126,8 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
                 HttpHost targetHost = new HttpHost(hostname, port, scheme);
                 authCache.put(targetHost, basicAuth);
                 // Add AuthCache to the execution context
-                context.setCredentialsProvider(credentialsProvider);
-                context.setAuthCache(authCache);
+                httpContext.setCredentialsProvider(credentialsProvider);
+                httpContext.setAuthCache(authCache);
                 log.debug("Preemptive credentials: hostname: " + hostname
                         + ", port: " + port
                         + ", username: " + getUsername()
@@ -157,7 +149,7 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
         String stringResult = null;
         HttpResponse response = null;
         try {
-            response = hc.execute(request, context);
+            response = hc.execute(request, httpContext);
             int statusCode = response.getStatusLine().getStatusCode();
             
             HttpEntity entity = response.getEntity();
@@ -195,21 +187,30 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
             String uq = "UPDATE temp_json SET values = ?;";
             int retval = DB.qr().update(uq, stringResult);
             if (retval == 1) {
-                result.put("aantal", retval);
                 result.put("status", "JSON weggeschreven naar DB");
                 // uitzoeken of het een locatie is of asset
-                refillAssetsApiTable();
+                String type = "";
+                if(apiurl.contains("Location")){
+                    retval = refillLocationsApiTable();
+                    type = "locaties";
+                }else if(apiurl.contains("Asset")){
+                    retval = refillAssetsApiTable();
+                    type = "assets";
+                }else{
+                    context.getValidationErrors().add("apiurl", new SimpleError("Wrong url selected."));
+                    return new ForwardResolution(JSP);
+                }
+                result.put("aantal", retval);
+                context.getMessages().add(new SimpleMessage("Er zijn " + retval + " " + type + " weggeschreven."));
                 
             } else {
-                result.put("aantal", retval);
-                result.put("status", "JSON niet weggeschreven naar DB");
+                //result.put("aantal", retval);
+                context.getValidationErrors().add("status", new SimpleError("JSON niet weggeschreven naar DB"));
+                //result.put("status", "JSON niet weggeschreven naar DB");
             }
             stringResult = result.toString(4);
         }
-        StreamingResolution res =  new StreamingResolution("application/json", stringResult);
-        res.setFilename(getLocationGuid() + ".json");
-        res.setAttachment(true);
-        return res;        
+        return new ForwardResolution(JSP);
     }
     
     private int refillAssetsApiTable() throws NamingException, SQLException {
@@ -218,10 +219,10 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
         //leeg maken
         sb.append("truncate pm_assets_api;");
         int retval = DB.qr().update(sb.toString());
-        if (retval <= 0) {
+       /* if (retval <= 0) {
             return retval;
         }
-        
+        */
         //vullen vanuit temp_json
         sb = new StringBuilder();
         sb.append("insert into pm_assets_api (");
@@ -325,7 +326,7 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
         sb.append("            json_array_elements(json_extract_path_text(VALUES::json,'ChildLocations')::json) AS ");
         sb.append("            VALUES ");
         sb.append("        FROM ");
-        sb.append("            temp_json_3 ) a;");
+        sb.append("            temp_json_2 ) a;");
         retval = DB.qr().update(sb.toString());
         return retval;
     }
