@@ -146,9 +146,6 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
         request.setHeader("Accept-Language", "NL");
         request.setHeader("Accept", "application/json");
 
-        JSONObject result = new JSONObject();
-        result.put("guid", getLocationGuid());
-        
         String stringResult = null;
         HttpResponse response = null;
         try {
@@ -157,15 +154,14 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
             
             HttpEntity entity = response.getEntity();
             if (statusCode != 200) {
-                result.put("status code", statusCode);
-                result.put("reason", response.getStatusLine().getReasonPhrase());
+                context.getValidationErrors().add("status", new SimpleError("Could not retrieve JSON. Status " + statusCode + ". Reason given: " + response.getStatusLine().getReasonPhrase()));
             } else {
                 //InputStream is = entity.getContent();
                 stringResult = EntityUtils.toString(entity);
             }
         } catch (IOException ex) {
             log.debug("Exception False: ", ex);
-            result.put("error", ex.getLocalizedMessage());
+            context.getValidationErrors().add("status", new SimpleError("Could not retrieve JSON." + ex.getLocalizedMessage()));
         } finally {
             if (hc instanceof CloseableHttpClient) {
                 try {
@@ -183,35 +179,24 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
             }
         }
         
-        if (stringResult == null) {
-            stringResult = result.toString(4);
-        } else {
+        if (stringResult != null) {
             //moet later beter
-            String uq = "INSERT INTO temp_json (values) VALUES (?);";
-            int retval = DB.qr().update(uq, stringResult);
-            if (retval == 1) {
-                result.put("status", "JSON weggeschreven naar DB");
+            int retval = 0;
                 // uitzoeken of het een locatie is of asset
-                String type = "";
-                if(apiurl.contains("Location")){
-                    retval = refillLocationsApiTable(stringResult);
-                    type = "locaties";
-                }else if(apiurl.contains("Asset")){
-                    retval = refillAssetsApiTable();
-                    type = "assets";
-                }else{
-                    context.getValidationErrors().add("apiurl", new SimpleError("Wrong url selected."));
-                    return new ForwardResolution(JSP);
-                }
-                result.put("aantal", retval);
-                context.getMessages().add(new SimpleMessage("Er zijn " + retval + " " + type + " weggeschreven."));
-                
+            String type = "";
+            String uq = "INSERT INTO temp_json (values) VALUES (?);";
+            retval = DB.qr().update(uq, stringResult);
+            if (apiurl.contains("Location")) {
+                retval = refillLocationsApiTable(stringResult);
+                type = "locaties";
+            } else if (apiurl.contains("Asset")) {
+                retval = refillAssetsApiTable();
+                type = "assets";
             } else {
-                //result.put("aantal", retval);
-                context.getValidationErrors().add("status", new SimpleError("JSON niet weggeschreven naar DB"));
-                //result.put("status", "JSON niet weggeschreven naar DB");
+                context.getValidationErrors().add("apiurl", new SimpleError("Wrong url selected."));
+                return new ForwardResolution(JSP);
             }
-            stringResult = result.toString(4);
+            context.getMessages().add(new SimpleMessage("Er zijn " + retval + " " + type + " weggeschreven."));
         }
         return new ForwardResolution(JSP);
     }
