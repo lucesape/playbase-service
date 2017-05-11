@@ -70,12 +70,56 @@ public class PlaymappingApiJSONActionBeanTest {
         assertEquals(14, real.get("AssetCount"));
         assertEquals(0, ((JSONArray)real.get("ChildLocations")).length());
         assertEquals(0, ((JSONArray)real.get("Documents")).length());
-        assertEquals(2, ((JSONArray)real.get("Images")).length());
+        assertEquals(2, ((List)real.get("Images")).size());
     }
     
     @Test
-    public void testParseAssets(){
-        
+    public void testParseAssets() throws IOException {
+        InputStream in = PlaymappingApiJSONActionBeanTest.class.getResourceAsStream("haarlemAssets.json");
+        String location = IOUtils.toString(in);
+        List<Map<String, Object>> returnValue = instance.parseAssets(location);
+        assertEquals(2339, returnValue.size());
     }
     
+    @Test
+    public void testParseAsset(){
+        String assetString = "{\"$id\": \"1\",\"ID\": \"dc5d0399-ccc4-4c22-9ab0-2a7b9ff80a19\",\"LocationID\": \"0d415c38-ca18-4d67-a716-00df56df8736\",\"LocationName\": \"Centrum\\\\C136/1005 Vroonhof 1\",\"LastUpdated\": \"2013-01-29T11:24:59.25\",\"Name\": \"Motorfiets\",\"AssetType\": \"Wiptoestellen/Type 2A - Enkelpunts - 1 richting\",\"Manufacturer\": \"KOMPAN A/S\",\"Product\": \"MOMENTS\\\\M130P\",\"SerialNumber\": \"04\",\"Material\": \"\",\"InstalledDate\": \"1988-01-01\",\"EndOfLifeYear\": -1,\"ProductID\": \"eeb6cc3b-0f77-40ac-8926-09588625244d\",\"ProductVariantID\": \"0ff2d747-6634-4ac5-861d-697ab4d80762\",\"Height\": 820,\"Depth\": 900,\"Width\": 360,\"FreefallHeight\": 560,\"SafetyZoneLength\": 3500,\"SafetyZoneWidth\": 2360,\"AgeGroupToddlers\": true,\"AgeGroupJuniors\": false,\"AgeGroupSeniors\": false,\"PricePurchase\": 700.0,\"PriceInstallation\": -1.0,\"PriceReInvestment\": -1.0,\"PriceMaintenance\": -1.0,\"PriceIndexation\": -1.0,\"Lat\": \"52,38138\",\"Lng\": \"4,641622\",\"Images\": [{\"$id\": \"3\",\"ID\": \"7f8ac724-1821-4bee-8f34-f8894deb5cac\",\"LastUpdated\": \"2010-07-06T18:15:08.453\",\"URI\": \"http://www.playmapping.com/GetImage.ashx?g=7f8ac724-1821-4bee-8f34-f8894deb5cac&w=350&h=350\",\"Description\": \"\"}],\"Documents\": [],\"Hyperlinks\": [],\"LinkedAssets\": []}";
+        JSONObject assetJSON = new JSONObject(assetString);
+        Map<String, Object> map = instance.parseAsset(assetJSON);
+        assertEquals("1", map.get("$id"));
+        assertEquals("dc5d0399-ccc4-4c22-9ab0-2a7b9ff80a19", map.get("ID"));
+        assertEquals("0d415c38-ca18-4d67-a716-00df56df8736", map.get("LocationID"));
+        assertEquals("Centrum\\C136/1005 Vroonhof 1", map.get("LocationName"));
+        assertEquals("2013-01-29T11:24:59.25", map.get("LastUpdated"));
+        assertEquals("Motorfiets", map.get("Name"));
+        assertEquals("Wiptoestellen/Type 2A - Enkelpunts - 1 richting", map.get("AssetType"));
+        assertEquals("KOMPAN A/S", map.get("Manufacturer"));
+        assertEquals("MOMENTS\\M130P", map.get("Product"));
+        assertEquals("04", map.get("SerialNumber"));
+        assertEquals("", map.get("Material"));
+        assertEquals("1988-01-01", map.get("InstalledDate"));
+        assertEquals(-1, map.get("EndOfLifeYear"));
+        assertEquals("eeb6cc3b-0f77-40ac-8926-09588625244d", map.get("ProductID"));
+        assertEquals("0ff2d747-6634-4ac5-861d-697ab4d80762", map.get("ProductVariantID"));
+        assertEquals(820, map.get("Height"));
+        assertEquals(900, map.get("Depth"));
+        assertEquals(360, map.get("Width"));
+        assertEquals(560, map.get("FreefallHeight"));
+        assertEquals(3500, map.get("SafetyZoneLength"));
+        assertEquals(2360, map.get("SafetyZoneWidth"));
+        assertEquals(true, map.get("AgeGroupToddlers"));
+        assertEquals(false, map.get("AgeGroupJuniors"));
+        assertEquals(false, map.get("AgeGroupSeniors"));
+        assertEquals(700.0, map.get("PricePurchase"));
+        assertEquals(-1.0, map.get("PriceInstallation"));
+        assertEquals(-1.0, map.get("PriceReInvestment"));
+        assertEquals(-1.0, map.get("PriceMaintenance"));
+        assertEquals(-1.0, map.get("PriceIndexation"));
+        assertEquals(52.38138, map.get("Lat"));
+        assertEquals(4.641622, map.get("Lng"));
+        assertEquals(0, ((JSONArray)map.get("Documents")).length());
+        assertEquals(1, ((List)map.get("Images")).size());
+        assertEquals(0, ((JSONArray)map.get("Hyperlinks")).length());
+    }
+
 }

@@ -301,7 +301,53 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
     
     protected List<Map<String, Object>> parseAssets(String assetsString){
         List<Map<String,Object>> assets = new ArrayList<>();
+        JSONArray assetsArray = new JSONArray(assetsString);
+        
+        for(int i = 0; i < assetsArray.length() ;i++){
+            JSONObject asset = assetsArray.getJSONObject(i);
+            assets.add(parseAsset(asset));
+            
+        }
         return assets;
+    }
+    
+    protected Map<String, Object> parseAsset(JSONObject assetJSON) {
+        Map<String, Object> asset = new HashMap<>();
+        asset.put("$id", assetJSON.optString("$id"));
+        asset.put("ID", assetJSON.optString("ID"));
+        asset.put("LocationID", assetJSON.optString("LocationID"));
+        asset.put("LocationName", assetJSON.optString("LocationName"));
+        asset.put("LastUpdated", assetJSON.optString("LastUpdated"));
+        asset.put("Name", assetJSON.optString("Name").replaceAll("\'", "\'\'"));
+        asset.put("AssetType", assetJSON.optString("AssetType"));
+        asset.put("Manufacturer", assetJSON.optString("Manufacturer"));
+        asset.put("Product", assetJSON.optString("Product"));
+        asset.put("SerialNumber", assetJSON.optString("SerialNumber"));
+        asset.put("Material", assetJSON.optString("Material"));
+        asset.put("InstalledDate", assetJSON.optString("InstalledDate"));
+        asset.put("EndOfLifeYear", assetJSON.optInt("EndOfLifeYear"));
+        asset.put("ProductID", assetJSON.optString("ProductID"));
+        asset.put("ProductVariantID", assetJSON.optString("ProductVariantID"));
+        asset.put("Height", assetJSON.optInt("Height"));
+        asset.put("Depth", assetJSON.optInt("Depth"));
+        asset.put("Width", assetJSON.optInt("Width"));
+        asset.put("FreefallHeight", assetJSON.optInt("FreefallHeight"));
+        asset.put("SafetyZoneLength", assetJSON.optInt("SafetyZoneLength"));
+        asset.put("SafetyZoneWidth", assetJSON.optInt("SafetyZoneWidth"));
+        asset.put("AgeGroupToddlers", assetJSON.optBoolean("AgeGroupToddlers"));
+        asset.put("AgeGroupJuniors", assetJSON.optBoolean("AgeGroupJuniors"));
+        asset.put("AgeGroupSeniors", assetJSON.optBoolean("AgeGroupSeniors"));
+        asset.put("PricePurchase", assetJSON.optDouble("PricePurchase"));
+        asset.put("PriceInstallation", assetJSON.optDouble("PriceInstallation"));
+        asset.put("PriceReInvestment", assetJSON.optDouble("PriceReInvestment"));
+        asset.put("PriceMaintenance", assetJSON.optDouble("PriceMaintenance"));
+        asset.put("PriceIndexation", assetJSON.optDouble("PriceIndexation"));
+        asset.put("Lat", Double.parseDouble(assetJSON.optString("Lat").replaceAll(",", ".")));
+        asset.put("Lng", Double.parseDouble(assetJSON.optString("Lng").replaceAll(",", ".")));
+        asset.put("Documents", assetJSON.optJSONArray("Documents"));
+        asset.put("Hyperlinks", assetJSON.optJSONArray("Hyperlinks"));
+        asset.put("Images", parseImages(assetJSON.optJSONArray("Images")));
+        return asset;
     }
     
     
@@ -337,11 +383,29 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
         location.put("Lat", Double.parseDouble(json.optString("Lat").replaceAll(",", ".")));
         location.put("Lng", Double.parseDouble(json.optString("Lng").replaceAll(",", ".")));
         location.put("ChildLocations", json.optJSONArray("ChildLocations"));
-        location.put("Images", json.optJSONArray("Images"));
         location.put("Documents", json.optJSONArray("Documents"));
+        location.put("Images", parseImages(json.optJSONArray("Images")));
         return location;
     }
+    protected List<Map<String,Object>> parseImages(JSONArray images){
+        List<Map<String,Object>> imagesList = new ArrayList<>();
+        for ( int i = 0 ; i < images.length(); i++){
+            JSONObject img = images.getJSONObject(i);
+             Map<String, Object> image = parseImage(img);
+             imagesList.add(image);
+        }
+        return imagesList;
+    }
     
+    protected Map<String, Object> parseImage(JSONObject image) {
+        Map<String, Object> imageMap = new HashMap<>();
+        imageMap.put("$id", image.optString("$id"));
+        imageMap.put("ID", image.optString("ID"));
+        imageMap.put("LastUpdated", image.optString("LastUpdated"));
+        imageMap.put("URI", image.optString("URI"));
+        imageMap.put("Description", image.optString("Description"));
+        return imageMap;
+    }
     // <editor-fold desc="Getters and setters" defaultstate="collapsed">
     /**
      * @return the locationGuid
