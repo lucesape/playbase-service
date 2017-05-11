@@ -12,7 +12,8 @@
     <li class="dropdown">
         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Importeren <span class="caret"></span></a>
         <ul class="dropdown-menu">
-            <li${menuitem == 'apijson' ? ' class="active"' : ''}><stripes:link beanclass="nl.b3p.playbase.stripes.PlaymappingApiJSONActionBean">API JSON</stripes:link></li>
+            <li${menuitem == 'importPlaymapping' ? ' class="active"' : ''}><stripes:link beanclass="nl.b3p.playbase.stripes.ImportPlaymappingActionBean">Playmapping</stripes:link></li>
+            <li${menuitem == 'importPlayadvisor' ? ' class="active"' : ''}><stripes:link beanclass="nl.b3p.playbase.stripes.ImportPlaymappingActionBean">Playadvisor</stripes:link></li>
         </ul>
     </li>
   

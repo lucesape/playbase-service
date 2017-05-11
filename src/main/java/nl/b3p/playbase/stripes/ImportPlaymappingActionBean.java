@@ -56,12 +56,12 @@ import org.json.JSONArray;
  * @author Meine Toonen
  */
 @StrictBinding
-@UrlBinding("/action/apijson")
-public class PlaymappingApiJSONActionBean implements ActionBean {
+@UrlBinding("/action/importPlaymapping")
+public class ImportPlaymappingActionBean implements ActionBean {
 
     private ActionBeanContext context;
 
-    private static final Log log = LogFactory.getLog(PlaymappingApiJSONActionBean.class);
+    private static final Log log = LogFactory.getLog(ImportPlaymappingActionBean.class);
 
     private static final String JSP = "/WEB-INF/jsp/admin/playmapping.jsp";
 

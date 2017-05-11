@@ -5,7 +5,7 @@
  */
 package nl.b3p.playbase.stripes;
 
-import nl.b3p.playbase.stripes.PlaymappingApiJSONActionBean;
+import nl.b3p.playbase.stripes.ImportPlaymappingActionBean;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -22,22 +22,22 @@ import org.junit.Test;
  *
  * @author meine
  */
-public class PlaymappingApiJSONActionBeanTest {
+public class ImportPlaymappingActionBeanTest {
     
     
-    private PlaymappingApiJSONActionBean instance;
-    public PlaymappingApiJSONActionBeanTest() {
+    private ImportPlaymappingActionBean instance;
+    public ImportPlaymappingActionBeanTest() {
     
     }
     
     @Before
     public void init(){
-        instance = new PlaymappingApiJSONActionBean();
+        instance = new ImportPlaymappingActionBean();
     }
     
     @Test
     public void testGetChildLocation3Levels() throws IOException{
-        InputStream in = PlaymappingApiJSONActionBeanTest.class.getResourceAsStream("pijnacker3Locations.json");
+        InputStream in = ImportPlaymappingActionBeanTest.class.getResourceAsStream("pijnacker3Locations.json");
         String location = IOUtils.toString(in);
         List<Map<String,Object>> returnValue = instance.parseChildLocations(location);
         assertEquals(195, returnValue.size());
@@ -45,7 +45,7 @@ public class PlaymappingApiJSONActionBeanTest {
     
     @Test
     public void testGetChildLocation2Levels() throws IOException{
-        InputStream in = PlaymappingApiJSONActionBeanTest.class.getResourceAsStream("haarlemLocations.json");
+        InputStream in = ImportPlaymappingActionBeanTest.class.getResourceAsStream("haarlemLocations.json");
         String location = IOUtils.toString(in);
         List<Map<String,Object>> returnValue = instance.parseChildLocations(location);
         assertEquals(273, returnValue.size());
@@ -76,7 +76,7 @@ public class PlaymappingApiJSONActionBeanTest {
     
     @Test
     public void testParseAssets() throws IOException {
-        InputStream in = PlaymappingApiJSONActionBeanTest.class.getResourceAsStream("haarlemAssets.json");
+        InputStream in = ImportPlaymappingActionBeanTest.class.getResourceAsStream("haarlemAssets.json");
         String location = IOUtils.toString(in);
         List<Map<String, Object>> returnValue = instance.parseAssets(location);
         assertEquals(2339, returnValue.size());
