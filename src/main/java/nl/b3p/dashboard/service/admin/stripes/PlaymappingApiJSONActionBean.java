@@ -272,7 +272,7 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
     }
     
     private int refillLocationsApiTable(String temp) throws NamingException, SQLException {
-        List<Map<String, Object>> childLocations = getChildLocation(temp);
+        List<Map<String, Object>> childLocations = parseChildLocations(temp);
         int retval = 0;
         for (Map<String, Object> childLocation : childLocations) {
             //insert childlocations from childlocations from childlocations
@@ -300,7 +300,7 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
         return retval;
     }
     
-    protected List<Map<String, Object>> getChildLocation(String locations){
+    protected List<Map<String, Object>> parseChildLocations(String locations){
         List<Map<String,Object>> locs = new ArrayList<>();
         JSONArray childLocations = new JSONArray(locations);
         for (int i = 0; i < childLocations.length(); i++) {
@@ -309,7 +309,7 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
             if(cls.length() == 0){
                 locs.add(parseLocation(childLocation));
             }else{
-                locs.addAll(getChildLocation(cls.toString()));
+                locs.addAll(parseChildLocations(cls.toString()));
             }
             
         }

@@ -39,7 +39,7 @@ public class PlaymappingApiJSONActionBeanTest {
         String location = "";
         InputStream in = PlaymappingApiJSONActionBeanTest.class.getResourceAsStream("pijnacker3.json");
         location = IOUtils.toString(in);
-        List<Map<String,Object>> returnValue = instance.getChildLocation(location);
+        List<Map<String,Object>> returnValue = instance.parseChildLocations(location);
         assertEquals(195, returnValue.size());
     }
     
@@ -48,7 +48,7 @@ public class PlaymappingApiJSONActionBeanTest {
         String location = "";
         InputStream in = PlaymappingApiJSONActionBeanTest.class.getResourceAsStream("haarlem.json");
         location = IOUtils.toString(in);
-        List<Map<String,Object>> returnValue = instance.getChildLocation(location);
+        List<Map<String,Object>> returnValue = instance.parseChildLocations(location);
         assertEquals(273, returnValue.size());
     }
     
