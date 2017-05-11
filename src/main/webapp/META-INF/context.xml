@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Context antiJARLocking="true" path="/playbase-service">
   <ResourceLink global="jdbc/playbase-service" name="jdbc/playbase-service" type="javax.sql.DataSource"/>
-  <!--Resource auth="Container" 
-            driverClassName="org.postgresql.Driver" 
-            maxActive="40" minEvictableIdleTimeMillis="5000" 
-            name="jdbc/dashboard-service" password="04zIYpUKFLUgAU0op" 
-            timeBetweenEvictionRunsMillis="30000" type="javax.sql.DataSource" 
-            url="jdbc:postgresql://x19.b3p.nl:5432/digitree_gis_test" 
-            username="digitree" validationQuery="select 1"/-->
+
 </Context>
