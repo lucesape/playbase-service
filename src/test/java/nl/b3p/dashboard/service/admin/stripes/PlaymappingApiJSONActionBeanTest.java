@@ -36,18 +36,16 @@ public class PlaymappingApiJSONActionBeanTest {
     
     @Test
     public void testGetChildLocation3Levels() throws IOException{
-        String location = "";
         InputStream in = PlaymappingApiJSONActionBeanTest.class.getResourceAsStream("pijnacker3Locations.json");
-        location = IOUtils.toString(in);
+        String location = IOUtils.toString(in);
         List<Map<String,Object>> returnValue = instance.parseChildLocations(location);
         assertEquals(195, returnValue.size());
     }
     
     @Test
     public void testGetChildLocation2Levels() throws IOException{
-        String location = "";
         InputStream in = PlaymappingApiJSONActionBeanTest.class.getResourceAsStream("haarlemLocations.json");
-        location = IOUtils.toString(in);
+        String location = IOUtils.toString(in);
         List<Map<String,Object>> returnValue = instance.parseChildLocations(location);
         assertEquals(273, returnValue.size());
     }
