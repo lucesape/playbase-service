@@ -1,4 +1,4 @@
-package nl.b3p.dashboard.service.server.db;
+package nl.b3p.playbase.db;
 
 import java.sql.Connection;
 import java.sql.SQLException;

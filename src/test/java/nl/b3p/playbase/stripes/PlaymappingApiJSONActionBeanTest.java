@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package nl.b3p.dashboard.service.admin.stripes;
+package nl.b3p.playbase.stripes;
 
+import nl.b3p.playbase.stripes.PlaymappingApiJSONActionBean;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;

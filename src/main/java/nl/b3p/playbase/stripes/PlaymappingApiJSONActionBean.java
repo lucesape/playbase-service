@@ -1,4 +1,4 @@
-package nl.b3p.dashboard.service.admin.stripes;
+package nl.b3p.playbase.stripes;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -21,7 +21,7 @@ import net.sourceforge.stripes.action.StrictBinding;
 import net.sourceforge.stripes.action.UrlBinding;
 import net.sourceforge.stripes.validation.SimpleError;
 import net.sourceforge.stripes.validation.Validate;
-import nl.b3p.dashboard.service.server.db.DB;
+import nl.b3p.playbase.db.DB;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;

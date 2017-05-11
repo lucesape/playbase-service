@@ -1,4 +1,4 @@
-package nl.b3p.dashboard.service.admin.stripes;
+package nl.b3p.playbase.stripes;
 
 import java.sql.Array;
 import java.sql.SQLException;
@@ -10,7 +10,7 @@ import java.util.Map;
 import javax.naming.NamingException;
 import net.sourceforge.stripes.action.*;
 import net.sourceforge.stripes.validation.*;
-import nl.b3p.dashboard.service.server.db.DB;
+import nl.b3p.playbase.db.DB;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
