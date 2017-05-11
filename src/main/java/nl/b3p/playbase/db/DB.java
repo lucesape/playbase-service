@@ -16,7 +16,7 @@ import org.apache.commons.logging.LogFactory;
 public class DB {
     private static final Log log = LogFactory.getLog("db");
 
-    private static final String JNDI_NAME = "java:/comp/env/jdbc/dashboard-service";
+    private static final String JNDI_NAME = "java:/comp/env/jdbc/playbase-service";
 
     public static final DataSource getDataSource(String jndiName) throws NamingException {
         InitialContext cxt = new InitialContext();
