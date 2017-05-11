@@ -3,11 +3,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>nl.b3p</groupId>
-    <artifactId>dashboard-service</artifactId>
+    <artifactId>playbase-service</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>war</packaging>
 
-    <name>dashboard-service</name>
+    <name>playbase-service</name>
     <url>https://github.com/b3partners/dashboard-service</url>
     
     <properties>
