@@ -37,7 +37,7 @@ public class PlaymappingApiJSONActionBeanTest {
     @Test
     public void testGetChildLocation3Levels() throws IOException{
         String location = "";
-        InputStream in = PlaymappingApiJSONActionBeanTest.class.getResourceAsStream("pijnacker3.json");
+        InputStream in = PlaymappingApiJSONActionBeanTest.class.getResourceAsStream("pijnacker3Locations.json");
         location = IOUtils.toString(in);
         List<Map<String,Object>> returnValue = instance.parseChildLocations(location);
         assertEquals(195, returnValue.size());
@@ -46,7 +46,7 @@ public class PlaymappingApiJSONActionBeanTest {
     @Test
     public void testGetChildLocation2Levels() throws IOException{
         String location = "";
-        InputStream in = PlaymappingApiJSONActionBeanTest.class.getResourceAsStream("haarlem.json");
+        InputStream in = PlaymappingApiJSONActionBeanTest.class.getResourceAsStream("haarlemLocations.json");
         location = IOUtils.toString(in);
         List<Map<String,Object>> returnValue = instance.parseChildLocations(location);
         assertEquals(273, returnValue.size());
@@ -75,5 +75,9 @@ public class PlaymappingApiJSONActionBeanTest {
         assertEquals(2, ((JSONArray)real.get("Images")).length());
     }
     
+    @Test
+    public void testParseAssets(){
+        
+    }
     
 }

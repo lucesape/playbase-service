@@ -139,7 +139,6 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
 
         }
         
-     
         HttpClient hc = hcb.build();
          
         HttpGet request = new HttpGet(getApiurl());
@@ -184,13 +183,13 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
             int retval = 0;
                 // uitzoeken of het een locatie is of asset
             String type = "";
-            String uq = "INSERT INTO temp_json (values) VALUES (?);";
-            retval = DB.qr().update(uq, stringResult);
             if (apiurl.contains("Location")) {
                 retval = refillLocationsApiTable(stringResult);
                 type = "locaties";
             } else if (apiurl.contains("Asset")) {
-                retval = refillAssetsApiTable();
+                String uq = "INSERT INTO temp_json (values) VALUES (?);";
+                retval = DB.qr().update(uq, stringResult);
+                retval = refillAssetsApiTable(stringResult);
                 type = "assets";
             } else {
                 context.getValidationErrors().add("apiurl", new SimpleError("Wrong url selected."));
@@ -201,7 +200,7 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
         return new ForwardResolution(JSP);
     }
     
-    private int refillAssetsApiTable() throws NamingException, SQLException {
+    private int refillAssetsApiTable(String assetsString) throws NamingException, SQLException {
         StringBuilder sb = new StringBuilder();
         
         //leeg maken
@@ -299,6 +298,12 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
         }
         return retval;
     }
+    
+    protected List<Map<String, Object>> parseAssets(String assetsString){
+        List<Map<String,Object>> assets = new ArrayList<>();
+        return assets;
+    }
+    
     
     protected List<Map<String, Object>> parseChildLocations(String locations){
         List<Map<String,Object>> locs = new ArrayList<>();
