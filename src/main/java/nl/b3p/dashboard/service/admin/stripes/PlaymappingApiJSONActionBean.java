@@ -335,8 +335,25 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
         return locs;
     }
     
-    protected Map<String,Object> parseLocation(JSONObject location){
-        return new HashMap<>();
+    protected Map<String,Object> parseLocation(JSONObject json){
+        Map<String, Object> location = new HashMap<>();
+        location.put("$id", json.optString("$id"));
+        location.put("ID", json.optString("ID"));
+        location.put("LastUpdated", json.optString("LastUpdated"));
+        location.put("Name", json.optString("Name"));
+        location.put("AddressLine1", json.optString("AddressLine1"));
+        location.put("Suburb", json.optString("Suburb"));
+        location.put("City", json.optString("City"));
+        location.put("Area", json.optString("Area"));
+        location.put("PostCode", json.optString("PostCode"));
+        location.put("Ref", json.optString("Ref"));
+        location.put("AssetCount", json.optInt("AssetCount"));
+        location.put("Lat", json.optString("Lat"));
+        location.put("Lng", json.optString("Lng"));
+        location.put("ChildLocations", json.optJSONArray("ChildLocations"));
+        location.put("Images", json.optJSONArray("Images"));
+        location.put("Documents", json.optJSONArray("Documents"));
+        return location;
     }
     
     // <editor-fold desc="Getters and setters" defaultstate="collapsed">
