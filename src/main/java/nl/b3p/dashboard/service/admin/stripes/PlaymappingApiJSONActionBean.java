@@ -50,7 +50,7 @@ import org.json.JSONArray;
 
 /**
  * Export van JSON files voor gebruik in dashboard
- * 
+ *
  *
  * @author Chris van Lith
  * @author Meine Toonen
@@ -62,18 +62,18 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
     private ActionBeanContext context;
 
     private static final Log log = LogFactory.getLog(PlaymappingApiJSONActionBean.class);
-    
+
     private static final String JSP = "/WEB-INF/jsp/admin/playmapping.jsp";
 
     @Validate
     private String locationGuid;
-    @Validate(required=true)
+    @Validate(required = true)
     private String username;
-    @Validate(required=true)
+    @Validate(required = true)
     private String password;
-    @Validate(required=true)
+    @Validate(required = true)
     private String apiurl;
-    
+
     @DefaultHandler
     @DontValidate
     public Resolution edit() throws Exception {
@@ -81,21 +81,21 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
     }
 
     public Resolution importPM() throws NamingException, SQLException {
-        return collectJSON ();
+        return collectJSON();
     }
-    
-    private Resolution collectJSON () throws SQLException, NamingException {
-        
+
+    private Resolution collectJSON() throws SQLException, NamingException {
+
         RequestConfig defaultRequestConfig = RequestConfig.custom()
-            .setStaleConnectionCheckEnabled(false)
-            .setTargetPreferredAuthSchemes(Arrays.asList(AuthSchemes.BASIC))
-            .setProxyPreferredAuthSchemes(Arrays.asList(AuthSchemes.BASIC))
-            .setConnectionRequestTimeout(60)
-            .build();
-        
+                .setStaleConnectionCheckEnabled(false)
+                .setTargetPreferredAuthSchemes(Arrays.asList(AuthSchemes.BASIC))
+                .setProxyPreferredAuthSchemes(Arrays.asList(AuthSchemes.BASIC))
+                .setConnectionRequestTimeout(60)
+                .build();
+
         HttpClientBuilder hcb = HttpClients.custom()
                 .setDefaultRequestConfig(defaultRequestConfig);
-        
+
         HttpClientContext httpContext = HttpClientContext.create();
         if (getUsername() != null && getPassword() != null) {
             String hostname = null; //any
@@ -110,19 +110,19 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
             } catch (MalformedURLException ex) {
                 // ignore
             }
-            
+
             CredentialsProvider credentialsProvider
-                    =                    new BasicCredentialsProvider();
-            Credentials defaultcreds = 
-                    new UsernamePasswordCredentials(getUsername(), getPassword());
-            AuthScope authScope = 
-                    new AuthScope(hostname, port);
+                    = new BasicCredentialsProvider();
+            Credentials defaultcreds
+                    = new UsernamePasswordCredentials(getUsername(), getPassword());
+            AuthScope authScope
+                    = new AuthScope(hostname, port);
             credentialsProvider.setCredentials(authScope, defaultcreds);
 
             hcb = hcb.setDefaultCredentialsProvider(credentialsProvider);
-            
+
             //preemptive not possible without hostname
-            if (hostname!=null) {
+            if (hostname != null) {
                 // Create AuthCache instance for preemptive authentication
                 AuthCache authCache = new BasicAuthCache();
                 BasicScheme basicAuth = new BasicScheme();
@@ -138,9 +138,9 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
             }
 
         }
-        
+
         HttpClient hc = hcb.build();
-         
+
         HttpGet request = new HttpGet(getApiurl());
         request.setHeader("Accept-Language", "NL");
         request.setHeader("Accept", "application/json");
@@ -150,7 +150,7 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
         try {
             response = hc.execute(request, httpContext);
             int statusCode = response.getStatusLine().getStatusCode();
-            
+
             HttpEntity entity = response.getEntity();
             if (statusCode != 200) {
                 context.getValidationErrors().add("status", new SimpleError("Could not retrieve JSON. Status " + statusCode + ". Reason given: " + response.getStatusLine().getReasonPhrase()));
@@ -177,18 +177,14 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
                 }
             }
         }
-        
+
         if (stringResult != null) {
-            //moet later beter
-            int retval = 0;
-                // uitzoeken of het een locatie is of asset
-            String type = "";
+            int retval;
+            String type;
             if (apiurl.contains("Location")) {
                 retval = refillLocationsApiTable(stringResult);
                 type = "locaties";
             } else if (apiurl.contains("Asset")) {
-                String uq = "INSERT INTO temp_json (values) VALUES (?);";
-                retval = DB.qr().update(uq, stringResult);
                 retval = refillAssetsApiTable(stringResult);
                 type = "assets";
             } else {
@@ -199,77 +195,65 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
         }
         return new ForwardResolution(JSP);
     }
-    
+
     private int refillAssetsApiTable(String assetsString) throws NamingException, SQLException {
-        StringBuilder sb = new StringBuilder();
-        
-        //leeg maken
-        sb.append("truncate pm_assets_api;");
-        int retval = DB.qr().update(sb.toString());
-       /* if (retval <= 0) {
-            return retval;
+        StringBuilder sb;
+        List<Map<String, Object>> assets = parseAssets(assetsString);
+        int retval = 0;
+        for (Map<String, Object> asset : assets) {
+            sb = new StringBuilder();
+            sb.append("insert into pm_assets_api (");
+            sb.append("	 \"id\",");
+            sb.append("      \"locationid\",");
+            sb.append("      \"locationname\",");
+            sb.append("      \"lastupdated\",");
+            sb.append("      \"name\",");
+            sb.append("      \"assettype\",");
+            sb.append("      \"manufacturer\",");
+            sb.append("      \"serialnumber\",");
+            sb.append("      \"installeddate\",");
+            sb.append("      \"endoflifeyear\",");
+            sb.append("      \"safetyzonelength\",");
+            sb.append("      \"safetyzonewidth\",");
+            sb.append("      \"agegrouptoddlers\",");
+            sb.append("      \"agegroupjuniors\",");
+            sb.append("      \"agegroupseniors\",");
+            sb.append("      \"pricepurchase\",");
+            sb.append("      \"priceinstallation\",");
+            sb.append("      \"pricereinvestment\",");
+            sb.append("      \"pricemaintenance\",");
+            sb.append("      \"priceindexation\",");
+            sb.append("      \"lat\",");
+            sb.append("      \"lng\"");
+            sb.append(") ");
+            sb.append("VALUES (");
+            sb.append("'").append(asset.get("ID")).append("',");
+            sb.append("'").append(asset.get("LocationID")).append("',");
+            sb.append("'").append(asset.get("LocationName")).append("',");
+            sb.append("'").append(asset.get("LastUpdated")).append("',");
+            sb.append("'").append(asset.get("Name")).append("',");
+            sb.append("'").append(asset.get("AssetType")).append("',");
+            sb.append("'").append(asset.get("Manufacturer")).append("',");
+            sb.append("'").append(asset.get("SerialNumber")).append("',");
+            sb.append("'").append(asset.get("InstalledDate")).append("',");
+            sb.append("'").append(asset.get("EndOfLifeYear")).append("',");
+            sb.append("'").append(asset.get("SafetyZoneLength")).append("',");
+            sb.append("'").append(asset.get("SafetyZoneWidth")).append("',");
+            sb.append("'").append(asset.get("AgeGroupToddlers")).append("',");
+            sb.append("'").append(asset.get("AgeGroupJuniors")).append("',");
+            sb.append("'").append(asset.get("AgeGroupSeniors")).append("',");
+            sb.append("'").append(asset.get("PricePurchase")).append("',");
+            sb.append("'").append(asset.get("PriceInstallation")).append("',");
+            sb.append("'").append(asset.get("PriceReInvestment")).append("',");
+            sb.append("'").append(asset.get("PriceMaintenance")).append("',");
+            sb.append("'").append(asset.get("PriceIndexation")).append("',");
+            sb.append("'").append(asset.get("Lat")).append("',");
+            sb.append("'").append(asset.get("Lng")).append("');");
+            retval += DB.qr().update(sb.toString());
         }
-        */
-        //vullen vanuit temp_json
-        sb = new StringBuilder();
-        sb.append("insert into pm_assets_api (");
-        sb.append("	 \"id\",");
-        sb.append("      \"locationid\",");
-        sb.append("      \"locationname\",");
-        sb.append("      \"lastupdated\",");
-        sb.append("      \"name\",");
-        sb.append("      \"assettype\",");
-        sb.append("      \"manufacturer\",");
-        sb.append("      \"serialnumber\",");
-        sb.append("      \"installeddate\",");
-        sb.append("      \"endoflifeyear\",");
-        sb.append("      \"safetyzonelength\",");
-        sb.append("      \"safetyzonewidth\",");
-        sb.append("      \"agegrouptoddlers\",");
-        sb.append("      \"agegroupjuniors\",");
-        sb.append("      \"agegroupseniors\",");
-        sb.append("      \"pricepurchase\",");
-        sb.append("      \"priceinstallation\",");
-        sb.append("      \"pricereinvestment\",");
-        sb.append("      \"pricemaintenance\",");
-        sb.append("      \"priceindexation\",");
-        sb.append("      \"lat\",");
-        sb.append("      \"lng\",");
-        sb.append("      \"groep\"");
-        sb.append(") ");
-        sb.append("select ");
-        sb.append("	 values->>'ID' as id,");
-        sb.append("      values->>'LocationID' as gassetlocationid,");
-        sb.append("      values->>'LocationName' as sassetlocationname,");
-        sb.append("      values->>'LastUpdated' as dupdated,");
-        sb.append("      values->>'Name' as name,");
-        sb.append("      values->>'AssetType' as assettype,");
-        sb.append("      values->>'Manufacturer' as smanufacturername,");
-        sb.append("      values->>'SerialNumber' as sserialnumber,");
-        sb.append("      (values->>'InstalledDate') as dinstalled,");
-        sb.append("      (values->>'EndOfLifeYear')::numeric as endoflifeyear,");
-        sb.append("      (values->>'SafetyZoneLength')::numeric as safetyzonelength,");
-        sb.append("      (values->>'SafetyZoneWidth')::numeric as safetyzonewidth,");
-        sb.append("      values->>'AgeGroupToddlers' as agegrouptoddlers,");
-        sb.append("      values->>'AgeGroupJuniors' as agegroupjuniors,");
-        sb.append("      values->>'AgeGroupSeniors' as agegroupseniors,");
-        sb.append("      (values->>'PricePurchase')::numeric as fpurchaceprice,");
-        sb.append("      (values->>'PriceInstallation')::numeric as finstallationprice,");
-        sb.append("      (values->>'PriceReInvestment')::numeric as freinvestmentcost,");
-        sb.append("      (values->>'PriceMaintenance')::numeric as fmaintenancecost,");
-        sb.append("      (values->>'PriceIndexation')::numeric as fpriceindexation,");
-        sb.append("      replace(values->>'Lat',',','.')::numeric as flattitude,");
-        sb.append("      replace(values->>'Lng',',','.')::numeric as flongitude,");
-        sb.append("      (values->'CustomProperties'->>'Groep') as groep ");
-        sb.append("from   (");
-        sb.append("           select json_array_elements(values::json) as values ");
-        sb.append("           from   temp_json ");
-        sb.append("       ) a;");
-        
-        retval = DB.qr().update(sb.toString());
         return retval;
     }
-    
+
     private int refillLocationsApiTable(String temp) throws NamingException, SQLException {
         List<Map<String, Object>> childLocations = parseChildLocations(temp);
         int retval = 0;
@@ -293,30 +277,30 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
             sb.append("\'").append(childLocation.get("Name")).append("\',");
             sb.append("").append(childLocation.get("Lat")).append(",");
             sb.append("").append(childLocation.get("Lng")).append("");
-            sb.append( ");");
+            sb.append(");");
             retval += DB.qr().update(sb.toString());
         }
         return retval;
     }
-    
-    protected List<Map<String, Object>> parseAssets(String assetsString){
-        List<Map<String,Object>> assets = new ArrayList<>();
+
+    protected List<Map<String, Object>> parseAssets(String assetsString) {
+        List<Map<String, Object>> assets = new ArrayList<>();
         JSONArray assetsArray = new JSONArray(assetsString);
-        
-        for(int i = 0; i < assetsArray.length() ;i++){
+
+        for (int i = 0; i < assetsArray.length(); i++) {
             JSONObject asset = assetsArray.getJSONObject(i);
             assets.add(parseAsset(asset));
-            
+
         }
         return assets;
     }
-    
+
     protected Map<String, Object> parseAsset(JSONObject assetJSON) {
         Map<String, Object> asset = new HashMap<>();
         asset.put("$id", assetJSON.optString("$id"));
         asset.put("ID", assetJSON.optString("ID"));
         asset.put("LocationID", assetJSON.optString("LocationID"));
-        asset.put("LocationName", assetJSON.optString("LocationName"));
+        asset.put("LocationName", assetJSON.optString("LocationName").replaceAll("\'", "\'\'"));
         asset.put("LastUpdated", assetJSON.optString("LastUpdated"));
         asset.put("Name", assetJSON.optString("Name").replaceAll("\'", "\'\'"));
         asset.put("AssetType", assetJSON.optString("AssetType"));
@@ -349,25 +333,24 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
         asset.put("Images", parseImages(assetJSON.optJSONArray("Images")));
         return asset;
     }
-    
-    
-    protected List<Map<String, Object>> parseChildLocations(String locations){
-        List<Map<String,Object>> locs = new ArrayList<>();
+
+    protected List<Map<String, Object>> parseChildLocations(String locations) {
+        List<Map<String, Object>> locs = new ArrayList<>();
         JSONArray childLocations = new JSONArray(locations);
         for (int i = 0; i < childLocations.length(); i++) {
             JSONObject childLocation = childLocations.getJSONObject(i);
             JSONArray cls = childLocation.getJSONArray("ChildLocations");
-            if(cls.length() == 0){
+            if (cls.length() == 0) {
                 locs.add(parseLocation(childLocation));
-            }else{
+            } else {
                 locs.addAll(parseChildLocations(cls.toString()));
             }
-            
+
         }
         return locs;
     }
-    
-    protected Map<String,Object> parseLocation(JSONObject json){
+
+    protected Map<String, Object> parseLocation(JSONObject json) {
         Map<String, Object> location = new HashMap<>();
         location.put("$id", json.optString("$id"));
         location.put("ID", json.optString("ID"));
@@ -387,16 +370,17 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
         location.put("Images", parseImages(json.optJSONArray("Images")));
         return location;
     }
-    protected List<Map<String,Object>> parseImages(JSONArray images){
-        List<Map<String,Object>> imagesList = new ArrayList<>();
-        for ( int i = 0 ; i < images.length(); i++){
+
+    protected List<Map<String, Object>> parseImages(JSONArray images) {
+        List<Map<String, Object>> imagesList = new ArrayList<>();
+        for (int i = 0; i < images.length(); i++) {
             JSONObject img = images.getJSONObject(i);
-             Map<String, Object> image = parseImage(img);
-             imagesList.add(image);
+            Map<String, Object> image = parseImage(img);
+            imagesList.add(image);
         }
         return imagesList;
     }
-    
+
     protected Map<String, Object> parseImage(JSONObject image) {
         Map<String, Object> imageMap = new HashMap<>();
         imageMap.put("$id", image.optString("$id"));
@@ -406,6 +390,7 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
         imageMap.put("Description", image.optString("Description"));
         return imageMap;
     }
+
     // <editor-fold desc="Getters and setters" defaultstate="collapsed">
     /**
      * @return the locationGuid
@@ -420,7 +405,7 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
     public void setLocationGuid(String locationGuid) {
         this.locationGuid = locationGuid;
     }
-    
+
     @Override
     public ActionBeanContext getContext() {
         return context;
