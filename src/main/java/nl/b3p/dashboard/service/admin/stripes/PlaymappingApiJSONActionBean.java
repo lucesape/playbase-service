@@ -4,7 +4,11 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.naming.NamingException;
 import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
@@ -17,8 +21,6 @@ import net.sourceforge.stripes.action.StrictBinding;
 import net.sourceforge.stripes.action.UrlBinding;
 import net.sourceforge.stripes.validation.SimpleError;
 import net.sourceforge.stripes.validation.Validate;
-import net.sourceforge.stripes.validation.ValidationErrors;
-import net.sourceforge.stripes.validation.ValidationMethod;
 import nl.b3p.dashboard.service.server.db.DB;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,6 +46,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.json.JSONArray;
 
 /**
  * Export van JSON files voor gebruik in dashboard
@@ -184,14 +187,14 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
             stringResult = result.toString(4);
         } else {
             //moet later beter
-            String uq = "UPDATE temp_json SET values = ?;";
+            String uq = "INSERT INTO temp_json (values) VALUES (?);";
             int retval = DB.qr().update(uq, stringResult);
             if (retval == 1) {
                 result.put("status", "JSON weggeschreven naar DB");
                 // uitzoeken of het een locatie is of asset
                 String type = "";
                 if(apiurl.contains("Location")){
-                    retval = refillLocationsApiTable();
+                    retval = refillLocationsApiTable(stringResult);
                     type = "locaties";
                 }else if(apiurl.contains("Asset")){
                     retval = refillAssetsApiTable();
@@ -283,7 +286,7 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
         return retval;
     }
     
-    private int refillLocationsApiTable() throws NamingException, SQLException {
+    private int refillLocationsApiTable(String temp) throws NamingException, SQLException {
         //vindt childlocations
         StringBuilder sb = new StringBuilder();
         sb.append("insert into temp_json_2 (\"values\") ");
@@ -329,6 +332,26 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
         sb.append("            temp_json_2 ) a;");
         retval = DB.qr().update(sb.toString());
         return retval;
+    }
+    
+    protected List<Map<String, Object>> getChildLocation(String locations){
+        List<Map<String,Object>> locs = new ArrayList<>();
+        JSONArray childLocations = new JSONArray(locations);
+        for (int i = 0; i < childLocations.length(); i++) {
+            JSONObject childLocation = childLocations.getJSONObject(i);
+            JSONArray cls = childLocation.getJSONArray("ChildLocations");
+            if(cls.length() == 0){
+                locs.add(parseLocation(childLocation));
+            }else{
+                locs.addAll(getChildLocation(cls.toString()));
+            }
+            
+        }
+        return locs;
+    }
+    
+    protected Map<String,Object> parseLocation(JSONObject location){
+        return new HashMap<>();
     }
     
     // <editor-fold desc="Getters and setters" defaultstate="collapsed">
