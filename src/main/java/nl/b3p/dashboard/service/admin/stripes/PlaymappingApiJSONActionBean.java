@@ -272,50 +272,31 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
     }
     
     private int refillLocationsApiTable(String temp) throws NamingException, SQLException {
-        //vindt childlocations
-        StringBuilder sb = new StringBuilder();
-        sb.append("insert into temp_json_2 (\"values\") ");
-        sb.append("  select json_array_elements(values::json #> '{0,\"ChildLocations\"}') as values from   temp_json; ");
-        int retval = DB.qr().update(sb.toString());
-        if (retval <= 0) {
-            return retval;
+        List<Map<String, Object>> childLocations = getChildLocation(temp);
+        int retval = 0;
+        for (Map<String, Object> childLocation : childLocations) {
+            //insert childlocations from childlocations from childlocations
+            StringBuilder sb = new StringBuilder();
+            sb.append("INSERT ");
+            sb.append("INTO ");
+            sb.append("    pm_locations_api ");
+            sb.append("    (");
+            sb.append("        \"id\",");
+            sb.append("        \"name\",");
+            sb.append("        \"lastupdated\",");
+            sb.append("        \"lat\",");
+            sb.append("        \"lng\"");
+            sb.append("    )");
+            sb.append("    VALUES(");
+            sb.append("    ");
+            sb.append("\'").append(childLocation.get("ID")).append("\',");
+            sb.append("\'").append(childLocation.get("LastUpdated")).append("\',");
+            sb.append("\'").append(childLocation.get("Name")).append("\',");
+            sb.append("").append(childLocation.get("Lat")).append(",");
+            sb.append("").append(childLocation.get("Lng")).append("");
+            sb.append( ");");
+            retval += DB.qr().update(sb.toString());
         }
-
-        //vindt childlocations van childlocations
-        sb = new StringBuilder();
-        sb.append("insert into temp_json_3 (\"values\") ");
-        sb.append("	select json_array_elements(json_extract_path_text(values::json,'ChildLocations')::json) as values from   temp_json_2; ");
-        retval = DB.qr().update(sb.toString());
-        if (retval <= 0) {
-            return retval;
-        }
-
-        //insert childlocations from childlocations from childlocations
-        sb = new StringBuilder();
-        sb.append("INSERT ");
-        sb.append("INTO ");
-        sb.append("    pm_locations_api ");
-        sb.append("    (");
-        sb.append("        \"id\",");
-        sb.append("        \"name\",");
-        sb.append("        \"lastupdated\",");
-        sb.append("        \"lat\",");
-        sb.append("        \"lng\"");
-        sb.append("    )");
-        sb.append("SELECT");
-        sb.append("    VALUES->>'ID'                            AS id,");
-        sb.append("    VALUES->>'Name'                          AS name,");
-        sb.append("    VALUES->>'LastUpdated'                   AS dupdated,");
-        sb.append("    REPLACE(VALUES->>'Lat',',','.')::NUMERIC AS lat,");
-        sb.append("    REPLACE(VALUES->>'Lng',',','.')::NUMERIC AS lng ");
-        sb.append("FROM ");
-        sb.append("    (");
-        sb.append("        SELECT ");
-        sb.append("            json_array_elements(json_extract_path_text(VALUES::json,'ChildLocations')::json) AS ");
-        sb.append("            VALUES ");
-        sb.append("        FROM ");
-        sb.append("            temp_json_2 ) a;");
-        retval = DB.qr().update(sb.toString());
         return retval;
     }
     
@@ -340,7 +321,7 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
         location.put("$id", json.optString("$id"));
         location.put("ID", json.optString("ID"));
         location.put("LastUpdated", json.optString("LastUpdated"));
-        location.put("Name", json.optString("Name"));
+        location.put("Name", json.optString("Name").replaceAll("\'", "\'\'"));
         location.put("AddressLine1", json.optString("AddressLine1"));
         location.put("Suburb", json.optString("Suburb"));
         location.put("City", json.optString("City"));
@@ -348,8 +329,8 @@ public class PlaymappingApiJSONActionBean implements ActionBean {
         location.put("PostCode", json.optString("PostCode"));
         location.put("Ref", json.optString("Ref"));
         location.put("AssetCount", json.optInt("AssetCount"));
-        location.put("Lat", json.optString("Lat"));
-        location.put("Lng", json.optString("Lng"));
+        location.put("Lat", Double.parseDouble(json.optString("Lat").replaceAll(",", ".")));
+        location.put("Lng", Double.parseDouble(json.optString("Lng").replaceAll(",", ".")));
         location.put("ChildLocations", json.optJSONArray("ChildLocations"));
         location.put("Images", json.optJSONArray("Images"));
         location.put("Documents", json.optJSONArray("Documents"));

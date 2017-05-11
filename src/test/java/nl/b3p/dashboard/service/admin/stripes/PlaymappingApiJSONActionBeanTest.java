@@ -61,16 +61,15 @@ public class PlaymappingApiJSONActionBeanTest {
         assertEquals("98d66e1b-e2eb-44ea-ab1b-ce5999cb4309", real.get("ID"));
         assertEquals("2015-01-08T11:18:10.613", real.get("LastUpdated"));
         assertEquals("C117/1009 Wilsonplein 8", real.get("Name"));
+        assertEquals(52.37759, real.get("Lat"));
+        assertEquals(4.627348, real.get("Lng"));
         assertEquals("Wilsonplein 8\r\nHaarlem", real.get("AddressLine1"));
-        
         assertEquals("", real.get("Suburb"));
         assertEquals("", real.get("City"));
         assertEquals("", real.get("Area"));
         assertEquals("", real.get("PostCode"));
         assertEquals("C117/1009", real.get("Ref"));
         assertEquals(14, real.get("AssetCount"));
-        assertEquals("52,37759", real.get("Lat"));
-        assertEquals("4,627348", real.get("Lng"));
         assertEquals(0, ((JSONArray)real.get("ChildLocations")).length());
         assertEquals(0, ((JSONArray)real.get("Documents")).length());
         assertEquals(2, ((JSONArray)real.get("Images")).length());
