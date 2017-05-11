@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Context antiJARLocking="true" path="/dashboard-service">
+<Context antiJARLocking="true" path="/playbase-service">
   <ResourceLink global="jdbc/dashboard-service" name="jdbc/dashboard-service" type="javax.sql.DataSource"/>
   <!--Resource auth="Container" 
             driverClassName="org.postgresql.Driver" 

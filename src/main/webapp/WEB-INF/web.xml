@@ -16,7 +16,7 @@
         <filter-class>net.sourceforge.stripes.controller.StripesFilter</filter-class>
         <init-param>
             <param-name>ActionResolver.Packages</param-name>
-            <param-value>nl.b3p.dashboard.service.admin.stripes</param-value>
+            <param-value>nl.b3p.playbase.stripes</param-value>
         </init-param>
         <init-param>
             <param-name>MultipartWrapper.Class</param-name>

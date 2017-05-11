@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <h1>Export JSON</h1>
         
         <jsp:include page="/WEB-INF/jsp/common/messages.jsp"/>
-        <stripes:form beanclass="nl.b3p.dashboard.service.admin.stripes.DashboardJSONActionBean" class="form-horizontal">
+        <stripes:form beanclass="nl.b3p.playbase.stripes.DashboardJSONActionBean" class="form-horizontal">
                 <stripes:submit name="spelen" class="btn btn-primary">spelen</stripes:submit>
                 <stripes:submit name="bomen" class="btn btn-primary">bomen</stripes:submit>
                 <stripes:submit name="cancel" class="btn btn-default">Annuleren</stripes:submit>

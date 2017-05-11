@@ -47,7 +47,7 @@
                             <span class="icon-bar"></span>
                             <span class="icon-bar"></span>
                         </button>
-                        <a class="navbar-brand" href="${contextPath}/admin/index.jsp">Dashboard Service</a>
+                        <a class="navbar-brand" href="${contextPath}/admin/index.jsp">Playbase</a>
                     </div>
                     <div id="navbar" class="navbar-collapse collapse">
                         <jsp:include page="/WEB-INF/jsp/admin/menu.jsp"/>

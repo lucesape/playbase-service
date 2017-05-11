@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <h1>Import JSON uit Playmapping API</h1>
         
         <jsp:include page="/WEB-INF/jsp/common/messages.jsp"/>
-        <stripes:form beanclass="nl.b3p.dashboard.service.admin.stripes.PlaymappingApiJSONActionBean" class="form-horizontal">
+        <stripes:form beanclass="nl.b3p.playbase.stripes.PlaymappingApiJSONActionBean" class="form-horizontal">
                 <stripes:submit name="importPM" class="btn btn-primary">Importeer</stripes:submit>
                 <stripes:submit name="cancel" class="btn btn-default">Annuleren</stripes:submit>
 
