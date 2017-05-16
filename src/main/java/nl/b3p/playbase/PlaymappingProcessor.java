@@ -1,7 +1,18 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2017 B3Partners B.V.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package nl.b3p.playbase;
 
@@ -21,7 +32,7 @@ import org.json.JSONObject;
  */
 public class PlaymappingProcessor {
     
-    public int refillAssetsApiTable(String assetsString) throws NamingException, SQLException {
+    public int processAssets(String assetsString) throws NamingException, SQLException {
         StringBuilder sb;
         List<Map<String, Object>> assets = parseAssets(assetsString);
         int retval = 0;
@@ -79,7 +90,7 @@ public class PlaymappingProcessor {
         return retval;
     }
 
-    public int refillLocationsApiTable(String temp) throws NamingException, SQLException {
+    public int processLocations(String temp) throws NamingException, SQLException {
         List<Map<String, Object>> childLocations = parseChildLocations(temp);
         int retval = 0;
         for (Map<String, Object> childLocation : childLocations) {
