@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
-import nl.b3p.playbase.stripes.ImportPlaymappingActionBeanTest;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -35,7 +34,7 @@ public class PlaymappingProcessorTest {
    
     @Test
     public void testGetChildLocation3Levels() throws IOException{
-        InputStream in = ImportPlaymappingActionBeanTest.class.getResourceAsStream("pijnacker3Locations.json");
+        InputStream in = PlaymappingProcessorTest.class.getResourceAsStream("pijnacker3Locations.json");
         String location = IOUtils.toString(in);
         List<Map<String,Object>> returnValue = instance.parseChildLocations(location);
         assertEquals(195, returnValue.size());
@@ -43,7 +42,7 @@ public class PlaymappingProcessorTest {
     
     @Test
     public void testGetChildLocation2Levels() throws IOException{
-        InputStream in = ImportPlaymappingActionBeanTest.class.getResourceAsStream("haarlemLocations.json");
+        InputStream in = PlaymappingProcessorTest.class.getResourceAsStream("haarlemLocations.json");
         String location = IOUtils.toString(in);
         List<Map<String,Object>> returnValue = instance.parseChildLocations(location);
         assertEquals(273, returnValue.size());
@@ -74,7 +73,7 @@ public class PlaymappingProcessorTest {
     
     @Test
     public void testParseAssets() throws IOException {
-        InputStream in = ImportPlaymappingActionBeanTest.class.getResourceAsStream("haarlemAssets.json");
+        InputStream in = PlaymappingProcessorTest.class.getResourceAsStream("haarlemAssets.json");
         String location = IOUtils.toString(in);
         List<Map<String, Object>> returnValue = instance.parseAssets(location);
         assertEquals(2339, returnValue.size());
