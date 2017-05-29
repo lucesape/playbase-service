@@ -110,7 +110,6 @@ public class PlaymappingProcessor {
 
     public ImportReport processLocations(String temp) throws NamingException, SQLException {
         List<Map<String, Object>> childLocations = parseChildLocations(temp);
-        int retval = 0;
         for (Map<String, Object> childLocation : childLocations) {
             saveLocation(childLocation);
         }
