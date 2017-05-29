@@ -23,20 +23,38 @@ import java.util.List;
 import java.util.Map;
 import javax.naming.NamingException;
 import nl.b3p.playbase.db.DB;
+import org.apache.commons.dbutils.handlers.ArrayListHandler;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
  *
- * @author meine
+ * @author Meine Toonen
  */
 public class PlaymappingProcessor {
+    private static final Log log = LogFactory.getLog("PlaymappingProcessor");
+    private int insertedLocations = 0;
+    private int updatedLocations = 0;
     
+
     public int processAssets(String assetsString) throws NamingException, SQLException {
         StringBuilder sb;
         List<Map<String, Object>> assets = parseAssets(assetsString);
+
         int retval = 0;
         for (Map<String, Object> asset : assets) {
+
+            // location
+            // accessibility
+            // agecategories
+            // categories
+            // equipment
+            // facilities
+            // check if asset exists
+            // ja: update
+            // nee: insert
             sb = new StringBuilder();
             sb.append("insert into pm_assets_api (");
             sb.append("	 \"id\",");
@@ -90,35 +108,19 @@ public class PlaymappingProcessor {
         return retval;
     }
 
-    public int processLocations(String temp) throws NamingException, SQLException {
+    public ImportReport processLocations(String temp) throws NamingException, SQLException {
         List<Map<String, Object>> childLocations = parseChildLocations(temp);
         int retval = 0;
         for (Map<String, Object> childLocation : childLocations) {
-            //insert childlocations from childlocations from childlocations
-            StringBuilder sb = new StringBuilder();
-            sb.append("INSERT ");
-            sb.append("INTO ");
-            sb.append("    pm_locations_api ");
-            sb.append("    (");
-            sb.append("        \"id\",");
-            sb.append("        \"name\",");
-            sb.append("        \"lastupdated\",");
-            sb.append("        \"lat\",");
-            sb.append("        \"lng\"");
-            sb.append("    )");
-            sb.append("    VALUES(");
-            sb.append("    ");
-            sb.append("\'").append(childLocation.get("ID")).append("\',");
-            sb.append("\'").append(childLocation.get("LastUpdated")).append("\',");
-            sb.append("\'").append(childLocation.get("Name")).append("\',");
-            sb.append("").append(childLocation.get("Lat")).append(",");
-            sb.append("").append(childLocation.get("Lng")).append("");
-            sb.append(");");
-            retval += DB.qr().update(sb.toString());
+            saveLocation(childLocation);
         }
-        return retval;
+        ImportReport report = new ImportReport();
+        report.setNumberInserted(insertedLocations);
+        report.setNumberUpdated(updatedLocations);
+        return report;
     }
 
+    // <editor-fold desc="Assets" defaultstate="collapsed">
     protected List<Map<String, Object>> parseAssets(String assetsString) {
         List<Map<String, Object>> assets = new ArrayList<>();
         JSONArray assetsArray = new JSONArray(assetsString);
@@ -167,6 +169,60 @@ public class PlaymappingProcessor {
         asset.put("Hyperlinks", assetJSON.optJSONArray("Hyperlinks"));
         asset.put("Images", parseImages(assetJSON.optJSONArray("Images")));
         return asset;
+    }
+    // </editor-fold>
+
+    // <editor-fold desc="Locations" defaultstate="collapsed">
+    protected void saveLocation(Map<String, Object> location) throws NamingException, SQLException {
+        StringBuilder sb = new StringBuilder();
+        boolean exists = locationExists(location);
+        if (!exists) {
+            sb.append("INSERT ");
+            sb.append("INTO ");
+            sb.append(DB.LOCATION_TABLE);
+            sb.append("(title,");
+            sb.append("latitude,");
+            sb.append("longitude,");
+            sb.append("pm_guid) ");
+            sb.append("VALUES( ");
+            sb.append("\'").append(location.get("Name")).append("\',");
+            sb.append("").append(location.get("Lat")).append(",");
+            sb.append("").append(location.get("Lng")).append(",");
+            sb.append("\'").append(location.get("ID")).append("\');");
+            insertedLocations += DB.qr().update(sb.toString());
+        }else{
+            sb = new StringBuilder();
+            sb.append("update ");
+            sb.append(DB.LOCATION_TABLE);
+            sb.append(" ");
+            sb.append("SET title = ");
+            sb.append("\'").append(location.get("Name")).append("\',");
+            sb.append("latitude = ");
+            sb.append("").append(location.get("Lat")).append(",");
+            sb.append("longitude = ");
+            sb.append("").append(location.get("Lng")).append("");
+            sb.append(" where pm_guid = '");
+            sb.append(location.get("ID"));
+            sb.append("';");
+            updatedLocations += DB.qr().update(sb.toString());
+        }
+    }
+
+    protected boolean locationExists(Map<String, Object> location) {
+        try {
+            StringBuilder sb = new StringBuilder();
+            sb.append("select * from ");
+            sb.append(DB.LOCATION_TABLE);
+            sb.append(" where pm_guid = '");
+            sb.append(location.get("ID"));
+            sb.append("';");
+            ArrayListHandler rsh = new ArrayListHandler();
+            List<Object[]> o = DB.qr().query(sb.toString(), rsh);
+            return o.size() > 0;
+        } catch (NamingException | SQLException ex) {
+            log.error("Cannot query if location exists: ", ex);
+            return false;
+        }
     }
 
     protected List<Map<String, Object>> parseChildLocations(String locations) {
@@ -225,5 +281,6 @@ public class PlaymappingProcessor {
         imageMap.put("Description", image.optString("Description"));
         return imageMap;
     }
+    // </editor-fold>
 
 }

@@ -34,4 +34,20 @@
                 <exec.classpathScope>${classPathScope}</exec.classpathScope>
             </properties>
         </action>
+        <action>
+            <actionName>debug.single.deploy</actionName>
+            <packagings>
+                <packaging>war</packaging>
+            </packagings>
+            <goals>
+                <goal>clean</goal>
+                <goal>install</goal>
+                <goal>package</goal>
+            </goals>
+            <properties>
+                <netbeans.deploy.clientUrlPart>${webpagePath}</netbeans.deploy.clientUrlPart>
+                <netbeans.deploy.debugmode>true</netbeans.deploy.debugmode>
+                <netbeans.deploy>true</netbeans.deploy>
+            </properties>
+        </action>
     </actions>

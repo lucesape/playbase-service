@@ -33,6 +33,8 @@ public class DB {
     private static final Log log = LogFactory.getLog("db");
 
     private static final String JNDI_NAME = "java:/comp/env/jdbc/playbase-service";
+    
+    public static final String LOCATION_TABLE = "playservice_locations";
 
     public static final DataSource getDataSource(String jndiName) throws NamingException {
         InitialContext cxt = new InitialContext();

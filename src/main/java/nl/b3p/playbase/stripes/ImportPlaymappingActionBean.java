@@ -33,6 +33,7 @@ import net.sourceforge.stripes.action.StrictBinding;
 import net.sourceforge.stripes.action.UrlBinding;
 import net.sourceforge.stripes.validation.SimpleError;
 import net.sourceforge.stripes.validation.Validate;
+import nl.b3p.playbase.ImportReport;
 import nl.b3p.playbase.PlaymappingProcessor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -193,8 +194,9 @@ public class ImportPlaymappingActionBean implements ActionBean {
         if (stringResult != null) {
             int retval;
             String type;
+            ImportReport report = null;
             if (apiurl.contains("Location")) {
-                retval = processor.processLocations(stringResult);
+                report = processor.processLocations(stringResult);
                 type = "locaties";
             } else if (apiurl.contains("Asset")) {
                 retval = processor.processAssets(stringResult);
@@ -203,7 +205,8 @@ public class ImportPlaymappingActionBean implements ActionBean {
                 context.getValidationErrors().add("apiurl", new SimpleError("Wrong url selected."));
                 return new ForwardResolution(JSP);
             }
-            context.getMessages().add(new SimpleMessage("Er zijn " + retval + " " + type + " weggeschreven."));
+            context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberInserted() + " " + type + " weggeschreven."));
+            context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberUpdated()+ " " + type + " geupdatet."));
         }
         return new ForwardResolution(JSP);
     }
