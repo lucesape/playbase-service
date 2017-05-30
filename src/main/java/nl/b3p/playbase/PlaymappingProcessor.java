@@ -145,11 +145,24 @@ public class PlaymappingProcessor {
         sb.append("pricemaintenance,");
         sb.append("pricepurchase,");
         sb.append("pricereinvestment,");
+        sb.append("depth,");
+        sb.append("width,");
+        sb.append("height,");
+        sb.append("endoflifeyear,");
+        sb.append("freefallheight,");
+        sb.append("safetyzonelength,");
+        sb.append("safetyzonewidth,");
+        sb.append("manufacturer,");
+        sb.append("material,");
+        sb.append("product,");
+        sb.append("productid,");
+        sb.append("productvariantid,");
+        sb.append("serialnumber,");
         sb.append("pm_guid) ");
         sb.append("VALUES( ");
-        sb.append("'").append(asset.get("InstalledDate")).append("',");
+        valueOrNull(sb, "InstalledDate", asset);
         sb.append(locationId).append(",");
-        sb.append("'").append(asset.get("Name")).append("',");
+        valueOrNull(sb, "Name", asset);
         sb.append(assetTypeId).append(",");
         sb.append(asset.get("Lat")).append(",");
         sb.append(asset.get("Lng")).append(",");
@@ -158,10 +171,33 @@ public class PlaymappingProcessor {
         sb.append(asset.get("PriceMaintenance")).append(",");
         sb.append(asset.get("PricePurchase")).append(",");
         sb.append(asset.get("PriceReInvestment")).append(",");
-        sb.append("'").append(asset.get("ID")).append("');");
+        sb.append(asset.get("Depth")).append(",");
+        sb.append(asset.get("Width")).append(",");
+        sb.append(asset.get("Height")).append(",");
+        sb.append(asset.get("EndOfLifeYear")).append(",");
+        sb.append(asset.get("FreefallHeight")).append(",");
+        sb.append(asset.get("SafetyZoneLength")).append(",");
+        sb.append(asset.get("SafetyZoneWidth")).append(",");
+        valueOrNull(sb, "Manufacturer", asset);
+        valueOrNull(sb, "Material", asset);
+        valueOrNull(sb, "Product", asset);
+        valueOrNull(sb, "ProductID", asset);
+        valueOrNull(sb, "ProductVariantID", asset);
+        valueOrNull(sb, "SerialNumber", asset);
+        valueOrNull(sb, "ID", asset);
         Integer id = DB.qr().insert(sb.toString(), new ScalarHandler<Integer>());
         report.increaseInserted();
         saveAssetsAgeCategories(asset, id);
+    }
+    
+    protected void valueOrNull (StringBuilder sb, String type,Map<String, Object> asset){
+        String value = (String)asset.get(type);
+        
+        if(value == null || value.isEmpty()){
+            sb.append("null,");
+        }else{
+            sb.append("'").append(value).append("',");
+        }
     }
     
     protected Integer getAssetType(Map<String, Object> asset){

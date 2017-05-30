@@ -13,12 +13,28 @@ ALTER TABLE public.playservice_location_equipment
 alter table playmapping_type_group add column id serial primary key;
 
 alter table playservice_location_equipment 
-add column PriceIndexation integer,
-add column PriceInstallation integer,
-add column PriceMaintenance integer,
-add column PricePurchase integer,
-add column PriceReInvestment integer;
+add column priceindexation integer,
+add column priceinstallation integer,
+add column pricemaintenance integer,
+add column pricepurchase integer,
+add column pricereinvestment integer;
 
+
+
+alter table playservice_location_equipment 
+add column depth integer, 
+add column width integer, 
+add column height integer, 
+add column endoflifeyear integer, 
+add column freefallheight integer, 
+add column safetyzonelength integer, 
+add column safetyzonewidth integer, 
+add column manufacturer character varying(255), 
+add column material character varying(255), 
+add column product character varying(255), 
+add column productid character varying(255), 
+add column productvariantid character varying(255), 
+add column serialnumber character varying(255);
 
 -- Table: public.playservice_location_agecategories
 
