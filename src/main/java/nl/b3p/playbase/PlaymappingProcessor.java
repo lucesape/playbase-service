@@ -36,75 +36,15 @@ import org.json.JSONObject;
 public class PlaymappingProcessor {
     private static final Log log = LogFactory.getLog("PlaymappingProcessor");    
 
-    public int processAssets(String assetsString) throws NamingException, SQLException {
-        StringBuilder sb;
+    public ImportReport processAssets(String assetsString) throws NamingException, SQLException {
         List<Map<String, Object>> assets = parseAssets(assetsString);
-
-        int retval = 0;
+        ImportReport report = new ImportReport("assets");
         for (Map<String, Object> asset : assets) {
-
-            // location
-            // accessibility
-            // agecategories
-            // categories
-            // equipment
-            // facilities
-            // check if asset exists
-            // ja: update
-            // nee: insert
-            sb = new StringBuilder();
-            sb.append("insert into pm_assets_api (");
-            sb.append("	 \"id\",");
-            sb.append("      \"locationid\",");
-            sb.append("      \"locationname\",");
-            sb.append("      \"lastupdated\",");
-            sb.append("      \"name\",");
-            sb.append("      \"assettype\",");
-            sb.append("      \"manufacturer\",");
-            sb.append("      \"serialnumber\",");
-            sb.append("      \"installeddate\",");
-            sb.append("      \"endoflifeyear\",");
-            sb.append("      \"safetyzonelength\",");
-            sb.append("      \"safetyzonewidth\",");
-            sb.append("      \"agegrouptoddlers\",");
-            sb.append("      \"agegroupjuniors\",");
-            sb.append("      \"agegroupseniors\",");
-            sb.append("      \"pricepurchase\",");
-            sb.append("      \"priceinstallation\",");
-            sb.append("      \"pricereinvestment\",");
-            sb.append("      \"pricemaintenance\",");
-            sb.append("      \"priceindexation\",");
-            sb.append("      \"lat\",");
-            sb.append("      \"lng\"");
-            sb.append(") ");
-            sb.append("VALUES (");
-            sb.append("'").append(asset.get("ID")).append("',");
-            sb.append("'").append(asset.get("LocationID")).append("',");
-            sb.append("'").append(asset.get("LocationName")).append("',");
-            sb.append("'").append(asset.get("LastUpdated")).append("',");
-            sb.append("'").append(asset.get("Name")).append("',");
-            sb.append("'").append(asset.get("AssetType")).append("',");
-            sb.append("'").append(asset.get("Manufacturer")).append("',");
-            sb.append("'").append(asset.get("SerialNumber")).append("',");
-            sb.append("'").append(asset.get("InstalledDate")).append("',");
-            sb.append("'").append(asset.get("EndOfLifeYear")).append("',");
-            sb.append("'").append(asset.get("SafetyZoneLength")).append("',");
-            sb.append("'").append(asset.get("SafetyZoneWidth")).append("',");
-            sb.append("'").append(asset.get("AgeGroupToddlers")).append("',");
-            sb.append("'").append(asset.get("AgeGroupJuniors")).append("',");
-            sb.append("'").append(asset.get("AgeGroupSeniors")).append("',");
-            sb.append("'").append(asset.get("PricePurchase")).append("',");
-            sb.append("'").append(asset.get("PriceInstallation")).append("',");
-            sb.append("'").append(asset.get("PriceReInvestment")).append("',");
-            sb.append("'").append(asset.get("PriceMaintenance")).append("',");
-            sb.append("'").append(asset.get("PriceIndexation")).append("',");
-            sb.append("'").append(asset.get("Lat")).append("',");
-            sb.append("'").append(asset.get("Lng")).append("');");
-            retval += DB.qr().update(sb.toString());
+            saveAsset(asset, report);
         }
-        return retval;
+        return report;
     }
-
+    
     public ImportReport processLocations(String temp) throws NamingException, SQLException {
         List<Map<String, Object>> childLocations = parseChildLocations(temp);
         ImportReport report = new ImportReport("locaties");
@@ -115,6 +55,69 @@ public class PlaymappingProcessor {
     }
 
     // <editor-fold desc="Assets" defaultstate="collapsed">
+    
+        protected void saveAsset(Map<String, Object> asset, ImportReport report) throws NamingException, SQLException {
+        // location
+        // accessibility
+        // agecategories
+        // categories
+        // equipment
+        // facilities
+        // check if asset exists
+        // ja: update
+        // nee: insert
+        StringBuilder sb = new StringBuilder();
+        sb.append("insert into pm_assets_api (");
+        sb.append("	 \"id\",");
+        sb.append("      \"locationid\",");
+        sb.append("      \"locationname\",");
+        sb.append("      \"lastupdated\",");
+        sb.append("      \"name\",");
+        sb.append("      \"assettype\",");
+        sb.append("      \"manufacturer\",");
+        sb.append("      \"serialnumber\",");
+        sb.append("      \"installeddate\",");
+        sb.append("      \"endoflifeyear\",");
+        sb.append("      \"safetyzonelength\",");
+        sb.append("      \"safetyzonewidth\",");
+        sb.append("      \"agegrouptoddlers\",");
+        sb.append("      \"agegroupjuniors\",");
+        sb.append("      \"agegroupseniors\",");
+        sb.append("      \"pricepurchase\",");
+        sb.append("      \"priceinstallation\",");
+        sb.append("      \"pricereinvestment\",");
+        sb.append("      \"pricemaintenance\",");
+        sb.append("      \"priceindexation\",");
+        sb.append("      \"lat\",");
+        sb.append("      \"lng\"");
+        sb.append(") ");
+        sb.append("VALUES (");
+        sb.append("'").append(asset.get("ID")).append("',");
+        sb.append("'").append(asset.get("LocationID")).append("',");
+        sb.append("'").append(asset.get("LocationName")).append("',");
+        sb.append("'").append(asset.get("LastUpdated")).append("',");
+        sb.append("'").append(asset.get("Name")).append("',");
+        sb.append("'").append(asset.get("AssetType")).append("',");
+        sb.append("'").append(asset.get("Manufacturer")).append("',");
+        sb.append("'").append(asset.get("SerialNumber")).append("',");
+        sb.append("'").append(asset.get("InstalledDate")).append("',");
+        sb.append("'").append(asset.get("EndOfLifeYear")).append("',");
+        sb.append("'").append(asset.get("SafetyZoneLength")).append("',");
+        sb.append("'").append(asset.get("SafetyZoneWidth")).append("',");
+        sb.append("'").append(asset.get("AgeGroupToddlers")).append("',");
+        sb.append("'").append(asset.get("AgeGroupJuniors")).append("',");
+        sb.append("'").append(asset.get("AgeGroupSeniors")).append("',");
+        sb.append("'").append(asset.get("PricePurchase")).append("',");
+        sb.append("'").append(asset.get("PriceInstallation")).append("',");
+        sb.append("'").append(asset.get("PriceReInvestment")).append("',");
+        sb.append("'").append(asset.get("PriceMaintenance")).append("',");
+        sb.append("'").append(asset.get("PriceIndexation")).append("',");
+        sb.append("'").append(asset.get("Lat")).append("',");
+        sb.append("'").append(asset.get("Lng")).append("');");
+        DB.qr().update(sb.toString());
+        report.increaseInserted();
+    }
+        
     protected List<Map<String, Object>> parseAssets(String assetsString) {
         List<Map<String, Object>> assets = new ArrayList<>();
         JSONArray assetsArray = new JSONArray(assetsString);
@@ -125,7 +128,7 @@ public class PlaymappingProcessor {
         }
         return assets;
     }
-
+    
     protected Map<String, Object> parseAsset(JSONObject assetJSON) {
         Map<String, Object> asset = new HashMap<>();
         asset.put("$id", assetJSON.optString("$id"));
@@ -167,6 +170,8 @@ public class PlaymappingProcessor {
     // </editor-fold>
 
     // <editor-fold desc="Locations" defaultstate="collapsed">
+    
+    
     protected void saveLocation(Map<String, Object> location, ImportReport report) throws NamingException, SQLException {
         StringBuilder sb = new StringBuilder();
         boolean exists = locationExists(location);

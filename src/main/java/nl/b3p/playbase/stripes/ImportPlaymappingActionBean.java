@@ -192,21 +192,20 @@ public class ImportPlaymappingActionBean implements ActionBean {
         }
 
         if (stringResult != null) {
-            int retval;
             String type;
             ImportReport report = null;
             if (apiurl.contains("Location")) {
                 report = processor.processLocations(stringResult);
                 type = "locaties";
             } else if (apiurl.contains("Asset")) {
-                retval = processor.processAssets(stringResult);
+                report = processor.processAssets(stringResult);
                 type = "assets";
             } else {
                 context.getValidationErrors().add("apiurl", new SimpleError("Wrong url selected."));
                 return new ForwardResolution(JSP);
             }
-            context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberInserted() + " " + type + " weggeschreven."));
-            context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberUpdated()+ " " + type + " geupdatet."));
+            context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberInserted() + " " + report.getType() + " weggeschreven."));
+            context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberUpdated()+ " " + report.getType() + " geupdatet."));
         }
         return new ForwardResolution(JSP);
     }

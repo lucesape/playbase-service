@@ -46,6 +46,14 @@ public class ImportReport {
     public void setNumberUpdated(int numberUpdated) {
         this.numberUpdated = numberUpdated;
     }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
     
     public void increaseUpdated(){
         this.numberUpdated++;
