@@ -115,13 +115,14 @@ public class PlaymappingProcessor {
     // <editor-fold desc="Assets" defaultstate="collapsed">
     protected void saveAsset(Map<String, Object> asset, ImportReport report) throws NamingException, SQLException {
         
-        // ToDo: save linked asset!
-        
-        // location
+        // xlocation
         // accessibility
-        // agecategories
-        // categories
-        // equipment
+        // xagecategories
+        // xcategories
+        // xequipment
+        // images
+        // documents
+        // linked assets
         // facilities
         // check if asset exists
         // ja: update 
