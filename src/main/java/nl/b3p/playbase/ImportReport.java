@@ -16,6 +16,9 @@
  */
 package nl.b3p.playbase;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author Meine Toonen
@@ -24,10 +27,13 @@ public class ImportReport {
     private int numberInserted;
     private int numberUpdated;
     private String type;
+    
+    private List<String> errors;
 
     public ImportReport(String type) {
         numberInserted = 0;
         numberUpdated = 0;
+        errors = new ArrayList<>();
         this.type = type;
     }
     
@@ -61,6 +67,18 @@ public class ImportReport {
     
     public void increaseInserted(){
         this.numberInserted++;
+    }
+    
+    public void addError(String message){
+        this.errors.add(message);
+    }
+
+    public List<String> getErrors() {
+        return errors;
+    }
+
+    public void setErrors(List<String> errors) {
+        this.errors = errors;
     }
     
     

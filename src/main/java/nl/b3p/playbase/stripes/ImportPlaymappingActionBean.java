@@ -233,6 +233,12 @@ public class ImportPlaymappingActionBean implements ActionBean {
             }
             context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberInserted() + " " + report.getType() + " weggeschreven."));
             context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberUpdated() + " " + report.getType() + " geupdatet."));
+            if(report.getErrors().size() > 0){
+                context.getMessages().add(new SimpleMessage("Er zijn " + report.getErrors().size()+ " " + report.getType() + " mislukt:"));
+                for (String error : report.getErrors()) {
+                    context.getMessages().add(new SimpleMessage(error));
+                }
+            }
         }
         return null;
     }
