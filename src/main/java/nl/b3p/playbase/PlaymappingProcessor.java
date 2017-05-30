@@ -212,11 +212,11 @@ public class PlaymappingProcessor {
         List<Object[]> o = DB.qr().query("SELECT id FROM " + DB.LOCATION_TABLE + " WHERE pm_guid = '" + locationId + "'", rsh);
         if(o.isEmpty()){
             String locationName = (String) asset.get("LocationName");
-            throw new IllegalArgumentException ("Cannot find location with name (id) " + locationName + "(" + locationId + ")");
+            throw new IllegalArgumentException ("Kan geen locatie vinden met naam (id) " + locationName + "(" + locationId + ")");
         }else if (o.size() == 1){
             return (Integer) o.get(0)[0];
         }else{
-            throw new IllegalArgumentException ("Multiple locations found with id " + locationId);
+            throw new IllegalArgumentException ("Meerdere locaties gevonden met id " + locationId);
         }
     }
 
