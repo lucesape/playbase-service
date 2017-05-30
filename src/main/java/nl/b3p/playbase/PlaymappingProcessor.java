@@ -34,10 +34,7 @@ import org.json.JSONObject;
  * @author Meine Toonen
  */
 public class PlaymappingProcessor {
-    private static final Log log = LogFactory.getLog("PlaymappingProcessor");
-    private int insertedLocations = 0;
-    private int updatedLocations = 0;
-    
+    private static final Log log = LogFactory.getLog("PlaymappingProcessor");    
 
     public int processAssets(String assetsString) throws NamingException, SQLException {
         StringBuilder sb;
@@ -110,12 +107,10 @@ public class PlaymappingProcessor {
 
     public ImportReport processLocations(String temp) throws NamingException, SQLException {
         List<Map<String, Object>> childLocations = parseChildLocations(temp);
+        ImportReport report = new ImportReport("locaties");
         for (Map<String, Object> childLocation : childLocations) {
-            saveLocation(childLocation);
+            saveLocation(childLocation, report);
         }
-        ImportReport report = new ImportReport();
-        report.setNumberInserted(insertedLocations);
-        report.setNumberUpdated(updatedLocations);
         return report;
     }
 
@@ -172,7 +167,7 @@ public class PlaymappingProcessor {
     // </editor-fold>
 
     // <editor-fold desc="Locations" defaultstate="collapsed">
-    protected void saveLocation(Map<String, Object> location) throws NamingException, SQLException {
+    protected void saveLocation(Map<String, Object> location, ImportReport report) throws NamingException, SQLException {
         StringBuilder sb = new StringBuilder();
         boolean exists = locationExists(location);
         if (!exists) {
@@ -188,7 +183,8 @@ public class PlaymappingProcessor {
             sb.append("").append(location.get("Lat")).append(",");
             sb.append("").append(location.get("Lng")).append(",");
             sb.append("\'").append(location.get("ID")).append("\');");
-            insertedLocations += DB.qr().update(sb.toString());
+            report.increaseInserted();
+            DB.qr().update(sb.toString());
         }else{
             sb = new StringBuilder();
             sb.append("update ");
@@ -203,7 +199,8 @@ public class PlaymappingProcessor {
             sb.append(" where pm_guid = '");
             sb.append(location.get("ID"));
             sb.append("';");
-            updatedLocations += DB.qr().update(sb.toString());
+            report.increaseUpdated();
+            DB.qr().update(sb.toString());
         }
     }
 

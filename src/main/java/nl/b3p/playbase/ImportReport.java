@@ -23,10 +23,12 @@ package nl.b3p.playbase;
 public class ImportReport {
     private int numberInserted;
     private int numberUpdated;
+    private String type;
 
-    public ImportReport() {
+    public ImportReport(String type) {
         numberInserted = 0;
         numberUpdated = 0;
+        this.type = type;
     }
     
     public int getNumberInserted() {
@@ -43,6 +45,14 @@ public class ImportReport {
 
     public void setNumberUpdated(int numberUpdated) {
         this.numberUpdated = numberUpdated;
+    }
+    
+    public void increaseUpdated(){
+        this.numberUpdated++;
+    }
+    
+    public void increaseInserted(){
+        this.numberInserted++;
     }
     
     
