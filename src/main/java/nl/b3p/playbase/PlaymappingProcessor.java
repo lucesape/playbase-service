@@ -18,12 +18,14 @@ package nl.b3p.playbase;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.naming.NamingException;
 import nl.b3p.playbase.db.DB;
 import org.apache.commons.dbutils.handlers.ArrayListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
@@ -34,8 +36,46 @@ import org.json.JSONObject;
  * @author Meine Toonen
  */
 public class PlaymappingProcessor {
-    private static final Log log = LogFactory.getLog("PlaymappingProcessor");    
+    private static final Log log = LogFactory.getLog("PlaymappingProcessor");
+    private Map<String, List<Integer>> agecategories;
+    
+    private final String AGECATEGORY_TODDLER_KEY = "AgeGroupToddlers";
+    private final String AGECATEGORY_JUNIOR_KEY = "AgeGroupJuniors";
+    private final String AGECATEGORY_SENIOR_KEY = "AgeGroupSeniors";
+    
+    private final String[] AGECATEGORY_TODDLER = {"0 - 5 jaar"};
+    private final String[] AGECATEGORY_JUNIOR = {"6 - 11 jaar","12 - 18 jaar"};
+    private final String[] AGECATEGORY_SENIOR = {"Volwassenen","Senioren"};
 
+    public void init() {
+        try {
+            agecategories = new HashMap<>();
+            
+            agecategories.put(AGECATEGORY_TODDLER_KEY, new ArrayList<Integer>());
+            agecategories.put(AGECATEGORY_JUNIOR_KEY, new ArrayList<Integer>());
+            agecategories.put(AGECATEGORY_SENIOR_KEY, new ArrayList<Integer>());
+            
+            ArrayListHandler rsh = new ArrayListHandler();
+            List<Object[]> o = DB.qr().query("SELECT * from playservice_agecategories_list", rsh);
+            for (Object[] cat : o) {
+                Integer id = (Integer)cat[0];
+                String categorie = (String) cat[1];
+                
+                if(Arrays.asList(AGECATEGORY_TODDLER).contains(categorie)){
+                    agecategories.get(AGECATEGORY_TODDLER_KEY).add(id);
+                } else if(Arrays.asList(AGECATEGORY_JUNIOR).contains(categorie)){
+                    agecategories.get(AGECATEGORY_JUNIOR_KEY).add(id);
+                } else if(Arrays.asList(AGECATEGORY_SENIOR).contains(categorie)){
+                    agecategories.get(AGECATEGORY_SENIOR_KEY).add(id);
+                } else {
+                    throw new IllegalArgumentException ("Found agecategory in db not defined in code");
+                }
+            }
+        } catch (NamingException | SQLException ex) {
+            log.error("Cannot initialize playmapping processor:", ex);
+        }
+    }
+    
     public ImportReport processAssets(String assetsString) throws NamingException, SQLException {
         List<Map<String, Object>> assets = parseAssets(assetsString);
         ImportReport report = new ImportReport("assets");
@@ -66,7 +106,29 @@ public class PlaymappingProcessor {
         // check if asset exists
         // ja: update
         // nee: insert
+        
         StringBuilder sb = new StringBuilder();
+        sb.append("INSERT ");
+        sb.append("INTO ");
+        sb.append(DB.ASSETS_TABLE);
+        sb.append("(");
+        sb.append("installeddate,");
+        sb.append("name,");
+        sb.append("latitude,");
+        sb.append("longitude,");
+        sb.append("pm_guid) ");
+        sb.append("VALUES( ");
+        sb.append("'").append(asset.get("InstalledDate")).append("',");
+        sb.append("'").append(asset.get("Name")).append("',");
+        sb.append("").append(asset.get("Lat")).append(",");
+        sb.append("").append(asset.get("Lng")).append(",");
+        sb.append("'").append(asset.get("ID")).append("');");
+        Integer id = DB.qr().insert(sb.toString(), new ScalarHandler<Integer>());
+        //DB.qr().update(sb.toString());
+        report.increaseInserted();
+        saveAssetsAgeCategories(asset, id);
+        
+            /* StringBuilder sb = new StringBuilder();
         sb.append("insert into pm_assets_api (");
         sb.append("	 \"id\",");
         sb.append("      \"locationid\",");
@@ -80,9 +142,6 @@ public class PlaymappingProcessor {
         sb.append("      \"endoflifeyear\",");
         sb.append("      \"safetyzonelength\",");
         sb.append("      \"safetyzonewidth\",");
-        sb.append("      \"agegrouptoddlers\",");
-        sb.append("      \"agegroupjuniors\",");
-        sb.append("      \"agegroupseniors\",");
         sb.append("      \"pricepurchase\",");
         sb.append("      \"priceinstallation\",");
         sb.append("      \"pricereinvestment\",");
@@ -115,9 +174,47 @@ public class PlaymappingProcessor {
         sb.append("'").append(asset.get("Lat")).append("',");
         sb.append("'").append(asset.get("Lng")).append("');");
         DB.qr().update(sb.toString());
-        report.increaseInserted();
+        report.increaseInserted();*/
     }
         
+    protected void saveAssetsAgeCategories(Map<String, Object> asset, Integer id) throws NamingException, SQLException {
+        boolean toddler = (boolean)asset.get(AGECATEGORY_TODDLER_KEY);
+        boolean junior = (boolean)asset.get(AGECATEGORY_JUNIOR_KEY);
+        boolean senior = (boolean)asset.get(AGECATEGORY_SENIOR_KEY);
+        
+        // delete old entries
+        DB.qr().update("DELETE FROM " + DB.ASSETS_AGECATEGORIES_TABLE + " WHERE location_equipment = " + id);
+        if(toddler){
+            saveAgeCategory(id, agecategories.get(AGECATEGORY_TODDLER_KEY));
+        }
+        
+        if(junior){
+            saveAgeCategory(id, agecategories.get(AGECATEGORY_JUNIOR_KEY));
+        }
+        
+        if(senior){
+            saveAgeCategory(id, agecategories.get(AGECATEGORY_SENIOR_KEY));
+        }
+    }
+    
+    protected void saveAgeCategory(Integer id, List<Integer> agecategories) throws NamingException, SQLException {
+        for (Integer agecategory : agecategories) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("INSERT ");
+            sb.append("INTO ");
+            sb.append(DB.ASSETS_AGECATEGORIES_TABLE);
+            sb.append("(");
+            sb.append("location_equipment,");
+            sb.append("agecategory)");
+            sb.append("VALUES( ");
+            sb.append(id);
+            sb.append(",");
+            sb.append(agecategory);
+            sb.append(");");
+            DB.qr().insert(sb.toString(), new ScalarHandler<Integer>());
+        }
+    }
+
     protected List<Map<String, Object>> parseAssets(String assetsString) {
         List<Map<String, Object>> assets = new ArrayList<>();
         JSONArray assetsArray = new JSONArray(assetsString);

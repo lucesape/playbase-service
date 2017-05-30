@@ -17,10 +17,13 @@
 package nl.b3p.playbase.stripes;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.naming.NamingException;
 import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
@@ -35,6 +38,7 @@ import net.sourceforge.stripes.validation.SimpleError;
 import net.sourceforge.stripes.validation.Validate;
 import nl.b3p.playbase.ImportReport;
 import nl.b3p.playbase.PlaymappingProcessor;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
@@ -94,7 +98,21 @@ public class ImportPlaymappingActionBean implements ActionBean {
     }
 
     public Resolution importPM() throws NamingException, SQLException {
-        return collectJSON();
+        try {
+            //return collectJSON();
+            InputStream in = ImportPlaymappingActionBean.class.getResourceAsStream("assets.json");
+            String theString = IOUtils.toString(in, "UTF-8");
+            in.close();
+            Resolution res = importString(theString);
+            if(res != null){
+                return res;
+            }else{
+            return new ForwardResolution(JSP);
+            }
+        } catch (IOException ex) {
+            log.error(ex);
+            return new ForwardResolution(JSP);
+        }
     }
 
     private Resolution collectJSON() throws SQLException, NamingException {
@@ -190,10 +208,19 @@ public class ImportPlaymappingActionBean implements ActionBean {
                 }
             }
         }
-
+        Resolution res = importString(stringResult);
+        if(res != null){
+            return res;
+        }else{
+            return new ForwardResolution(JSP);
+        }
+    }
+    
+    private Resolution importString(String stringResult) throws NamingException, SQLException {
         if (stringResult != null) {
             String type;
             ImportReport report = null;
+            processor.init();
             if (apiurl.contains("Location")) {
                 report = processor.processLocations(stringResult);
                 type = "locaties";
@@ -205,9 +232,9 @@ public class ImportPlaymappingActionBean implements ActionBean {
                 return new ForwardResolution(JSP);
             }
             context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberInserted() + " " + report.getType() + " weggeschreven."));
-            context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberUpdated()+ " " + report.getType() + " geupdatet."));
+            context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberUpdated() + " " + report.getType() + " geupdatet."));
         }
-        return new ForwardResolution(JSP);
+        return null;
     }
 
     // <editor-fold desc="Getters and setters" defaultstate="collapsed">

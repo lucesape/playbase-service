@@ -1,0 +1,5 @@
+Vragen
+------
+
+Agecategories: in PM  3 booleans: toddlers, juniors, seniors. In playservice_agecategories_list 5 categorien:"0 - 5 jaar","6 - 11 jaar","12 - 18 jaar","Volwassenen","Senioren". Zijn toddlers 0-5, juniors 6-11 EN 12-18 en seniors "senioren"? Of nieuwe categorie toevoegen?
+

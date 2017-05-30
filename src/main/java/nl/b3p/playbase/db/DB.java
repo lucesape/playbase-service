@@ -35,6 +35,9 @@ public class DB {
     private static final String JNDI_NAME = "java:/comp/env/jdbc/playbase-service";
     
     public static final String LOCATION_TABLE = "playservice_locations";
+    
+    public static final String ASSETS_TABLE = "playservice_location_equipment";
+    public static final String ASSETS_AGECATEGORIES_TABLE = "playservice_location_equipment_agecategories";
 
     public static final DataSource getDataSource(String jndiName) throws NamingException {
         InitialContext cxt = new InitialContext();
