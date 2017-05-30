@@ -184,7 +184,7 @@ public class PlaymappingProcessor {
         valueOrNull(sb, "ProductID", asset);
         valueOrNull(sb, "ProductVariantID", asset);
         valueOrNull(sb, "SerialNumber", asset);
-        valueOrNull(sb, "ID", asset);
+        sb.append("'").append(asset.get("ID")).append("');");
         Integer id = DB.qr().insert(sb.toString(), new ScalarHandler<Integer>());
         report.increaseInserted();
         saveAssetsAgeCategories(asset, id);
