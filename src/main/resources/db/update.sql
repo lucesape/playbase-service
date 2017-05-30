@@ -6,11 +6,18 @@ add column  longitude double precision,
   add column pm_guid character varying(255),
   add column name character varying(255);
 
-  
+
 ALTER TABLE public.playservice_location_equipment
   ADD CONSTRAINT playservicelocationequipmenttype_fk FOREIGN KEY (type_) REFERENCES public.playmapping_type_group (id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 alter table playmapping_type_group add column id serial primary key;
+
+alter table playservice_location_equipment 
+add column PriceIndexation integer,
+add column PriceInstallation integer,
+add column PriceMaintenance integer,
+add column PricePurchase integer,
+add column PriceReInvestment integer;
 
 
 -- Table: public.playservice_location_agecategories
