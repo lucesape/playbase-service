@@ -39,6 +39,7 @@ public class PlaymappingProcessor {
 
     private static final Log log = LogFactory.getLog("PlaymappingProcessor");
     private Map<String, List<Integer>> agecategories;
+    private Map<String, Integer> types;
 
     private final String AGECATEGORY_TODDLER_KEY = "AgeGroupToddlers";
     private final String AGECATEGORY_JUNIOR_KEY = "AgeGroupJuniors";
@@ -49,6 +50,7 @@ public class PlaymappingProcessor {
     private final String[] AGECATEGORY_SENIOR = {"Volwassenen", "Senioren"};
 
     public void init() {
+            ArrayListHandler rsh = new ArrayListHandler();
         try {
             agecategories = new HashMap<>();
 
@@ -56,8 +58,7 @@ public class PlaymappingProcessor {
             agecategories.put(AGECATEGORY_JUNIOR_KEY, new ArrayList<Integer>());
             agecategories.put(AGECATEGORY_SENIOR_KEY, new ArrayList<Integer>());
 
-            ArrayListHandler rsh = new ArrayListHandler();
-            List<Object[]> o = DB.qr().query("SELECT * from playservice_agecategories_list", rsh);
+            List<Object[]> o = DB.qr().query("SELECT * from " + DB.ASSETS_AGECATEGORIES_LIST_TABLE , rsh);
             for (Object[] cat : o) {
                 Integer id = (Integer) cat[0];
                 String categorie = (String) cat[1];
@@ -71,6 +72,17 @@ public class PlaymappingProcessor {
                 } else {
                     throw new IllegalArgumentException("Found agecategory in db not defined in code");
                 }
+            }
+        } catch (NamingException | SQLException ex) {
+            log.error("Cannot initialize playmapping processor:", ex);
+        }
+        try {
+            types = new HashMap<>();
+            List<Object[]> o = DB.qr().query("SELECT id, catasset from "  + DB.ASSETS_TYPE_GROUP_LIST_TABLE, rsh);
+            for (Object[] type : o) {
+                Integer id = (Integer)type[0];
+                String cat = (String)type[1];
+                types.put(cat, id);
             }
         } catch (NamingException | SQLException ex) {
             log.error("Cannot initialize playmapping processor:", ex);
@@ -115,6 +127,7 @@ public class PlaymappingProcessor {
         // ja: update 
        // nee: insert
         Integer locationId = getLocation(asset);
+        Integer assetTypeId = getAssetType(asset);
         
         StringBuilder sb = new StringBuilder();
         sb.append("INSERT ");
@@ -124,6 +137,7 @@ public class PlaymappingProcessor {
         sb.append("installeddate,");
         sb.append("location,");
         sb.append("name,");
+        sb.append("type_,");
         sb.append("latitude,");
         sb.append("longitude,");
         sb.append("pm_guid) ");
@@ -131,12 +145,19 @@ public class PlaymappingProcessor {
         sb.append("'").append(asset.get("InstalledDate")).append("',");
         sb.append("").append(locationId).append(",");
         sb.append("'").append(asset.get("Name")).append("',");
+        sb.append("").append(assetTypeId).append(",");
         sb.append("").append(asset.get("Lat")).append(",");
         sb.append("").append(asset.get("Lng")).append(",");
         sb.append("'").append(asset.get("ID")).append("');");
         Integer id = DB.qr().insert(sb.toString(), new ScalarHandler<Integer>());
         report.increaseInserted();
         saveAssetsAgeCategories(asset, id);
+    }
+    
+    protected Integer getAssetType(Map<String, Object> asset){
+        String type = (String)asset.get("AssetType");
+        Integer id = types.get(type);
+        return id;
     }
 
     protected Integer getLocation(Map<String, Object> asset) throws NamingException, SQLException {

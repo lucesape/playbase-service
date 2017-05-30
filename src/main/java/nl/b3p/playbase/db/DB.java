@@ -38,6 +38,8 @@ public class DB {
     
     public static final String ASSETS_TABLE = "playservice_location_equipment";
     public static final String ASSETS_AGECATEGORIES_TABLE = "playservice_location_equipment_agecategories";
+    public static final String ASSETS_AGECATEGORIES_LIST_TABLE = "playservice_agecategories_list";
+    public static final String ASSETS_TYPE_GROUP_LIST_TABLE = "playmapping_type_group";
 
     public static final DataSource getDataSource(String jndiName) throws NamingException {
         InitialContext cxt = new InitialContext();

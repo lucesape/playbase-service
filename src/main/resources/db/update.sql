@@ -1,10 +1,16 @@
 alter table playservice_location_equipment
 add column  longitude double precision,
   add column latitude double precision,
-
+  add column type_ integer,
   add column installeddate character varying(255),
   add column pm_guid character varying(255),
   add column name character varying(255);
+
+  
+ALTER TABLE public.playservice_location_equipment
+  ADD CONSTRAINT playservicelocationequipmenttype_fk FOREIGN KEY (type_) REFERENCES public.playmapping_type_group (id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+alter table playmapping_type_group add column id serial primary key;
 
 
 -- Table: public.playservice_location_agecategories
