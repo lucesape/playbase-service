@@ -64,3 +64,26 @@ ALTER TABLE public.playservice_images
 
 ALTER TABLE public.playservice_images
   ADD CONSTRAINT playserviceimages_equipment_fk FOREIGN KEY (equipment) REFERENCES public.playservice_location_equipment (id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+
+CREATE TABLE public.playservice_documents
+(
+  id serial,
+  url text,
+  caption character varying(255),
+  location integer NOT NULL,
+  equipment integer,
+  pm_guid character varying(255),
+  CONSTRAINT playservice_documents_pkey PRIMARY KEY (id),
+  CONSTRAINT playservice_documents_fk FOREIGN KEY (equipment)
+      REFERENCES public.playservice_location_equipment (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT playservice_documents_fk1 FOREIGN KEY (location)
+      REFERENCES public.playservice_locations (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE public.playservice_documents
+  OWNER TO playbase;

@@ -78,7 +78,7 @@ public class PlaymappingProcessorTest {
         assertEquals("C117/1009", real.get("Ref"));
         assertEquals(14, real.get("AssetCount"));
         assertEquals(0, ((JSONArray)real.get("ChildLocations")).length());
-        assertEquals(0, ((JSONArray)real.get("Documents")).length());
+        assertEquals(0, ((List)real.get("Documents")).size());
         assertEquals(2, ((List)real.get("Images")).size());
     }
     
@@ -126,7 +126,7 @@ public class PlaymappingProcessorTest {
         assertEquals(-1.0, map.get("PriceIndexation"));
         assertEquals(52.38138, map.get("Lat"));
         assertEquals(4.641622, map.get("Lng"));
-        assertEquals(0, ((JSONArray)map.get("Documents")).length());
+        assertEquals(0, ((List)map.get("Documents")).size());
         assertEquals(1, ((List)map.get("Images")).size());
         assertEquals(0, ((JSONArray)map.get("Hyperlinks")).length());
     }

@@ -120,8 +120,8 @@ public class PlaymappingProcessor {
         // xagecategories
         // xcategories
         // xequipment
-        // images
-        // documents
+        // ximages
+        // xdocuments
         // linked assets
         // facilities
         // check if asset exists
@@ -189,7 +189,8 @@ public class PlaymappingProcessor {
         Integer id = DB.qr().insert(sb.toString(), new ScalarHandler<Integer>());
         report.increaseInserted();
         saveAssetsAgeCategories(asset, id);
-        saveImages(asset, id, locationId);
+        saveImagesAndWords((List<Map<String, Object>>)asset.get("Images"), id, locationId, DB.ASSETS_IMAGES_TABLE);
+        saveImagesAndWords((List<Map<String, Object>>)asset.get("Documents"), id, locationId, DB.ASSETS_DOCUMENTS_TABLE);
     }
     
     protected void valueOrNull (StringBuilder sb, String type,Map<String, Object> valueMap){
@@ -260,13 +261,12 @@ public class PlaymappingProcessor {
         }
     }
     
-    protected void saveImages(Map<String, Object> asset, Integer assetId, Integer locationId) throws NamingException, SQLException{
-        List<Map<String, Object>> images = (List<Map<String, Object>>)asset.get("Images");
+    protected void saveImagesAndWords(List<Map<String, Object>> images, Integer assetId, Integer locationId, String table) throws NamingException, SQLException{
         for (Map<String, Object> image : images) {
             StringBuilder sb = new StringBuilder();
             sb.append("INSERT ");
             sb.append("INTO ");
-            sb.append(DB.ASSETS_IMAGES_TABLE);
+            sb.append(table);
             sb.append("(");
             sb.append("caption,");
             sb.append("url,");
@@ -327,9 +327,9 @@ public class PlaymappingProcessor {
         asset.put("PriceIndexation", assetJSON.optDouble("PriceIndexation"));
         asset.put("Lat", Double.parseDouble(assetJSON.optString("Lat").replaceAll(",", ".")));
         asset.put("Lng", Double.parseDouble(assetJSON.optString("Lng").replaceAll(",", ".")));
-        asset.put("Documents", assetJSON.optJSONArray("Documents"));
+        asset.put("Documents", parseImagesAndWords(assetJSON.optJSONArray("Documents")));
         asset.put("Hyperlinks", assetJSON.optJSONArray("Hyperlinks"));
-        asset.put("Images", parseImages(assetJSON.optJSONArray("Images")));
+        asset.put("Images", parseImagesAndWords(assetJSON.optJSONArray("Images")));
         return asset;
     }
     // </editor-fold>
@@ -421,29 +421,34 @@ public class PlaymappingProcessor {
         location.put("Lat", Double.parseDouble(json.optString("Lat").replaceAll(",", ".")));
         location.put("Lng", Double.parseDouble(json.optString("Lng").replaceAll(",", ".")));
         location.put("ChildLocations", json.optJSONArray("ChildLocations"));
-        location.put("Documents", json.optJSONArray("Documents"));
-        location.put("Images", parseImages(json.optJSONArray("Images")));
+        location.put("Documents", parseImagesAndWords(json.optJSONArray("Documents")));
+        location.put("Images", parseImagesAndWords(json.optJSONArray("Images")));
         return location;
     }
 
-    protected List<Map<String, Object>> parseImages(JSONArray images) {
-        List<Map<String, Object>> imagesList = new ArrayList<>();
+    /**
+     * Parse images and documents
+     * @param images
+     * @return 
+     */
+    protected List<Map<String, Object>> parseImagesAndWords(JSONArray images) {
+        List<Map<String, Object>> list = new ArrayList<>();
         for (int i = 0; i < images.length(); i++) {
             JSONObject img = images.getJSONObject(i);
-            Map<String, Object> image = parseImage(img);
-            imagesList.add(image);
+            Map<String, Object> image = parseImageAndWord(img);
+            list.add(image);
         }
-        return imagesList;
+        return list;
     }
 
-    protected Map<String, Object> parseImage(JSONObject image) {
-        Map<String, Object> imageMap = new HashMap<>();
-        imageMap.put("$id", image.optString("$id"));
-        imageMap.put("ID", image.optString("ID"));
-        imageMap.put("LastUpdated", image.optString("LastUpdated"));
-        imageMap.put("URI", image.optString("URI"));
-        imageMap.put("Description", image.optString("Description"));
-        return imageMap;
+    protected Map<String, Object> parseImageAndWord(JSONObject image) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("$id", image.optString("$id"));
+        map.put("ID", image.optString("ID"));
+        map.put("LastUpdated", image.optString("LastUpdated"));
+        map.put("URI", image.optString("URI"));
+        map.put("Description", image.optString("Description"));
+        return map;
     }
     // </editor-fold>
 
