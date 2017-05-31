@@ -98,8 +98,8 @@ public class ImportPlaymappingActionBean implements ActionBean {
     }
 
     public Resolution importPM() throws NamingException, SQLException {
-            return collectJSON();
-        /*try {
+        //    return collectJSON();
+        try {
             InputStream in = ImportPlaymappingActionBean.class.getResourceAsStream("assets.json");
             String theString = IOUtils.toString(in, "UTF-8");
             in.close();
@@ -112,7 +112,7 @@ public class ImportPlaymappingActionBean implements ActionBean {
         } catch (IOException ex) {
             log.error(ex);
             return new ForwardResolution(JSP);
-        }*/
+        }
     }
 
     private Resolution collectJSON() throws SQLException, NamingException {

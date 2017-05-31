@@ -189,10 +189,11 @@ public class PlaymappingProcessor {
         Integer id = DB.qr().insert(sb.toString(), new ScalarHandler<Integer>());
         report.increaseInserted();
         saveAssetsAgeCategories(asset, id);
+        saveImages(asset, id, locationId);
     }
     
-    protected void valueOrNull (StringBuilder sb, String type,Map<String, Object> asset){
-        String value = (String)asset.get(type);
+    protected void valueOrNull (StringBuilder sb, String type,Map<String, Object> valueMap){
+        String value = (String)valueMap.get(type);
         
         if(value == null || value.isEmpty()){
             sb.append("null,");
@@ -255,7 +256,30 @@ public class PlaymappingProcessor {
             sb.append(",");
             sb.append(agecategory);
             sb.append(");");
-            DB.qr().insert(sb.toString(), new ScalarHandler<Integer>());
+            DB.qr().insert(sb.toString(), new ScalarHandler<>());
+        }
+    }
+    
+    protected void saveImages(Map<String, Object> asset, Integer assetId, Integer locationId) throws NamingException, SQLException{
+        List<Map<String, Object>> images = (List<Map<String, Object>>)asset.get("Images");
+        for (Map<String, Object> image : images) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("INSERT ");
+            sb.append("INTO ");
+            sb.append(DB.ASSETS_IMAGES_TABLE);
+            sb.append("(");
+            sb.append("caption,");
+            sb.append("url,");
+            sb.append("location,");
+            sb.append("equipment,");
+            sb.append("pm_guid)");
+            sb.append("VALUES( ");
+            valueOrNull(sb, "Description", image);
+            sb.append("'").append(image.get("URI")).append("',");
+            sb.append(locationId).append(",");
+            sb.append(assetId).append(",");
+            sb.append("'").append(image.get("ID")).append("');");
+            DB.qr().insert(sb.toString(), new ScalarHandler<>());
         }
     }
 

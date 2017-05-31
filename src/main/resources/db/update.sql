@@ -58,3 +58,9 @@ WITH (
 );
 ALTER TABLE public.playservice_location_equipment_agecategories
   OWNER TO playbase;
+
+ALTER TABLE public.playservice_images
+  ADD COLUMN pm_guid character varying(255);
+
+ALTER TABLE public.playservice_images
+  ADD CONSTRAINT playserviceimages_equipment_fk FOREIGN KEY (equipment) REFERENCES public.playservice_location_equipment (id) ON UPDATE NO ACTION ON DELETE NO ACTION;
