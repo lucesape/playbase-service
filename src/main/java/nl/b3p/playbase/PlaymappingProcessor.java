@@ -50,7 +50,7 @@ public class PlaymappingProcessor {
     private final String[] AGECATEGORY_SENIOR = {"Volwassenen", "Senioren"};
 
     public void init() {
-            ArrayListHandler rsh = new ArrayListHandler();
+        ArrayListHandler rsh = new ArrayListHandler();
         try {
             agecategories = new HashMap<>();
 
@@ -58,7 +58,7 @@ public class PlaymappingProcessor {
             agecategories.put(AGECATEGORY_JUNIOR_KEY, new ArrayList<Integer>());
             agecategories.put(AGECATEGORY_SENIOR_KEY, new ArrayList<Integer>());
 
-            List<Object[]> o = DB.qr().query("SELECT * from " + DB.ASSETS_AGECATEGORIES_LIST_TABLE , rsh);
+            List<Object[]> o = DB.qr().query("SELECT * from " + DB.ASSETS_AGECATEGORIES_LIST_TABLE, rsh);
             for (Object[] cat : o) {
                 Integer id = (Integer) cat[0];
                 String categorie = (String) cat[1];
@@ -78,10 +78,10 @@ public class PlaymappingProcessor {
         }
         try {
             types = new HashMap<>();
-            List<Object[]> o = DB.qr().query("SELECT id, catasset from "  + DB.ASSETS_TYPE_GROUP_LIST_TABLE, rsh);
+            List<Object[]> o = DB.qr().query("SELECT id, catasset from " + DB.ASSETS_TYPE_GROUP_LIST_TABLE, rsh);
             for (Object[] type : o) {
-                Integer id = (Integer)type[0];
-                String cat = (String)type[1];
+                Integer id = (Integer) type[0];
+                String cat = (String) type[1];
                 types.put(cat, id);
             }
         } catch (NamingException | SQLException ex) {
