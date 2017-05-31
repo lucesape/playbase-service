@@ -262,6 +262,7 @@ public class PlaymappingProcessor {
     }
     
     protected void saveImagesAndWords(List<Map<String, Object>> images, Integer assetId, Integer locationId, String table) throws NamingException, SQLException{
+        DB.qr().update("DELETE FROM " + table + " WHERE equipment = " + assetId);
         for (Map<String, Object> image : images) {
             StringBuilder sb = new StringBuilder();
             sb.append("INSERT ");
