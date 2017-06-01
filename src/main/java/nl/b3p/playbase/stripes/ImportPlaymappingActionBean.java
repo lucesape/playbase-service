@@ -89,6 +89,9 @@ public class ImportPlaymappingActionBean implements ActionBean {
     @Validate(required = true)
     private String apiurl;
     
+    @Validate
+    private String file;
+    
     private final PlaymappingProcessor processor = new PlaymappingProcessor();
 
     @DefaultHandler
@@ -100,7 +103,7 @@ public class ImportPlaymappingActionBean implements ActionBean {
     public Resolution importPM() throws NamingException, SQLException {
         //    return collectJSON();
         try {
-            InputStream in = ImportPlaymappingActionBean.class.getResourceAsStream("assets.json");
+            InputStream in = ImportPlaymappingActionBean.class.getResourceAsStream(file);
             String theString = IOUtils.toString(in, "UTF-8");
             in.close();
             Resolution res = importString(theString);
@@ -310,5 +313,15 @@ public class ImportPlaymappingActionBean implements ActionBean {
         this.apiurl = apiurl;
     }
 
+    public String getFile() {
+        return file;
+    }
+
+    public void setFile(String file) {
+        this.file = file;
+    }
+    
     // </editor-fold> 
+
+    
 }

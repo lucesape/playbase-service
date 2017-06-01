@@ -16,6 +16,7 @@
  */
 package nl.b3p.playbase;
 
+import com.vividsolutions.jts.io.ParseException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,6 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.naming.NamingException;
+import nl.b3p.loader.jdbc.GeometryJdbcConverter;
+import nl.b3p.loader.jdbc.GeometryJdbcConverterFactory;
 import nl.b3p.playbase.db.DB;
 import org.apache.commons.dbutils.handlers.ArrayListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
@@ -48,6 +51,8 @@ public class PlaymappingProcessor {
     private final String[] AGECATEGORY_TODDLER = {"0 - 5 jaar"};
     private final String[] AGECATEGORY_JUNIOR = {"6 - 11 jaar", "12 - 18 jaar"};
     private final String[] AGECATEGORY_SENIOR = {"Volwassenen", "Senioren"};
+    
+    private GeometryJdbcConverter geometryConverter;
 
     public void init() {
         ArrayListHandler rsh = new ArrayListHandler();
@@ -87,6 +92,11 @@ public class PlaymappingProcessor {
         } catch (NamingException | SQLException ex) {
             log.error("Cannot initialize playmapping processor:", ex);
         }
+        try {
+            geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(DB.getConnection());
+        } catch (NamingException | SQLException ex) {
+            log.error("Cannot get geometryConverter: ", ex);
+        } 
     }
 
     public ImportReport processAssets(String assetsString) throws NamingException, SQLException {
@@ -130,6 +140,15 @@ public class PlaymappingProcessor {
         Integer locationId = getLocation(asset);
         Integer assetTypeId = getAssetType(asset);
         Integer id = null;
+        Object geom = null;
+        
+        try {
+            geom = geometryConverter.createNativePoint((double)asset.get("Lat"), (double)asset.get("Lng"), 4326);
+        } catch (ParseException ex) {
+            log.error("Cannot parse geometry", ex);
+        }catch (NullPointerException ex){
+            log.info("no geom for asset");
+        }
         if (assetExists(asset)) {
          
             StringBuilder sb = new StringBuilder();
@@ -191,13 +210,13 @@ public class PlaymappingProcessor {
             valueOrNull(sb, "ProductVariantID", asset);
             sb.append("serialnumber = ");
             valueOrNull(sb, "SerialNumber", asset);
+            sb.append("geom = ?,");
             sb.append("pm_guid = ");
             sb.append("'").append(asset.get("ID")).append("'");
             sb.append(" WHERE id = ").append(id);
-            DB.qr().update(sb.toString());
+            DB.qr().update(sb.toString(),geom);
             report.increaseUpdated();            
         }else{
-
             StringBuilder sb = new StringBuilder();
             sb.append("INSERT ");
             sb.append("INTO ");
@@ -227,6 +246,7 @@ public class PlaymappingProcessor {
             sb.append("productid,");
             sb.append("productvariantid,");
             sb.append("serialnumber,");
+            sb.append("geom,");
             sb.append("pm_guid) ");
             sb.append("VALUES( ");
             valueOrNull(sb, "InstalledDate", asset);
@@ -253,8 +273,9 @@ public class PlaymappingProcessor {
             valueOrNull(sb, "ProductID", asset);
             valueOrNull(sb, "ProductVariantID", asset);
             valueOrNull(sb, "SerialNumber", asset);
+            sb.append("?,");
             sb.append("'").append(asset.get("ID")).append("');");
-            id = DB.qr().insert(sb.toString(), new ScalarHandler<Integer>());
+            id = DB.qr().insert(sb.toString(), new ScalarHandler<Integer>(),geom);
             report.increaseInserted();
         }
         
@@ -429,7 +450,15 @@ public class PlaymappingProcessor {
     // <editor-fold desc="Locations" defaultstate="collapsed">
     protected void saveLocation(Map<String, Object> location, ImportReport report) throws NamingException, SQLException {
         StringBuilder sb = new StringBuilder();
-        boolean exists = locationExists(location);
+        boolean exists = locationExists(location);        
+        Object geom = null;
+        try {
+            geom = geometryConverter.createNativePoint((double)location.get("Lat"), (double)location.get("Lng"), 4326);
+        } catch (ParseException ex) {
+            log.error("Cannot parse geometry", ex);
+        }catch (NullPointerException ex){
+            log.info("no geom for asset");
+        }
         if (!exists) {
             sb.append("INSERT ");
             sb.append("INTO ");
@@ -437,14 +466,16 @@ public class PlaymappingProcessor {
             sb.append("(title,");
             sb.append("latitude,");
             sb.append("longitude,");
+            sb.append("geom,");
             sb.append("pm_guid) ");
             sb.append("VALUES( ");
             sb.append("\'").append(location.get("Name")).append("\',");
             sb.append(location.get("Lat")).append(",");
             sb.append(location.get("Lng")).append(",");
+            sb.append("?,");
             sb.append("\'").append(location.get("ID")).append("\');");
             report.increaseInserted();
-            DB.qr().update(sb.toString());
+            DB.qr().update(sb.toString(),geom);
         } else {
             sb = new StringBuilder();
             sb.append("update ");
@@ -456,11 +487,12 @@ public class PlaymappingProcessor {
             sb.append(location.get("Lat")).append(",");
             sb.append("longitude = ");
             sb.append(location.get("Lng")).append("");
+            sb.append("geom = ?,");
             sb.append(" where pm_guid = '");
             sb.append(location.get("ID"));
             sb.append("';");
             report.increaseUpdated();
-            DB.qr().update(sb.toString());
+            DB.qr().update(sb.toString(),geom);
         }
     }
 

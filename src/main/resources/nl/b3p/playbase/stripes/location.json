@@ -1,0 +1,33 @@
+[{
+    "$id": "4",
+    "AddressLine1": "Beltmolen",
+    "Area": "Sectie 1 Noord",
+    "AssetCount": 10,
+    "ChildLocations": [],
+    "City": "Berkel Enshot",
+    "Documents": [],
+    "ID": "ab5912be-5588-4108-9b46-7d93b125a267",
+    "Images": [
+        {
+            "$id": "5",
+            "Description": "",
+            "ID": "70d0c2b7-a91d-4406-bd2d-e6159d58c3d2",
+            "LastUpdated": "2016-03-02T13:44:16.35",
+            "URI": "http://www.playmapping.com/GetImage.ashx?g=70d0c2b7-a91d-4406-bd2d-e6159d58c3d2&w=350&h=350"
+        },
+        {
+            "$id": "6",
+            "Description": "",
+            "ID": "bc50ad1e-9d3d-4ac1-9b6d-fab24281a08e",
+            "LastUpdated": "2016-03-02T13:44:10.4",
+            "URI": "http://www.playmapping.com/GetImage.ashx?g=bc50ad1e-9d3d-4ac1-9b6d-fab24281a08e&w=350&h=350"
+        }
+    ],
+    "LastUpdated": "2016-03-03T07:05:26.923",
+    "Lat": "51,59194",
+    "Lng": "5,137373",
+    "Name": "Beltmolen",
+    "PostCode": "",
+    "Ref": "",
+    "Suburb": "Berkel"
+}]

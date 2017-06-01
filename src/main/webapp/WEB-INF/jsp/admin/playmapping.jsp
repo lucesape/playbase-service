@@ -39,8 +39,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                             <stripes:option value="https://api.playmapping.com/CustomerAsset/GetAll" label="Assets"/>
                             <stripes:option value="https://api.playmapping.com/CustomerLocation/GetAll" label="Locations"/>
                         </stripes:select>
-                        
-                        <%--stripes:text class="form-control" name="apiurl"/--%>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">File</label>
+                    <div class="col-sm-10">
+                        <stripes:select name="file" >
+                            <stripes:option value="assets.json" label="AllAssets"/>
+                            <stripes:option value="singleAssetWithLinked.json" label="SingleAsset"/>
+                            <stripes:option value="locations.json" label="AllLocations"/>
+                            <stripes:option value="location.json" label="SingleLocation"/>
+                        </stripes:select>
                     </div>
                 </div>
                 <div class="form-group">

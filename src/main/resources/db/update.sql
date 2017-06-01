@@ -82,8 +82,15 @@ CREATE TABLE public.playservice_documents
       REFERENCES public.playservice_locations (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION
 )
-WITH (
+WITH (y
   OIDS=FALSE
 );
 ALTER TABLE public.playservice_documents
   OWNER TO playbase;
+
+
+
+
+alter table playservice_locations add column geom geometry(Point, 4326)
+
+alter table playservice_location_equipment add column geom geometry(Point, 4326)
