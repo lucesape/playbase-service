@@ -87,7 +87,7 @@ public class PlaymappingProcessorTest {
         InputStream in = PlaymappingProcessorTest.class.getResourceAsStream("haarlemAssets.json");
         String location = IOUtils.toString(in);
         List<Map<String, Object>> returnValue = instance.parseAssets(location);
-        assertEquals(2339, returnValue.size());
+        assertEquals(3479, returnValue.size());
     }
     
     @Test
@@ -128,6 +128,16 @@ public class PlaymappingProcessorTest {
         assertEquals(4.641622, map.get("Lng"));
         assertEquals(0, ((List)map.get("Documents")).size());
         assertEquals(1, ((List)map.get("Images")).size());
+        assertEquals(0, ((JSONArray)map.get("LinkedAssets")).length());
         assertEquals(0, ((JSONArray)map.get("Hyperlinks")).length());
+    }
+    
+    @Test
+    public void testParseAssetWithLinkedAsset() throws IOException{
+        InputStream in = PlaymappingProcessorTest.class.getResourceAsStream("singleAssetWithLinked.json");
+        String asset = IOUtils.toString(in);
+        List<Map<String, Object>> returnValue = instance.parseAssets(asset);
+        assertEquals(2, returnValue.size());
+        
     }
 }

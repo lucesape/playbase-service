@@ -116,7 +116,6 @@ public class PlaymappingProcessor {
     protected void saveAsset(Map<String, Object> asset, ImportReport report) throws NamingException, SQLException {
         
         // xlocation
-        // accessibility
         // xagecategories
         // xcategories
         // xequipment
@@ -124,6 +123,7 @@ public class PlaymappingProcessor {
         // xdocuments
         // linked assets
         // facilities
+        // accessibility
         // check if asset exists
         // ja: update 
        // nee: insert
@@ -379,6 +379,8 @@ public class PlaymappingProcessor {
         for (int i = 0; i < assetsArray.length(); i++) {
             JSONObject asset = assetsArray.getJSONObject(i);
             assets.add(parseAsset(asset));
+            String linkedAssets = asset.getJSONArray("LinkedAssets").toString();
+            assets.addAll(parseAssets(linkedAssets));
         }
         return assets;
     }
@@ -419,6 +421,7 @@ public class PlaymappingProcessor {
         asset.put("Documents", parseImagesAndWords(assetJSON.optJSONArray("Documents")));
         asset.put("Hyperlinks", assetJSON.optJSONArray("Hyperlinks"));
         asset.put("Images", parseImagesAndWords(assetJSON.optJSONArray("Images")));
+        asset.put("LinkedAssets", assetJSON.optJSONArray("LinkedAssets"));
         return asset;
     }
     // </editor-fold>
