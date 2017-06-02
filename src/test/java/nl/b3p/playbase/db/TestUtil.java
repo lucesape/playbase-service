@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.sql.Connection;
 import java.sql.SQLException;
+import javax.naming.NamingException;
 import javax.sql.DataSource;
 import nl.b3p.loader.jdbc.GeometryJdbcConverter;
 import nl.b3p.loader.jdbc.GeometryJdbcConverterFactory;
@@ -31,12 +32,20 @@ import org.hsqldb.jdbc.JDBCDataSource;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TestName;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  *
  * @author Meine Toonen meinetoonen@b3partners.nl
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(DB.class)
 public class TestUtil {
     
     protected final static Log log = LogFactory.getLog(TestUtil.class);
@@ -49,7 +58,7 @@ public class TestUtil {
     public TestName testName = new TestName();
     
     @Before
-    public void setUpClass() throws SQLException, IOException {
+    public void setUpClass() throws SQLException, IOException, NamingException {
         if(useDB){
             JDBCDataSource ds = new JDBCDataSource();
             String testname = testName.getMethodName();
@@ -58,9 +67,24 @@ public class TestUtil {
             datasource = ds;
             initDB("schemaexport.sql");
             initDB("initdata.sql");
+            initDB("initdata_locations.sql");
             GeometryJdbcConverter gjc = GeometryJdbcConverterFactory.getGeometryJdbcConverter(datasource.getConnection());
             run = new QueryRunner(datasource, gjc.isPmdKnownBroken() );
+            
+             PowerMockito.mockStatic(DB.class);
+             Mockito.when(DB.qr()).thenReturn(getDS());
+             Mockito.when(DB.getConnection()).thenReturn(ds.getConnection());
+            //BDDMockito.given(DriverManager.getConnection(...)).willReturn(...);
+        
         }
+    }
+    public QueryRunner getDS(){
+        return new QueryRunner(datasource);
+    }
+    
+    @Test
+    public void stub(){
+        
     }
     
     @After
