@@ -22,8 +22,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.naming.NamingException;
 import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
@@ -101,8 +99,8 @@ public class ImportPlaymappingActionBean implements ActionBean {
     }
 
     public Resolution importPM() throws NamingException, SQLException {
-        //    return collectJSON();
-        try {
+            return collectJSON();
+        /*try {
             InputStream in = ImportPlaymappingActionBean.class.getResourceAsStream(file);
             String theString = IOUtils.toString(in, "UTF-8");
             in.close();
@@ -115,7 +113,7 @@ public class ImportPlaymappingActionBean implements ActionBean {
         } catch (IOException ex) {
             log.error(ex);
             return new ForwardResolution(JSP);
-        }
+        }*/
     }
 
     private Resolution collectJSON() throws SQLException, NamingException {

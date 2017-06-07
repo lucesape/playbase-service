@@ -64,7 +64,7 @@ public class PlaymappingProcessor {
             agecategories.put(AGECATEGORY_JUNIOR_KEY, new ArrayList<Integer>());
             agecategories.put(AGECATEGORY_SENIOR_KEY, new ArrayList<Integer>());
 
-            List<Object[]> o = DB.qr().query("SELECT * from " + DB.ASSETS_AGECATEGORIES_LIST_TABLE, rsh);
+            List<Object[]> o = DB.qr().query("SELECT * from " + DB.LIST_AGECATEGORIES_TABLE, rsh);
             for (Object[] cat : o) {
                 Integer id = (Integer) cat[0];
                 String categorie = (String) cat[1];

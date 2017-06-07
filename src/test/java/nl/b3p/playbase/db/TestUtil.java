@@ -74,8 +74,6 @@ public class TestUtil {
              PowerMockito.mockStatic(DB.class);
              Mockito.when(DB.qr()).thenReturn(getDS());
              Mockito.when(DB.getConnection()).thenReturn(ds.getConnection());
-            //BDDMockito.given(DriverManager.getConnection(...)).willReturn(...);
-        
         }
     }
     public QueryRunner getDS(){

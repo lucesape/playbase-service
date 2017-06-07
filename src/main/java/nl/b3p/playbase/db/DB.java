@@ -35,10 +35,19 @@ public class DB {
     protected static final String JNDI_NAME = "java:/comp/env/jdbc/playbase-service";
     
     public static final String LOCATION_TABLE = "playservice_locations";
+    public static final String LOCATION_CATEGORY_TABLE = "playservice_location_categories";
+    public static final String LOCATION_AGE_CATEGORY_TABLE = "playservice_location_agecategories";
+    public static final String LOCATION_ACCESSIBILITY_TABLE = "playservice_location_accessibility";
+    public static final String LOCATION_FACILITIES_TABLE = "playservice_location_facilities";
+    
+    public static final String LIST_CATEGORY_TABLE = "playservice_categories_list";
+    public static final String LIST_AGECATEGORIES_TABLE = "playservice_agecategories_list";
+    public static final String LIST_ACCESSIBILITY_TABLE = "playservice_accessibility_list";
+    public static final String LIST_FACILITIES_TABLE = "playservice_facilities_list";
+    public static final String LIST_PARKING_TABLE = "playservice_parking_list";
     
     public static final String ASSETS_TABLE = "playservice_location_equipment";
     public static final String ASSETS_AGECATEGORIES_TABLE = "playservice_location_equipment_agecategories";
-    public static final String ASSETS_AGECATEGORIES_LIST_TABLE = "playservice_agecategories_list";
     public static final String ASSETS_TYPE_GROUP_LIST_TABLE = "playmapping_type_group";
     public static final String ASSETS_IMAGES_TABLE = "playservice_images";
     public static final String ASSETS_DOCUMENTS_TABLE = "playservice_documents";
