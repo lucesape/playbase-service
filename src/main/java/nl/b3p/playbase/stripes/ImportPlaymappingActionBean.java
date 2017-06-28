@@ -35,7 +35,7 @@ import net.sourceforge.stripes.action.UrlBinding;
 import net.sourceforge.stripes.validation.SimpleError;
 import net.sourceforge.stripes.validation.Validate;
 import nl.b3p.playbase.ImportReport;
-import nl.b3p.playbase.PlaymappingProcessor;
+import nl.b3p.playbase.PlaymappingImporter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -90,7 +90,7 @@ public class ImportPlaymappingActionBean implements ActionBean {
     @Validate
     private String file;
     
-    private final PlaymappingProcessor processor = new PlaymappingProcessor();
+    private final PlaymappingImporter processor = new PlaymappingImporter();
 
     @DefaultHandler
     @DontValidate

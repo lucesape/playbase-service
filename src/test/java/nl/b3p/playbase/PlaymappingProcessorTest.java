@@ -40,11 +40,11 @@ public class PlaymappingProcessorTest extends TestUtil {
         this.useDB = true;
     }
 
-    public PlaymappingProcessor instance;
+    public PlaymappingImporter instance;
 
     @Before
     public void beforeTest() {
-        instance = new PlaymappingProcessor();
+        instance = new PlaymappingImporter();
         instance.init();
     }
 

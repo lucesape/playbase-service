@@ -34,6 +34,10 @@
             <param-name>LocalizationBundleFactory.FieldNameBundle</param-name>
             <param-value>PlaybaseServiceResources</param-value>
         </init-param>
+        <init-param>
+            <param-name>FileUpload.MaximumPostSize</param-name>
+            <param-value>31457280</param-value>
+        </init-param>
     </filter>
     <filter-mapping>
         <filter-name>StripesFilter</filter-name>
