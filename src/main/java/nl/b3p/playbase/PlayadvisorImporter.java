@@ -84,16 +84,12 @@ public class PlayadvisorImporter extends Importer {
         playadvisorColumnToPlaybase.put("Ping Status", "");
         playadvisorColumnToPlaybase.put("Samenspeelplek Enquete", "");
         playadvisorColumnToPlaybase.put("Test enquete monique", "");
-
     }
-
-    public void importStream(InputStream in, ImportReport report) throws IOException, CsvFormatException {
-        CsvInputStream cis = new CsvInputStream(new InputStreamReader(in));
-
-        String[] s = cis.readRecord();
+    
+    public void init(String[] header){
         //process header
-        for (int i = 0; i < s.length; i++) {
-            String col = s[i];
+        for (int i = 0; i < header.length; i++) {
+            String col = header[i];
             
             String playbaseColumnName = playadvisorColumnToPlaybase.get(col);
             if(playbaseColumnName == null){
@@ -101,6 +97,13 @@ public class PlayadvisorImporter extends Importer {
             }
             indexToColumn.put(i, playbaseColumnName);
         }
+    }
+
+    public void importStream(InputStream in, ImportReport report) throws IOException, CsvFormatException {
+        CsvInputStream cis = new CsvInputStream(new InputStreamReader(in));
+
+        String[] s = cis.readRecord();
+        init(s);
         try {
             while ((s = cis.readRecord()) != null) {
                 Map<String, Object> vals = parseRecord(s);

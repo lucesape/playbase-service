@@ -38,6 +38,7 @@ public class PlaymappingProcessorTest extends TestUtil {
 
     public PlaymappingProcessorTest() {
         this.useDB = true;
+        this.initData = true;
     }
 
     public PlaymappingImporter instance;

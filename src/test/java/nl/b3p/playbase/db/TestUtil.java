@@ -51,6 +51,7 @@ public class TestUtil {
     protected final static Log log = LogFactory.getLog(TestUtil.class);
     protected DataSource datasource;
     protected boolean useDB = false;
+    protected boolean initData = false;
     
     protected QueryRunner run;
     
@@ -67,13 +68,15 @@ public class TestUtil {
             datasource = ds;
             initDB("schemaexport.sql");
             initDB("initdata.sql");
-            initDB("initdata_locations.sql");
+            if(initData){
+                initDB("initdata_locations.sql");
+            }
             GeometryJdbcConverter gjc = GeometryJdbcConverterFactory.getGeometryJdbcConverter(datasource.getConnection());
-            run = new QueryRunner(datasource, gjc.isPmdKnownBroken() );
-            
-             PowerMockito.mockStatic(DB.class);
-             Mockito.when(DB.qr()).thenReturn(getDS());
-             Mockito.when(DB.getConnection()).thenReturn(ds.getConnection());
+            run = new QueryRunner(datasource, gjc.isPmdKnownBroken());
+
+            PowerMockito.mockStatic(DB.class);
+            Mockito.when(DB.qr()).thenReturn(getDS());
+            Mockito.when(DB.getConnection()).thenReturn(ds.getConnection());
         }
     }
     public QueryRunner getDS(){
