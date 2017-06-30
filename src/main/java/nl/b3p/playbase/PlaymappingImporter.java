@@ -160,7 +160,7 @@ public class PlaymappingImporter extends Importer{
     }
 
     /**
-     * Parse images and documents
+     * Parse images and documents (=words).
      * @param images
      * @return 
      */

@@ -20,7 +20,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.naming.NamingException;
 import nl.b3p.commons.csv.CsvFormatException;
@@ -35,68 +37,38 @@ import org.apache.commons.logging.LogFactory;
 public class PlayadvisorImporter extends Importer {
 
     private static final Log log = LogFactory.getLog("PlayadvisorProcesor");
-    private Map<String, String> playadvisorColumnToPlaybase;
-    private Map<Integer, String> indexToColumn;
+    private Map<Integer, String> playadvisorColumnToPlaybase;
 
     public PlayadvisorImporter() {
         playadvisorColumnToPlaybase = new HashMap<>();
-        indexToColumn = new HashMap<>();
-        playadvisorColumnToPlaybase.put("id", "pa_id");
-        playadvisorColumnToPlaybase.put("Title", "title");
-        playadvisorColumnToPlaybase.put("Content", "content");
-        playadvisorColumnToPlaybase.put("Excerpt", "summary");
-        playadvisorColumnToPlaybase.put("Date", "");
-        playadvisorColumnToPlaybase.put("Post Type", "");
-        playadvisorColumnToPlaybase.put("Permalink", "");
-        playadvisorColumnToPlaybase.put("URL", "");
-        playadvisorColumnToPlaybase.put("Title", "");
-        playadvisorColumnToPlaybase.put("Caption", "");
-        playadvisorColumnToPlaybase.put("Description", "");
-        playadvisorColumnToPlaybase.put("Alt Text", "");
-        playadvisorColumnToPlaybase.put("URL", "");
-        playadvisorColumnToPlaybase.put("Speelplektype", "");
-        playadvisorColumnToPlaybase.put("Landen", "");
-        playadvisorColumnToPlaybase.put("Plaatsen", "");
-        playadvisorColumnToPlaybase.put("Speeltoestellen", "");
-        playadvisorColumnToPlaybase.put("Faciliteiten", "");
-        playadvisorColumnToPlaybase.put("Leeftijden", "");
-        playadvisorColumnToPlaybase.put("Parkeren", "");
-        playadvisorColumnToPlaybase.put("Toegankelijkheid", "");
-        playadvisorColumnToPlaybase.put("Ambassadeurs", "");
-        playadvisorColumnToPlaybase.put("average_rating", "");
-        playadvisorColumnToPlaybase.put("x_coordinaat", "");
-        playadvisorColumnToPlaybase.put("y_coordinaat", "");
-        playadvisorColumnToPlaybase.put("galerij", "");
-        playadvisorColumnToPlaybase.put("_wp_attached_file", "");
-        playadvisorColumnToPlaybase.put("_wp_attachment_metadata", "");
-        playadvisorColumnToPlaybase.put("_wpml_media_duplicate", "");
-        playadvisorColumnToPlaybase.put("_wpml_media_featured", "");
-        playadvisorColumnToPlaybase.put("favoriet", "");
-        playadvisorColumnToPlaybase.put("Status", "");
-        playadvisorColumnToPlaybase.put("Author", "");
-        playadvisorColumnToPlaybase.put("Slug", "");
-        playadvisorColumnToPlaybase.put("Format", "");
-        playadvisorColumnToPlaybase.put("Template", "");
-        playadvisorColumnToPlaybase.put("Parent", "");
-        playadvisorColumnToPlaybase.put("Parent Slug", "");
-        playadvisorColumnToPlaybase.put("Order", "");
-        playadvisorColumnToPlaybase.put("Comment Status", "");
-        playadvisorColumnToPlaybase.put("Ping Status", "");
-        playadvisorColumnToPlaybase.put("Samenspeelplek Enquete", "");
-        playadvisorColumnToPlaybase.put("Test enquete monique", "");
+        playadvisorColumnToPlaybase.put(0, "pa_id");
+        playadvisorColumnToPlaybase.put(1, "title");
+        playadvisorColumnToPlaybase.put(2, "content");
+        playadvisorColumnToPlaybase.put(3, "summary");
+        playadvisorColumnToPlaybase.put(4, "");
+        playadvisorColumnToPlaybase.put(5, "locationtype");
+        playadvisorColumnToPlaybase.put(6, "website");
+        playadvisorColumnToPlaybase.put(7, "imageurl");
+        playadvisorColumnToPlaybase.put(8, "imagetitle");
+        playadvisorColumnToPlaybase.put(9, "imagecaption");
+        playadvisorColumnToPlaybase.put(10, "imagedescription");
+        playadvisorColumnToPlaybase.put(11, "imagealttext");
+        playadvisorColumnToPlaybase.put(12, "url_2");
+        playadvisorColumnToPlaybase.put(13, "locationsubtype");
+        playadvisorColumnToPlaybase.put(14, "country");
+        playadvisorColumnToPlaybase.put(15, "municipality");
+        playadvisorColumnToPlaybase.put(16, "assets");
+        playadvisorColumnToPlaybase.put(17, "facilities");
+        playadvisorColumnToPlaybase.put(18, "agecategories");
+        playadvisorColumnToPlaybase.put(19, "parking");
+        playadvisorColumnToPlaybase.put(20, "accessiblity");
+        playadvisorColumnToPlaybase.put(21, "ambassadors");
+        playadvisorColumnToPlaybase.put(22, "average_rating");
+        playadvisorColumnToPlaybase.put(23, "Lng");
+        playadvisorColumnToPlaybase.put(24, "Lat");
     }
     
     public void init(String[] header){
-        //process header
-        for (int i = 0; i < header.length; i++) {
-            String col = header[i];
-            
-            String playbaseColumnName = playadvisorColumnToPlaybase.get(col);
-            if(playbaseColumnName == null){
-                playbaseColumnName = col;
-            }
-            indexToColumn.put(i, playbaseColumnName);
-        }
     }
 
     public void importStream(InputStream in, ImportReport report) throws IOException, CsvFormatException {
@@ -116,13 +88,67 @@ public class PlayadvisorImporter extends Importer {
 
     protected Map<String, Object> parseRecord(String[] record) {
         Map<String, Object> dbvalues = new HashMap<>();
+        String [] imageUrls = null;
+        String [] imageDescriptions = null;
         for (int i = 0; i < record.length; i++) {
             String val = record[i];
-            String col = indexToColumn.get(i);
-            dbvalues.put(col, val);
+            String col = playadvisorColumnToPlaybase.get(i);
+            Object value = val;
+            if(col == null){
+                continue;
+            }
+            switch (col){
+                case "imageurl":
+                    imageUrls = val.split(",");
+                    break;
+                case "imagetitle":
+                    break;
+                case "imagecaption":
+                    break;
+                case "imagedescription":
+                    imageDescriptions = val.split(",");
+                    break;
+                case "imagealttext":
+                    break;
+                case "assets":
+                    break;
+                case "facilities":
+                    break;
+                case "accessiblity":
+                    break;
+                case "Lng":
+                case "Lat":
+                    value = Double.parseDouble(val);
+                    break;
+                default:
+                    break;
+            }
+            dbvalues.put(col, value);
         }
-
+        List<Map<String,Object>> images = parseImages(imageUrls, imageDescriptions);
+        dbvalues.put("images", images);
+        
         return dbvalues;
+    }
+    
+    private List<Map<String,Object>> parseImages(String [] imageUrls,String [] imageDescriptions){
+        List<Map<String,Object>> images = new ArrayList<>();
+        for (int i = 0; i < imageUrls.length; i++) {
+            String imageUrl = imageUrls[i];
+            String description = imageDescriptions[i];
+            Map<String,Object> image = parseImage(imageUrl, description);
+            images.add(image);
+            
+        }
+        return images;
+    }
+    
+    private Map<String,Object> parseImage(String imageUrl,String  imageDescription){
+        Map<String,Object> image = new HashMap<>();
+        image.put("Description", imageDescription);
+        image.put("URI", imageUrl);
+        
+        return image;
     }
 
 }
