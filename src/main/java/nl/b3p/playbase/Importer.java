@@ -117,12 +117,14 @@ public class Importer {
             sb.append("latitude,");
             sb.append("longitude,");
             sb.append("geom,");
+            sb.append("pa_id,");
             sb.append("pm_guid) ");
             sb.append("VALUES( ");
             sb.append("\'").append(location.get("Name")).append("\',");
             sb.append(location.get("Lat")).append(",");
             sb.append(location.get("Lng")).append(",");
             sb.append("?,");
+            sb.append("\'").append(location.get("pa_id")).append("\',");
             sb.append("\'").append(location.get("ID")).append("\');");
             id = DB.qr().insert(sb.toString(), new ScalarHandler<Integer>(),geom);
             report.increaseInserted();
@@ -138,10 +140,16 @@ public class Importer {
             sb.append("latitude = ");
             sb.append(location.get("Lat")).append(",");
             sb.append("longitude = ");
-            sb.append(location.get("Lng")).append("");
-            sb.append("geom = ?,");
-            sb.append(" where pm_guid = '");
-            sb.append(location.get("ID"));
+            sb.append(location.get("Lng")).append(", ");
+            sb.append("geom = ? ");
+            
+             if(location.containsKey("ID")){
+                sb.append("where pm_guid = '");
+                sb.append(location.get("ID"));
+            } else if (location.containsKey("pa_id")) {
+                sb.append("where pa_id = '");
+                sb.append(location.get("pa_id"));
+            }
             sb.append("';");
             DB.qr().update(sb.toString(),geom);
             report.increaseUpdated();
@@ -153,8 +161,13 @@ public class Importer {
             StringBuilder sb = new StringBuilder();
             sb.append("select * from ");
             sb.append(DB.LOCATION_TABLE);
-            sb.append(" where pm_guid = '");
-            sb.append(location.get("ID"));
+            if(location.containsKey("ID")){
+                sb.append(" where pm_guid = '");
+                sb.append(location.get("ID"));
+            } else if (location.containsKey("pa_id")) {
+                sb.append(" where pa_id = '");
+                sb.append(location.get("pa_id"));
+            }
             sb.append("';");
             ArrayListHandler rsh = new ArrayListHandler();
             List<Object[]> o = DB.qr().query(sb.toString(), rsh);

@@ -51,6 +51,7 @@ public class PlayadvisorImporterTest extends TestUtil{
         InputStream in = PlaymappingProcessorTest.class.getResourceAsStream("playadvisor_single_location.csv");
         ImportReport report = new ImportReport("locaties");
         instance.importStream(in, report);
+        in.close();
         assertEquals(1,report.getNumberInserted());
         List locations = DB.qr().query("Select * from " + DB.LOCATION_TABLE, new ArrayListHandler());
         assertEquals(1, locations.size());
@@ -73,4 +74,23 @@ public class PlayadvisorImporterTest extends TestUtil{
         }
     }
     
+    @Test
+    public void testUpdateLocation() throws Exception {
+        InputStream in = PlaymappingProcessorTest.class.getResourceAsStream("playadvisor_single_location.csv");
+        ImportReport report = new ImportReport("locaties");
+        instance.importStream(in, report);
+        in.close();
+        assertEquals(1,report.getNumberInserted());
+        List locations = DB.qr().query("Select * from " + DB.LOCATION_TABLE, new ArrayListHandler());
+        assertEquals(1, locations.size());
+        report = new ImportReport("locaties");
+        in = PlaymappingProcessorTest.class.getResourceAsStream("playadvisor_single_location.csv");
+        instance.importStream(in, report);
+        in.close();
+        assertEquals(0, report.getNumberInserted());
+        assertEquals(1, report.getNumberUpdated());
+        locations = DB.qr().query("Select * from " + DB.LOCATION_TABLE, new ArrayListHandler());
+        assertEquals(1, locations.size());
+    }
+
 }
