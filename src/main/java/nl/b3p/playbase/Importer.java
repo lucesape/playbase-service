@@ -108,6 +108,7 @@ public class Importer {
         }catch (NullPointerException ex){
             log.info("no geom for asset");
         }
+        Integer id = null;
         if (!exists) {
             sb.append("INSERT ");
             sb.append("INTO ");
@@ -123,8 +124,10 @@ public class Importer {
             sb.append(location.get("Lng")).append(",");
             sb.append("?,");
             sb.append("\'").append(location.get("ID")).append("\');");
+            id = DB.qr().insert(sb.toString(), new ScalarHandler<Integer>(),geom);
             report.increaseInserted();
-            DB.qr().update(sb.toString(),geom);
+            List<Map<String,Object>> images = (List<Map<String,Object>>) location.get("images");
+            saveImagesAndWords(images, null, id, DB.IMAGES_TABLE);
         } else {
             sb = new StringBuilder();
             sb.append("update ");
@@ -140,8 +143,8 @@ public class Importer {
             sb.append(" where pm_guid = '");
             sb.append(location.get("ID"));
             sb.append("';");
-            report.increaseUpdated();
             DB.qr().update(sb.toString(),geom);
+            report.increaseUpdated();
         }
     }
 
@@ -321,7 +324,7 @@ public class Importer {
         
         
         saveAssetsAgeCategories(asset, id);
-        saveImagesAndWords((List<Map<String, Object>>)asset.get("Images"), id, locationId, DB.ASSETS_IMAGES_TABLE);
+        saveImagesAndWords((List<Map<String, Object>>)asset.get("Images"), id, locationId, DB.IMAGES_TABLE);
         saveImagesAndWords((List<Map<String, Object>>)asset.get("Documents"), id, locationId, DB.ASSETS_DOCUMENTS_TABLE);
     }
     

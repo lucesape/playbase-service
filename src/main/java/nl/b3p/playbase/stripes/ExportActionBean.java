@@ -201,7 +201,7 @@ Parkeren
 
     protected void retrieveImages(Integer id, List<String> record) throws NamingException, SQLException {
         ArrayListHandler rsh = new ArrayListHandler();
-        List<Object[]> images = DB.qr().query("SELECT url, caption,pm_guid from " + DB.ASSETS_IMAGES_TABLE + " WHERE location = " + id, rsh);
+        List<Object[]> images = DB.qr().query("SELECT url, caption,pm_guid from " + DB.IMAGES_TABLE + " WHERE location = " + id, rsh);
         String urls = "";
         String captions = "";
         String ids = "";

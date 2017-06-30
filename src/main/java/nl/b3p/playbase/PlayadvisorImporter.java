@@ -99,14 +99,14 @@ public class PlayadvisorImporter extends Importer {
             }
             switch (col){
                 case "imageurl":
-                    imageUrls = val.split(",");
+                    imageUrls = val.split("\\|");
                     break;
                 case "imagetitle":
                     break;
                 case "imagecaption":
                     break;
                 case "imagedescription":
-                    imageDescriptions = val.split(",");
+                    imageDescriptions = val.split("\\|");
                     break;
                 case "imagealttext":
                     break;
@@ -135,7 +135,7 @@ public class PlayadvisorImporter extends Importer {
         List<Map<String,Object>> images = new ArrayList<>();
         for (int i = 0; i < imageUrls.length; i++) {
             String imageUrl = imageUrls[i];
-            String description = imageDescriptions[i];
+            String description = imageDescriptions.length == imageUrls.length ? imageDescriptions[i] : null;
             Map<String,Object> image = parseImage(imageUrl, description);
             images.add(image);
             
