@@ -103,7 +103,7 @@ public class PlaymappingProcessorTest extends TestUtil {
         Map<String, Object> map = instance.parseAsset(assetJSON);
         assertEquals("1", map.get("$id"));
         assertEquals("dc5d0399-ccc4-4c22-9ab0-2a7b9ff80a19", map.get("ID"));
-        assertEquals("0d415c38-ca18-4d67-a716-00df56df8736", map.get("LocationID"));
+        assertEquals("0d415c38-ca18-4d67-a716-00df56df8736", map.get("LocationPMID"));
         assertEquals("Centrum\\C136/1005 Vroonhof 1", map.get("LocationName"));
         assertEquals("2013-01-29T11:24:59.25", map.get("LastUpdated"));
         assertEquals("Motorfiets", map.get("Name"));

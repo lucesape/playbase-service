@@ -18,8 +18,6 @@ package nl.b3p.playbase;
 
 import com.vividsolutions.jts.io.ParseException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,52 +34,20 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Meine Toonen
  */
-public class Importer {
+public abstract class Importer {
     private static final Log log = LogFactory.getLog("Importer");
     private GeometryJdbcConverter geometryConverter;
     
-    private Map<String, List<Integer>> agecategories;
     private Map<String, Integer> assetTypes;
     
     protected Map<String,Map<String,Integer>> locationTypes;
     protected Map<String,Integer> facilityTypes;
     protected Map<String,Integer> accessibilityTypes;
+    protected Map<String,Integer> agecategoryTypes;
 
-    private final String AGECATEGORY_TODDLER_KEY = "AgeGroupToddlers";
-    private final String AGECATEGORY_JUNIOR_KEY = "AgeGroupJuniors";
-    private final String AGECATEGORY_SENIOR_KEY = "AgeGroupSeniors";
-
-    private final String[] AGECATEGORY_TODDLER = {"0 - 5 jaar"};
-    private final String[] AGECATEGORY_JUNIOR = {"6 - 11 jaar", "12 - 18 jaar"};
-    private final String[] AGECATEGORY_SENIOR = {"Volwassenen", "Senioren"};
-    
     public Importer(){
+       
         ArrayListHandler rsh = new ArrayListHandler();
-        try {
-            agecategories = new HashMap<>();
-
-            agecategories.put(AGECATEGORY_TODDLER_KEY, new ArrayList<Integer>());
-            agecategories.put(AGECATEGORY_JUNIOR_KEY, new ArrayList<Integer>());
-            agecategories.put(AGECATEGORY_SENIOR_KEY, new ArrayList<Integer>());
-
-            List<Object[]> o = DB.qr().query("SELECT * from " + DB.LIST_AGECATEGORIES_TABLE, rsh);
-            for (Object[] cat : o) {
-                Integer id = (Integer) cat[0];
-                String categorie = (String) cat[1];
-
-                if (Arrays.asList(AGECATEGORY_TODDLER).contains(categorie)) {
-                    agecategories.get(AGECATEGORY_TODDLER_KEY).add(id);
-                } else if (Arrays.asList(AGECATEGORY_JUNIOR).contains(categorie)) {
-                    agecategories.get(AGECATEGORY_JUNIOR_KEY).add(id);
-                } else if (Arrays.asList(AGECATEGORY_SENIOR).contains(categorie)) {
-                    agecategories.get(AGECATEGORY_SENIOR_KEY).add(id);
-                } else {
-                    throw new IllegalArgumentException("Found agecategory in db not defined in code");
-                }
-            }
-        } catch (NamingException | SQLException ex) {
-            log.error("Cannot initialize playmapping processor:", ex);
-        }
         try {
             assetTypes = new HashMap<>();
             List<Object[]> o = DB.qr().query("SELECT id, catasset from " + DB.ASSETS_TYPE_GROUP_LIST_TABLE, rsh);
@@ -136,6 +102,18 @@ public class Importer {
                 Integer id = (Integer) type[0];
                 String accesiblity = (String) type[1];
                 accessibilityTypes.put(accesiblity.toLowerCase(), id);
+            }
+        } catch (NamingException | SQLException ex) {
+            log.error("Cannot initialize playadvisory facilitytypes:", ex);
+        }
+        
+         try {
+            agecategoryTypes = new HashMap<>();
+            List<Object[]> o = DB.qr().query("SELECT id, agecategory from " + DB.LIST_AGECATEGORIES_TABLE, rsh);
+            for (Object[] type : o) {
+                Integer id = (Integer) type[0];
+                String agecategory = (String) type[1];
+                agecategoryTypes.put(agecategory.toLowerCase(), id);
             }
         } catch (NamingException | SQLException ex) {
             log.error("Cannot initialize playadvisory facilitytypes:", ex);
@@ -403,15 +381,19 @@ public class Importer {
     
     protected boolean assetExists(Map<String, Object> asset) {
         try {
-            StringBuilder sb = new StringBuilder();
-            sb.append("select * from ");
-            sb.append(DB.ASSETS_TABLE);
-            sb.append(" where pm_guid = '");
-            sb.append(asset.get("ID"));
-            sb.append("';");
-            ArrayListHandler rsh = new ArrayListHandler();
-            List<Object[]> o = DB.qr().query(sb.toString(), rsh);
-            return o.size() > 0;
+            if (asset.get("ID") == null) {
+                return false;
+            } else {
+                StringBuilder sb = new StringBuilder();
+                sb.append("select * from ");
+                sb.append(DB.ASSETS_TABLE);
+                sb.append(" where pm_guid = '");
+                sb.append(asset.get("ID"));
+                sb.append("';");
+                ArrayListHandler rsh = new ArrayListHandler();
+                List<Object[]> o = DB.qr().query(sb.toString(), rsh);
+                return o.size() > 0;
+            }
         } catch (NamingException | SQLException ex) {
             log.error("Cannot query if asset exists: ", ex);
             return false;
@@ -427,28 +409,8 @@ public class Importer {
             sb.append("'").append(value).append("',");
         }
     }
-    
-    protected void saveAssetsAgeCategories(Map<String, Object> asset, Integer id) throws NamingException, SQLException {
-        boolean toddler = (boolean) asset.get(AGECATEGORY_TODDLER_KEY);
-        boolean junior = (boolean) asset.get(AGECATEGORY_JUNIOR_KEY);
-        boolean senior = (boolean) asset.get(AGECATEGORY_SENIOR_KEY);
-
-        // delete old entries
-        DB.qr().update("DELETE FROM " + DB.ASSETS_AGECATEGORIES_TABLE + " WHERE location_equipment = " + id);
-        if (toddler) {
-            saveAgeCategory(id, agecategories.get(AGECATEGORY_TODDLER_KEY));
-        }
-
-        if (junior) {
-            saveAgeCategory(id, agecategories.get(AGECATEGORY_JUNIOR_KEY));
-        }
-
-        if (senior) {
-            saveAgeCategory(id, agecategories.get(AGECATEGORY_SENIOR_KEY));
-        }
-    }
-
-    protected void saveAgeCategory(Integer id, List<Integer> agecategories) throws NamingException, SQLException {
+  
+    protected void saveAgeCategory(Integer location, List<Integer> agecategories) throws NamingException, SQLException {
         for (Integer agecategory : agecategories) {
             StringBuilder sb = new StringBuilder();
             sb.append("INSERT ");
@@ -458,7 +420,7 @@ public class Importer {
             sb.append("location_equipment,");
             sb.append("agecategory)");
             sb.append("VALUES( ");
-            sb.append(id);
+            sb.append(location);
             sb.append(",");
             sb.append(agecategory);
             sb.append(");");
@@ -468,26 +430,27 @@ public class Importer {
     
     protected void saveImagesAndWords(List<Map<String, Object>> images, Integer assetId, Integer locationId, String table) throws NamingException, SQLException{
         DB.qr().update("DELETE FROM " + table + " WHERE equipment = " + assetId);
-        for (Map<String, Object> image : images) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("INSERT ");
-            sb.append("INTO ");
-            sb.append(table);
-            sb.append("(");
-            sb.append("caption,");
-            sb.append("url,");
-            sb.append("location,");
-            sb.append("equipment,");
-            sb.append("pm_guid)");
-            sb.append("VALUES( ");
-            valueOrNull(sb, "Description", image);
-            sb.append("'").append(image.get("URI")).append("',");
-            sb.append(locationId).append(",");
-            sb.append(assetId).append(",");
-            sb.append("'").append(image.get("ID")).append("');");
-            DB.qr().insert(sb.toString(), new ScalarHandler<>());
+        if (images != null) {
+            for (Map<String, Object> image : images) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("INSERT ");
+                sb.append("INTO ");
+                sb.append(table);
+                sb.append("(");
+                sb.append("caption,");
+                sb.append("url,");
+                sb.append("location,");
+                sb.append("equipment,");
+                sb.append("pm_guid)");
+                sb.append("VALUES( ");
+                valueOrNull(sb, "Description", image);
+                sb.append("'").append(image.get("URI")).append("',");
+                sb.append(locationId).append(",");
+                sb.append(assetId).append(",");
+                sb.append("'").append(image.get("ID")).append("');");
+                DB.qr().insert(sb.toString(), new ScalarHandler<>());
+            }
         }
-        
     }    
     
     protected Integer getAssetType(Map<String, Object> asset){
@@ -498,7 +461,14 @@ public class Importer {
 
     protected Integer getLocation(Map<String, Object> asset) throws NamingException, SQLException {
         ArrayListHandler rsh = new ArrayListHandler();
-        String locationId = (String) asset.get("LocationID");
+        String locationId = null;
+        if(asset.containsKey("LocationPMID")){
+            locationId = (String) asset.get("LocationPMID");
+        }else if (asset.containsKey("LocationPAID")){
+            // In Playadvisor we already retrieved the database id for the location.
+            return (Integer)asset.get("LocationPAID");
+        }
+        
         List<Object[]> o = DB.qr().query("SELECT id FROM " + DB.LOCATION_TABLE + " WHERE pm_guid = '" + locationId + "'", rsh);
         if(o.isEmpty()){
             String locationName = (String) asset.get("LocationName");
@@ -509,4 +479,6 @@ public class Importer {
             throw new IllegalArgumentException ("Meerdere locaties gevonden met id " + locationId);
         }
     }
+    
+    protected abstract void saveAssetsAgeCategories(Map<String, Object> asset, Integer id) throws NamingException, SQLException;
 }
