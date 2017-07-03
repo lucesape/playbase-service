@@ -57,6 +57,8 @@ public class PlayadvisorImporterTest extends TestUtil{
         assertEquals(1, locations.size());
         List images = DB.qr().query("Select * from " + DB.IMAGES_TABLE, new ArrayListHandler());
         assertEquals(2, images.size());
+        List types = DB.qr().query("Select * from " + DB.LOCATION_CATEGORY_TABLE , new ArrayListHandler());
+        assertEquals(1, types.size());
     }
 
     /**
@@ -91,6 +93,8 @@ public class PlayadvisorImporterTest extends TestUtil{
         assertEquals(1, report.getNumberUpdated());
         locations = DB.qr().query("Select * from " + DB.LOCATION_TABLE, new ArrayListHandler());
         assertEquals(1, locations.size());
+        List types = DB.qr().query("Select * from " + DB.LOCATION_CATEGORY_TABLE , new ArrayListHandler());
+        assertEquals(1, types.size());
     }
 
 }

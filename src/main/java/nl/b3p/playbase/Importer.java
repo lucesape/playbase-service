@@ -41,7 +41,9 @@ public class Importer {
     private GeometryJdbcConverter geometryConverter;
     
     private Map<String, List<Integer>> agecategories;
-    private Map<String, Integer> types;
+    private Map<String, Integer> assetTypes;
+    
+    private Map<String,Map<String,Integer>> locationTypes;
 
     private final String AGECATEGORY_TODDLER_KEY = "AgeGroupToddlers";
     private final String AGECATEGORY_JUNIOR_KEY = "AgeGroupJuniors";
@@ -79,15 +81,38 @@ public class Importer {
             log.error("Cannot initialize playmapping processor:", ex);
         }
         try {
-            types = new HashMap<>();
+            assetTypes = new HashMap<>();
             List<Object[]> o = DB.qr().query("SELECT id, catasset from " + DB.ASSETS_TYPE_GROUP_LIST_TABLE, rsh);
             for (Object[] type : o) {
                 Integer id = (Integer) type[0];
                 String cat = (String) type[1];
-                types.put(cat, id);
+                assetTypes.put(cat, id);
             }
         } catch (NamingException | SQLException ex) {
-            log.error("Cannot initialize playmapping processor:", ex);
+            log.error("Cannot initialize playmapping assettypes:", ex);
+        }
+       
+         try {
+            geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(DB.getConnection());
+        } catch (NamingException | SQLException ex) {
+            log.error("Cannot get geometryConverter: ", ex);
+        }
+         
+        try {
+            locationTypes = new HashMap<>();
+            List<Object[]> o = DB.qr().query("SELECT id, category, main from " + DB.LIST_CATEGORY_TABLE, rsh);
+            for (Object[] type : o) {
+                Integer id = (Integer) type[0];
+                String category = (String) type[1];
+                String main = (String) type[2];
+                if(!locationTypes.containsKey(main)){
+                    locationTypes.put(main, new HashMap<String, Integer>());
+                }
+                locationTypes.get(main).put(category, id);
+                
+            }
+        } catch (NamingException | SQLException ex) {
+            log.error("Cannot initialize playadvisor location types:", ex);
         }
        
          try {
@@ -154,6 +179,10 @@ public class Importer {
             DB.qr().update(sb.toString(),geom);
             report.increaseUpdated();
         }
+        if(location.containsKey("locationsubtype")){
+            saveLocationType(location, id);
+        }
+        
     }
 
     protected boolean locationExists(Map<String, Object> location) {
@@ -429,10 +458,30 @@ public class Importer {
         }
     }
     
+    protected void saveLocationType(Map<String,Object> location, Integer id) throws NamingException, SQLException{
+        String type = (String)location.get("locationsubtype");
+        String main = type.substring(0, type.indexOf(">"));
+        String category = type.substring(type.indexOf(">") + 1);
+        Integer categoryId = locationTypes.get(main).get(category);
+        DB.qr().update("DELETE FROM " + DB.LOCATION_CATEGORY_TABLE + " WHERE location = " + id);
+        StringBuilder sb = new StringBuilder();
+        sb.append("INSERT ");
+        sb.append("INTO ");
+        sb.append(DB.LOCATION_CATEGORY_TABLE);
+        sb.append("(");
+        sb.append("location,");
+        sb.append("category)");
+        sb.append("VALUES( ");
+        sb.append(id).append(",");
+        sb.append(categoryId);
+        sb.append(");");
+        DB.qr().insert(sb.toString(), new ScalarHandler<>());
+    }
+    
     
     protected Integer getAssetType(Map<String, Object> asset){
         String type = (String)asset.get("AssetType");
-        Integer id = types.get(type);
+        Integer id = assetTypes.get(type);
         return id;
     }
 
