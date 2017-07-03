@@ -83,6 +83,7 @@ public class PlayadvisorImporter extends Importer {
             }
         } catch (NamingException | SQLException ex) {
             log.error("Cannot save location to db: ", ex);
+            report.addError(ex.getLocalizedMessage());
         }
     }
 

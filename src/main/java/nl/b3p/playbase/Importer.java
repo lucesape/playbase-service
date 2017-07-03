@@ -44,6 +44,7 @@ public class Importer {
     private Map<String, Integer> assetTypes;
     
     private Map<String,Map<String,Integer>> locationTypes;
+    private Map<String,Integer> facilityTypes;
 
     private final String AGECATEGORY_TODDLER_KEY = "AgeGroupToddlers";
     private final String AGECATEGORY_JUNIOR_KEY = "AgeGroupJuniors";
@@ -92,7 +93,7 @@ public class Importer {
             log.error("Cannot initialize playmapping assettypes:", ex);
         }
        
-         try {
+        try {
             geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(DB.getConnection());
         } catch (NamingException | SQLException ex) {
             log.error("Cannot get geometryConverter: ", ex);
@@ -114,12 +115,18 @@ public class Importer {
         } catch (NamingException | SQLException ex) {
             log.error("Cannot initialize playadvisor location types:", ex);
         }
-       
-         try {
-            geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(DB.getConnection());
+
+        try {
+            facilityTypes = new HashMap<>();
+            List<Object[]> o = DB.qr().query("SELECT id, facility from " + DB.LIST_FACILITIES_TABLE, rsh);
+            for (Object[] type : o) {
+                Integer id = (Integer) type[0];
+                String facility = (String) type[1];
+                facilityTypes.put(facility, id);
+            }
         } catch (NamingException | SQLException ex) {
-            log.error("Cannot get geometryConverter: ", ex);
-        } 
+            log.error("Cannot initialize playadvisory facilitytypes:", ex);
+        }
     }
     
     protected void saveLocation(Map<String, Object> location, ImportReport report) throws NamingException, SQLException {
@@ -157,6 +164,21 @@ public class Importer {
             saveImagesAndWords(images, null, id, DB.IMAGES_TABLE);
         } else {
             sb = new StringBuilder();
+            sb.append("select id from ");
+            
+            sb.append(DB.LOCATION_TABLE);
+              if(location.containsKey("ID")){
+                sb.append(" where pm_guid = '");
+                sb.append(location.get("ID"));
+            } else if (location.containsKey("pa_id")) {
+                sb.append(" where pa_id = '");
+                sb.append(location.get("pa_id"));
+            }
+            sb.append("';");
+            id = (Integer) DB.qr().query(sb.toString(), new ScalarHandler<>());
+
+            
+            sb = new StringBuilder();
             sb.append("update ");
             sb.append(DB.LOCATION_TABLE);
             sb.append(" ");
@@ -181,6 +203,9 @@ public class Importer {
         }
         if(location.containsKey("locationsubtype")){
             saveLocationType(location, id);
+        }
+        if(location.containsKey("facilities")){
+            saveFacilities(id,location);
         }
         
     }
@@ -244,7 +269,6 @@ public class Importer {
             sb.append("';");
             id = (Integer) DB.qr().query(sb.toString(), new ScalarHandler<>());
 
-            int a = 0;
             sb = new StringBuilder();
             sb.append("UPDATE ").append(DB.ASSETS_TABLE);
             sb.append(" set installeddate = ");
@@ -454,6 +478,29 @@ public class Importer {
             sb.append(locationId).append(",");
             sb.append(assetId).append(",");
             sb.append("'").append(image.get("ID")).append("');");
+            DB.qr().insert(sb.toString(), new ScalarHandler<>());
+        }
+        
+    }
+    protected void saveFacilities( Integer locationId, Map<String,Object> location) throws NamingException, SQLException{
+        
+        DB.qr().update("DELETE FROM " + DB.LOCATION_FACILITIES_TABLE + " WHERE location = " + locationId);
+        String facilitiesString = (String)location.get("facilities");
+        String[] facilities = facilitiesString.split("\\|");
+        
+        for (String facility : facilities) {
+            Integer facilityId = facilityTypes.get(facility);
+            StringBuilder sb = new StringBuilder();
+            sb.append("INSERT ");
+            sb.append("INTO ");
+            sb.append(DB.LOCATION_FACILITIES_TABLE);
+            sb.append("(");
+            sb.append("location,");
+            sb.append("facility)");
+            sb.append("VALUES( ");
+            sb.append(locationId).append(",");
+            sb.append(facilityId);
+            sb.append(");");
             DB.qr().insert(sb.toString(), new ScalarHandler<>());
         }
     }

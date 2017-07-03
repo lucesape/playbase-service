@@ -151,12 +151,9 @@ public class PlaymappingProcessorTest extends TestUtil {
     public void testSaveAssets() throws IOException, NamingException, SQLException {
         InputStream in = PlaymappingProcessorTest.class.getResourceAsStream("singleAssetWithLinked.json");
         String asset = IOUtils.toString(in);
-        //DataSource s = DB.getDataSource();
         ImportReport report= instance.processAssets(asset);
         
-        int a = 0;
+        assertEquals(0, report.getErrors().size());
         assertEquals(2, report.getNumberInserted());
-
     }
-    
 }

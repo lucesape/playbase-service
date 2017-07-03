@@ -52,6 +52,7 @@ public class PlayadvisorImporterTest extends TestUtil{
         ImportReport report = new ImportReport("locaties");
         instance.importStream(in, report);
         in.close();
+        assertEquals(0, report.getErrors().size());
         assertEquals(1,report.getNumberInserted());
         List locations = DB.qr().query("Select * from " + DB.LOCATION_TABLE, new ArrayListHandler());
         assertEquals(1, locations.size());
@@ -59,6 +60,8 @@ public class PlayadvisorImporterTest extends TestUtil{
         assertEquals(2, images.size());
         List types = DB.qr().query("Select * from " + DB.LOCATION_CATEGORY_TABLE , new ArrayListHandler());
         assertEquals(1, types.size());
+        List facilities = DB.qr().query("Select * from " + DB.LOCATION_FACILITIES_TABLE , new ArrayListHandler());
+        assertEquals(3, facilities.size());
     }
 
     /**
@@ -89,12 +92,16 @@ public class PlayadvisorImporterTest extends TestUtil{
         in = PlaymappingProcessorTest.class.getResourceAsStream("playadvisor_single_location.csv");
         instance.importStream(in, report);
         in.close();
+        assertEquals(0, report.getErrors().size());
         assertEquals(0, report.getNumberInserted());
         assertEquals(1, report.getNumberUpdated());
         locations = DB.qr().query("Select * from " + DB.LOCATION_TABLE, new ArrayListHandler());
         assertEquals(1, locations.size());
         List types = DB.qr().query("Select * from " + DB.LOCATION_CATEGORY_TABLE , new ArrayListHandler());
         assertEquals(1, types.size());
+        List facilities = DB.qr().query("Select * from " + DB.LOCATION_FACILITIES_TABLE , new ArrayListHandler());
+        assertEquals(3, facilities.size());
+        
     }
 
 }
