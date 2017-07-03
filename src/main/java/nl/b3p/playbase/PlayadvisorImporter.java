@@ -40,7 +40,7 @@ public class PlayadvisorImporter extends Importer {
 
     private static final Log log = LogFactory.getLog("PlayadvisorProcesor");
     private Map<Integer, String> playadvisorColumnToPlaybase;
-    
+
     private static final String LOCATIONSUBTYPE = "locationsubtype";
     private static final String FACILITIES = "facilities";
     private static final String ACCESSIBLITIY = "accessibility";
@@ -75,8 +75,8 @@ public class PlayadvisorImporter extends Importer {
         playadvisorColumnToPlaybase.put(23, "Lng");
         playadvisorColumnToPlaybase.put(24, "Lat");
     }
-    
-    public void init(String[] header){
+
+    public void init(String[] header) {
     }
 
     public void importStream(InputStream in, ImportReport report) throws IOException, CsvFormatException {
@@ -87,19 +87,19 @@ public class PlayadvisorImporter extends Importer {
         try {
             while ((s = cis.readRecord()) != null) {
                 Map<String, Object> location = parseRecord(s);
-                
+
                 int id = saveLocation(location, report);
-                
-                List<Map<String,Object>> assets = parseAssets(location, id);
-                
+
+                List<Map<String, Object>> assets = parseAssets(location, id);
+
                 for (Map<String, Object> asset : assets) {
                     saveAsset(asset, report);
                 }
-                
+
                 if (location.containsKey(AGECATEGORIES)) {
                     saveAgecategories(id, location);
                 }
-                
+
                 if (location.containsKey(LOCATIONSUBTYPE)) {
                     saveLocationType(location, id);
                 }
@@ -109,8 +109,7 @@ public class PlayadvisorImporter extends Importer {
                 if (location.containsKey(ACCESSIBLITIY)) {
                     saveAccessibility(id, location);
                 }
-                
-                
+
             }
         } catch (NamingException | SQLException ex) {
             log.error("Cannot save location to db: ", ex);
@@ -120,16 +119,16 @@ public class PlayadvisorImporter extends Importer {
 
     protected Map<String, Object> parseRecord(String[] record) {
         Map<String, Object> dbvalues = new HashMap<>();
-        String [] imageUrls = null;
-        String [] imageDescriptions = null;
+        String[] imageUrls = null;
+        String[] imageDescriptions = null;
         for (int i = 0; i < record.length; i++) {
             String val = record[i];
             String col = playadvisorColumnToPlaybase.get(i);
             Object value = val;
-            if(col == null){
+            if (col == null) {
                 continue;
             }
-            switch (col){
+            switch (col) {
                 case "imageurl":
                     imageUrls = val.split("\\|");
                     break;
@@ -157,54 +156,55 @@ public class PlayadvisorImporter extends Importer {
             }
             dbvalues.put(col, value);
         }
-        List<Map<String,Object>> images = parseImages(imageUrls, imageDescriptions);
+        List<Map<String, Object>> images = parseImages(imageUrls, imageDescriptions);
         dbvalues.put("images", images);
-        
+
         return dbvalues;
     }
-    
-    private List<Map<String,Object>> parseAssets(Map<String, Object> location, Integer locationId) throws NamingException, SQLException{
-        
-        DB.qr().update("DELETE FROM " + DB.ASSETS_TABLE + " WHERE location = " + locationId);
-        List<Map<String,Object>> assets = new ArrayList<>();
-        String assetString = (String)location.get("assets");
+
+    private List<Map<String, Object>> parseAssets(Map<String, Object> location, Integer locationId) throws NamingException, SQLException {
+
+    //    DB.qr().update("DELETE FROM " + DB.ASSETS_TABLE + " WHERE location = " + locationId);
+        List<Map<String, Object>> assets = new ArrayList<>();
+        String assetString = (String) location.get("assets");
         String[] assetArray = assetString.split("\\|");
         for (String asset : assetArray) {
-            Map<String,Object> assMap = new HashMap<>();
+            Map<String, Object> assMap = new HashMap<>();
             assMap.put("Name", asset);
             assMap.put("LocationPAID", locationId);
+            assMap.put(AGECATEGORIES, location.get(AGECATEGORIES));
             assets.add(assMap);
         }
-        return assets;        
+        return assets;
     }
-    
-    private List<Map<String,Object>> parseImages(String [] imageUrls,String [] imageDescriptions){
-        List<Map<String,Object>> images = new ArrayList<>();
+
+    private List<Map<String, Object>> parseImages(String[] imageUrls, String[] imageDescriptions) {
+        List<Map<String, Object>> images = new ArrayList<>();
         for (int i = 0; i < imageUrls.length; i++) {
             String imageUrl = imageUrls[i];
             String description = imageDescriptions.length == imageUrls.length ? imageDescriptions[i] : null;
-            Map<String,Object> image = parseImage(imageUrl, description);
+            Map<String, Object> image = parseImage(imageUrl, description);
             images.add(image);
-            
+
         }
         return images;
     }
-    
-    private Map<String,Object> parseImage(String imageUrl,String  imageDescription){
-        Map<String,Object> image = new HashMap<>();
+
+    private Map<String, Object> parseImage(String imageUrl, String imageDescription) {
+        Map<String, Object> image = new HashMap<>();
         image.put("Description", imageDescription);
         image.put("URI", imageUrl);
-        
+
         return image;
     }
 
     // <editor-fold desc="Saving of string-concatenated multivalues" defaultstate="collapsed">
-    protected void saveFacilities( Integer locationId, Map<String,Object> location) throws NamingException, SQLException{
-        
+    protected void saveFacilities(Integer locationId, Map<String, Object> location) throws NamingException, SQLException {
+
         DB.qr().update("DELETE FROM " + DB.LOCATION_FACILITIES_TABLE + " WHERE location = " + locationId);
-        String facilitiesString = (String)location.get(FACILITIES);
+        String facilitiesString = (String) location.get(FACILITIES);
         String[] facilities = facilitiesString.split("\\|");
-        
+
         for (String facility : facilities) {
             Integer facilityId = facilityTypes.get(facility);
             StringBuilder sb = new StringBuilder();
@@ -221,12 +221,12 @@ public class PlayadvisorImporter extends Importer {
             DB.qr().insert(sb.toString(), new ScalarHandler<>());
         }
     }
-    
-    protected void saveAgecategories( Integer locationId, Map<String,Object> location) throws NamingException, SQLException{
+
+    protected void saveAgecategories(Integer locationId, Map<String, Object> location) throws NamingException, SQLException {
         DB.qr().update("DELETE FROM " + DB.LOCATION_AGE_CATEGORY_TABLE + " WHERE location = " + locationId);
-        String agecategoriesString = (String)location.get(AGECATEGORIES);
+        String agecategoriesString = (String) location.get(AGECATEGORIES);
         String[] agecategories = agecategoriesString.split("\\|");
-        
+
         for (String agecategory : agecategories) {
             Integer agecategoryId = agecategoryTypes.get(agecategory);
             StringBuilder sb = new StringBuilder();
@@ -243,13 +243,13 @@ public class PlayadvisorImporter extends Importer {
             DB.qr().insert(sb.toString(), new ScalarHandler<>());
         }
     }
-    
-    protected void saveAccessibility( Integer locationId, Map<String,Object> location) throws NamingException, SQLException{
-        
+
+    protected void saveAccessibility(Integer locationId, Map<String, Object> location) throws NamingException, SQLException {
+
         DB.qr().update("DELETE FROM " + DB.LOCATION_ACCESSIBILITY_TABLE + " WHERE location = " + locationId);
-        String accessiblitiesString = (String)location.get(ACCESSIBLITIY);
+        String accessiblitiesString = (String) location.get(ACCESSIBLITIY);
         String[] accessibilities = accessiblitiesString.split("\\|");
-        
+
         for (String accessiblity : accessibilities) {
             Integer id = accessibilityTypes.get(accessiblity.toLowerCase());
             StringBuilder sb = new StringBuilder();
@@ -266,9 +266,9 @@ public class PlayadvisorImporter extends Importer {
             DB.qr().insert(sb.toString(), new ScalarHandler<>());
         }
     }
-    
-    protected void saveLocationType(Map<String,Object> location, Integer id) throws NamingException, SQLException{
-        String type = (String)location.get(LOCATIONSUBTYPE);
+
+    protected void saveLocationType(Map<String, Object> location, Integer id) throws NamingException, SQLException {
+        String type = (String) location.get(LOCATIONSUBTYPE);
         String main = type.substring(0, type.indexOf(">"));
         String category = type.substring(type.indexOf(">") + 1);
         Integer categoryId = locationTypes.get(main).get(category);
@@ -286,10 +286,19 @@ public class PlayadvisorImporter extends Importer {
         sb.append(");");
         DB.qr().insert(sb.toString(), new ScalarHandler<>());
     }
-    
+
     @Override
     protected void saveAssetsAgeCategories(Map<String, Object> asset, Integer location) throws NamingException, SQLException {
-        
+        String agecategoriesString = (String) asset.get("agecategories");
+        if (agecategoriesString != null) {
+            String[] agecategories = agecategoriesString.split("\\|");
+            List<Integer> ids = new ArrayList<>();
+            for (String agecategory : agecategories) {
+                int id = agecategoryTypes.get(agecategory);
+                ids.add(id);
+            }
+            saveAssetsAgeCategory(location, ids);
+        }
     }
     // </editor-fold>
 }

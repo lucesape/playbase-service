@@ -66,6 +66,10 @@ public class PlayadvisorImporterTest extends TestUtil{
         assertEquals(2, accessiblities.size());
         List assets = DB.qr().query("Select * from " + DB.ASSETS_TABLE , new ArrayListHandler());
         assertEquals(4, assets.size());
+        List assetsAgecategories = DB.qr().query("Select * from " + DB.ASSETS_AGECATEGORIES_TABLE , new ArrayListHandler());
+        assertEquals(8, assetsAgecategories.size());
+        List locationAgecategories = DB.qr().query("Select * from " + DB.LOCATION_AGE_CATEGORY_TABLE , new ArrayListHandler());
+        assertEquals(2, locationAgecategories.size());
     }
 
     /**
@@ -111,6 +115,10 @@ public class PlayadvisorImporterTest extends TestUtil{
         
         List assets = DB.qr().query("Select * from " + DB.ASSETS_TABLE , new ArrayListHandler());
         assertEquals(4, assets.size());
+        List assetsAgecategories = DB.qr().query("Select * from " + DB.ASSETS_AGECATEGORIES_TABLE , new ArrayListHandler());
+        assertEquals(8, assetsAgecategories.size());
+        List locationAgecategories = DB.qr().query("Select * from " + DB.LOCATION_AGE_CATEGORY_TABLE , new ArrayListHandler());
+        assertEquals(2, locationAgecategories.size());
         
     }
 

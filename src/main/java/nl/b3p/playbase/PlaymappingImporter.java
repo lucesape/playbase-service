@@ -167,15 +167,15 @@ public class PlaymappingImporter extends Importer {
         // delete old entries
         DB.qr().update("DELETE FROM " + DB.ASSETS_AGECATEGORIES_TABLE + " WHERE location_equipment = " + location);
         if (toddler) {
-            saveAgeCategory(location, agecategories.get(AGECATEGORY_TODDLER_KEY));
+            saveAssetsAgeCategory(location, agecategories.get(AGECATEGORY_TODDLER_KEY));
         }
 
         if (junior) {
-            saveAgeCategory(location, agecategories.get(AGECATEGORY_JUNIOR_KEY));
+            saveAssetsAgeCategory(location, agecategories.get(AGECATEGORY_JUNIOR_KEY));
         }
 
         if (senior) {
-            saveAgeCategory(location, agecategories.get(AGECATEGORY_SENIOR_KEY));
+            saveAssetsAgeCategory(location, agecategories.get(AGECATEGORY_SENIOR_KEY));
         }
     }
 

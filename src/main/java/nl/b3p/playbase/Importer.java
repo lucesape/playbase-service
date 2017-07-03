@@ -410,7 +410,7 @@ public abstract class Importer {
         }
     }
   
-    protected void saveAgeCategory(Integer location, List<Integer> agecategories) throws NamingException, SQLException {
+    protected void saveAssetsAgeCategory(Integer location, List<Integer> agecategories) throws NamingException, SQLException {
         for (Integer agecategory : agecategories) {
             StringBuilder sb = new StringBuilder();
             sb.append("INSERT ");
@@ -418,6 +418,24 @@ public abstract class Importer {
             sb.append(DB.ASSETS_AGECATEGORIES_TABLE);
             sb.append("(");
             sb.append("location_equipment,");
+            sb.append("agecategory)");
+            sb.append("VALUES( ");
+            sb.append(location);
+            sb.append(",");
+            sb.append(agecategory);
+            sb.append(");");
+            DB.qr().insert(sb.toString(), new ScalarHandler<>());
+        }
+    }
+  
+    protected void saveLocationAgeCategory(Integer location, List<Integer> agecategories) throws NamingException, SQLException {
+        for (Integer agecategory : agecategories) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("INSERT ");
+            sb.append("INTO ");
+            sb.append(DB.LOCATION_AGE_CATEGORY_TABLE);
+            sb.append("(");
+            sb.append("location,");
             sb.append("agecategory)");
             sb.append("VALUES( ");
             sb.append(location);
