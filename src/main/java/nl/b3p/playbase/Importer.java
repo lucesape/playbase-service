@@ -43,9 +43,9 @@ public class Importer {
     private Map<String, List<Integer>> agecategories;
     private Map<String, Integer> assetTypes;
     
-    private Map<String,Map<String,Integer>> locationTypes;
-    private Map<String,Integer> facilityTypes;
-    private Map<String,Integer> accessibilityTypes;
+    protected Map<String,Map<String,Integer>> locationTypes;
+    protected Map<String,Integer> facilityTypes;
+    protected Map<String,Integer> accessibilityTypes;
 
     private final String AGECATEGORY_TODDLER_KEY = "AgeGroupToddlers";
     private final String AGECATEGORY_JUNIOR_KEY = "AgeGroupJuniors";
@@ -142,7 +142,7 @@ public class Importer {
         }
     }
     
-    protected void saveLocation(Map<String, Object> location, ImportReport report) throws NamingException, SQLException {
+    protected int saveLocation(Map<String, Object> location, ImportReport report) throws NamingException, SQLException {
         StringBuilder sb = new StringBuilder();
         boolean exists = locationExists(location);        
         Object geom = null;
@@ -214,16 +214,7 @@ public class Importer {
             DB.qr().update(sb.toString(),geom);
             report.increaseUpdated();
         }
-        if(location.containsKey("locationsubtype")){
-            saveLocationType(location, id);
-        }
-        if(location.containsKey("facilities")){
-            saveFacilities(id,location);
-        }
-        if(location.containsKey("accessibility")){
-            saveAccessibility(id,location);
-        }
-        
+        return id;        
     }
 
     protected boolean locationExists(Map<String, Object> location) {
@@ -497,72 +488,7 @@ public class Importer {
             DB.qr().insert(sb.toString(), new ScalarHandler<>());
         }
         
-    }
-    protected void saveFacilities( Integer locationId, Map<String,Object> location) throws NamingException, SQLException{
-        
-        DB.qr().update("DELETE FROM " + DB.LOCATION_FACILITIES_TABLE + " WHERE location = " + locationId);
-        String facilitiesString = (String)location.get("facilities");
-        String[] facilities = facilitiesString.split("\\|");
-        
-        for (String facility : facilities) {
-            Integer facilityId = facilityTypes.get(facility);
-            StringBuilder sb = new StringBuilder();
-            sb.append("INSERT ");
-            sb.append("INTO ");
-            sb.append(DB.LOCATION_FACILITIES_TABLE);
-            sb.append("(");
-            sb.append("location,");
-            sb.append("facility)");
-            sb.append("VALUES( ");
-            sb.append(locationId).append(",");
-            sb.append(facilityId);
-            sb.append(");");
-            DB.qr().insert(sb.toString(), new ScalarHandler<>());
-        }
-    }
-    protected void saveAccessibility( Integer locationId, Map<String,Object> location) throws NamingException, SQLException{
-        
-        DB.qr().update("DELETE FROM " + DB.LOCATION_ACCESSIBILITY_TABLE + " WHERE location = " + locationId);
-        String accessiblitiesString = (String)location.get("accessibility");
-        String[] accessibilities = accessiblitiesString.split("\\|");
-        
-        for (String accessiblity : accessibilities) {
-            Integer id = accessibilityTypes.get(accessiblity.toLowerCase());
-            StringBuilder sb = new StringBuilder();
-            sb.append("INSERT ");
-            sb.append("INTO ");
-            sb.append(DB.LOCATION_ACCESSIBILITY_TABLE);
-            sb.append("(");
-            sb.append("location,");
-            sb.append("accessibility)");
-            sb.append("VALUES( ");
-            sb.append(locationId).append(",");
-            sb.append(id);
-            sb.append(");");
-            DB.qr().insert(sb.toString(), new ScalarHandler<>());
-        }
-    }
-    
-    protected void saveLocationType(Map<String,Object> location, Integer id) throws NamingException, SQLException{
-        String type = (String)location.get("locationsubtype");
-        String main = type.substring(0, type.indexOf(">"));
-        String category = type.substring(type.indexOf(">") + 1);
-        Integer categoryId = locationTypes.get(main).get(category);
-        DB.qr().update("DELETE FROM " + DB.LOCATION_CATEGORY_TABLE + " WHERE location = " + id);
-        StringBuilder sb = new StringBuilder();
-        sb.append("INSERT ");
-        sb.append("INTO ");
-        sb.append(DB.LOCATION_CATEGORY_TABLE);
-        sb.append("(");
-        sb.append("location,");
-        sb.append("category)");
-        sb.append("VALUES( ");
-        sb.append(id).append(",");
-        sb.append(categoryId);
-        sb.append(");");
-        DB.qr().insert(sb.toString(), new ScalarHandler<>());
-    }
-    
+    }    
     
     protected Integer getAssetType(Map<String, Object> asset){
         String type = (String)asset.get("AssetType");

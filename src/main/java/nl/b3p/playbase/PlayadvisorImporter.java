@@ -27,6 +27,8 @@ import java.util.Map;
 import javax.naming.NamingException;
 import nl.b3p.commons.csv.CsvFormatException;
 import nl.b3p.commons.csv.CsvInputStream;
+import nl.b3p.playbase.db.DB;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -38,8 +40,13 @@ public class PlayadvisorImporter extends Importer {
 
     private static final Log log = LogFactory.getLog("PlayadvisorProcesor");
     private Map<Integer, String> playadvisorColumnToPlaybase;
+    
+    private static final String LOCATIONSUBTYPE = "locationsubtype";
+    private static final String FACILITIES = "facilities";
+    private static final String ACCESSIBLITIY = "accessibility";
 
     public PlayadvisorImporter() {
+        super();
         playadvisorColumnToPlaybase = new HashMap<>();
         playadvisorColumnToPlaybase.put(0, "pa_id");
         playadvisorColumnToPlaybase.put(1, "title");
@@ -54,14 +61,14 @@ public class PlayadvisorImporter extends Importer {
         playadvisorColumnToPlaybase.put(10, "imagedescription");
         playadvisorColumnToPlaybase.put(11, "imagealttext");
         playadvisorColumnToPlaybase.put(12, "url_2");
-        playadvisorColumnToPlaybase.put(13, "locationsubtype");
+        playadvisorColumnToPlaybase.put(13, LOCATIONSUBTYPE);
         playadvisorColumnToPlaybase.put(14, "country");
         playadvisorColumnToPlaybase.put(15, "municipality");
         playadvisorColumnToPlaybase.put(16, "assets");
-        playadvisorColumnToPlaybase.put(17, "facilities");
+        playadvisorColumnToPlaybase.put(17, FACILITIES);
         playadvisorColumnToPlaybase.put(18, "agecategories");
         playadvisorColumnToPlaybase.put(19, "parking");
-        playadvisorColumnToPlaybase.put(20, "accessibility");
+        playadvisorColumnToPlaybase.put(20, ACCESSIBLITIY);
         playadvisorColumnToPlaybase.put(21, "ambassadors");
         playadvisorColumnToPlaybase.put(22, "average_rating");
         playadvisorColumnToPlaybase.put(23, "Lng");
@@ -78,8 +85,20 @@ public class PlayadvisorImporter extends Importer {
         init(s);
         try {
             while ((s = cis.readRecord()) != null) {
-                Map<String, Object> vals = parseRecord(s);
-                saveLocation(vals, report);
+                Map<String, Object> location = parseRecord(s);
+                int id = saveLocation(location, report);
+                
+                if (location.containsKey(LOCATIONSUBTYPE)) {
+                    saveLocationType(location, id);
+                }
+                if (location.containsKey(FACILITIES)) {
+                    saveFacilities(id, location);
+                }
+                if (location.containsKey(ACCESSIBLITIY)) {
+                    saveAccessibility(id, location);
+                }
+                
+                
             }
         } catch (NamingException | SQLException ex) {
             log.error("Cannot save location to db: ", ex);
@@ -152,4 +171,69 @@ public class PlayadvisorImporter extends Importer {
         return image;
     }
 
+    
+    protected void saveFacilities( Integer locationId, Map<String,Object> location) throws NamingException, SQLException{
+        
+        DB.qr().update("DELETE FROM " + DB.LOCATION_FACILITIES_TABLE + " WHERE location = " + locationId);
+        String facilitiesString = (String)location.get(FACILITIES);
+        String[] facilities = facilitiesString.split("\\|");
+        
+        for (String facility : facilities) {
+            Integer facilityId = facilityTypes.get(facility);
+            StringBuilder sb = new StringBuilder();
+            sb.append("INSERT ");
+            sb.append("INTO ");
+            sb.append(DB.LOCATION_FACILITIES_TABLE);
+            sb.append("(");
+            sb.append("location,");
+            sb.append("facility)");
+            sb.append("VALUES( ");
+            sb.append(locationId).append(",");
+            sb.append(facilityId);
+            sb.append(");");
+            DB.qr().insert(sb.toString(), new ScalarHandler<>());
+        }
+    }
+    protected void saveAccessibility( Integer locationId, Map<String,Object> location) throws NamingException, SQLException{
+        
+        DB.qr().update("DELETE FROM " + DB.LOCATION_ACCESSIBILITY_TABLE + " WHERE location = " + locationId);
+        String accessiblitiesString = (String)location.get(ACCESSIBLITIY);
+        String[] accessibilities = accessiblitiesString.split("\\|");
+        
+        for (String accessiblity : accessibilities) {
+            Integer id = accessibilityTypes.get(accessiblity.toLowerCase());
+            StringBuilder sb = new StringBuilder();
+            sb.append("INSERT ");
+            sb.append("INTO ");
+            sb.append(DB.LOCATION_ACCESSIBILITY_TABLE);
+            sb.append("(");
+            sb.append("location,");
+            sb.append("accessibility)");
+            sb.append("VALUES( ");
+            sb.append(locationId).append(",");
+            sb.append(id);
+            sb.append(");");
+            DB.qr().insert(sb.toString(), new ScalarHandler<>());
+        }
+    }
+    
+    protected void saveLocationType(Map<String,Object> location, Integer id) throws NamingException, SQLException{
+        String type = (String)location.get(LOCATIONSUBTYPE);
+        String main = type.substring(0, type.indexOf(">"));
+        String category = type.substring(type.indexOf(">") + 1);
+        Integer categoryId = locationTypes.get(main).get(category);
+        DB.qr().update("DELETE FROM " + DB.LOCATION_CATEGORY_TABLE + " WHERE location = " + id);
+        StringBuilder sb = new StringBuilder();
+        sb.append("INSERT ");
+        sb.append("INTO ");
+        sb.append(DB.LOCATION_CATEGORY_TABLE);
+        sb.append("(");
+        sb.append("location,");
+        sb.append("category)");
+        sb.append("VALUES( ");
+        sb.append(id).append(",");
+        sb.append(categoryId);
+        sb.append(");");
+        DB.qr().insert(sb.toString(), new ScalarHandler<>());
+    }
 }
