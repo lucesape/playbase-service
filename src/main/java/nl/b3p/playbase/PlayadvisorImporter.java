@@ -61,7 +61,7 @@ public class PlayadvisorImporter extends Importer {
         playadvisorColumnToPlaybase.put(17, "facilities");
         playadvisorColumnToPlaybase.put(18, "agecategories");
         playadvisorColumnToPlaybase.put(19, "parking");
-        playadvisorColumnToPlaybase.put(20, "accessiblity");
+        playadvisorColumnToPlaybase.put(20, "accessibility");
         playadvisorColumnToPlaybase.put(21, "ambassadors");
         playadvisorColumnToPlaybase.put(22, "average_rating");
         playadvisorColumnToPlaybase.put(23, "Lng");

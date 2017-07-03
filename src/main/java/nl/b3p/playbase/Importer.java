@@ -45,6 +45,7 @@ public class Importer {
     
     private Map<String,Map<String,Integer>> locationTypes;
     private Map<String,Integer> facilityTypes;
+    private Map<String,Integer> accessibilityTypes;
 
     private final String AGECATEGORY_TODDLER_KEY = "AgeGroupToddlers";
     private final String AGECATEGORY_JUNIOR_KEY = "AgeGroupJuniors";
@@ -123,6 +124,18 @@ public class Importer {
                 Integer id = (Integer) type[0];
                 String facility = (String) type[1];
                 facilityTypes.put(facility, id);
+            }
+        } catch (NamingException | SQLException ex) {
+            log.error("Cannot initialize playadvisory facilitytypes:", ex);
+        }
+        
+        try {
+            accessibilityTypes = new HashMap<>();
+            List<Object[]> o = DB.qr().query("SELECT id, accessibility from " + DB.LIST_ACCESSIBILITY_TABLE, rsh);
+            for (Object[] type : o) {
+                Integer id = (Integer) type[0];
+                String accesiblity = (String) type[1];
+                accessibilityTypes.put(accesiblity.toLowerCase(), id);
             }
         } catch (NamingException | SQLException ex) {
             log.error("Cannot initialize playadvisory facilitytypes:", ex);
@@ -206,6 +219,9 @@ public class Importer {
         }
         if(location.containsKey("facilities")){
             saveFacilities(id,location);
+        }
+        if(location.containsKey("accessibility")){
+            saveAccessibility(id,location);
         }
         
     }
@@ -500,6 +516,28 @@ public class Importer {
             sb.append("VALUES( ");
             sb.append(locationId).append(",");
             sb.append(facilityId);
+            sb.append(");");
+            DB.qr().insert(sb.toString(), new ScalarHandler<>());
+        }
+    }
+    protected void saveAccessibility( Integer locationId, Map<String,Object> location) throws NamingException, SQLException{
+        
+        DB.qr().update("DELETE FROM " + DB.LOCATION_ACCESSIBILITY_TABLE + " WHERE location = " + locationId);
+        String accessiblitiesString = (String)location.get("accessibility");
+        String[] accessibilities = accessiblitiesString.split("\\|");
+        
+        for (String accessiblity : accessibilities) {
+            Integer id = accessibilityTypes.get(accessiblity.toLowerCase());
+            StringBuilder sb = new StringBuilder();
+            sb.append("INSERT ");
+            sb.append("INTO ");
+            sb.append(DB.LOCATION_ACCESSIBILITY_TABLE);
+            sb.append("(");
+            sb.append("location,");
+            sb.append("accessibility)");
+            sb.append("VALUES( ");
+            sb.append(locationId).append(",");
+            sb.append(id);
             sb.append(");");
             DB.qr().insert(sb.toString(), new ScalarHandler<>());
         }

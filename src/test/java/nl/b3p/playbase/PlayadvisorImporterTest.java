@@ -62,6 +62,8 @@ public class PlayadvisorImporterTest extends TestUtil{
         assertEquals(1, types.size());
         List facilities = DB.qr().query("Select * from " + DB.LOCATION_FACILITIES_TABLE , new ArrayListHandler());
         assertEquals(3, facilities.size());
+        List accessiblities = DB.qr().query("Select * from " + DB.LOCATION_ACCESSIBILITY_TABLE , new ArrayListHandler());
+        assertEquals(2, accessiblities.size());
     }
 
     /**
@@ -101,6 +103,9 @@ public class PlayadvisorImporterTest extends TestUtil{
         assertEquals(1, types.size());
         List facilities = DB.qr().query("Select * from " + DB.LOCATION_FACILITIES_TABLE , new ArrayListHandler());
         assertEquals(3, facilities.size());
+        
+        List accessiblities = DB.qr().query("Select * from " + DB.LOCATION_ACCESSIBILITY_TABLE , new ArrayListHandler());
+        assertEquals(2, accessiblities.size());
         
     }
 
