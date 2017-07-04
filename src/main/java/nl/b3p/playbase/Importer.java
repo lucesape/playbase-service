@@ -24,8 +24,13 @@ import java.util.Map;
 import javax.naming.NamingException;
 import nl.b3p.loader.jdbc.GeometryJdbcConverter;
 import nl.b3p.loader.jdbc.GeometryJdbcConverterFactory;
+import nl.b3p.loader.util.DbUtilsGeometryColumnConverter;
 import nl.b3p.playbase.db.DB;
+import nl.b3p.playbase.entities.Asset;
+import org.apache.commons.dbutils.BasicRowProcessor;
+import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ArrayListHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -230,7 +235,7 @@ public abstract class Importer {
     }
 
     
-    protected void saveAsset(Map<String, Object> asset, ImportReport report) throws NamingException, SQLException {
+    protected void saveAsset(Asset asset, ImportReport report) throws NamingException, SQLException {
         
         // xlocation
         // xagecategories
@@ -244,14 +249,16 @@ public abstract class Importer {
         // check if asset exists
         // ja: update 
        // nee: insert
-        Integer locationId = getLocation(asset);
-        Integer assetTypeId = getAssetType(asset);
-        Integer equipmentTypeId = getEquipmentType(asset);
+        Integer locationId = asset.getLocation();//getLocation(asset);
+        Integer assetTypeId = asset.getType_(); //getAssetType(asset);
+        Integer equipmentTypeId = asset.getEquipment();// getEquipmentType(asset);
         Integer id = null;
         Object geom = null;
         
+        ResultSetHandler<Asset> handler = new BeanHandler(Asset.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
+        
         try {
-            geom = geometryConverter.createNativePoint((double)asset.get("Lat"), (double)asset.get("Lng"), 4326);
+            geom = geometryConverter.createNativePoint(asset.getLatitude(), asset.getLongitude(), 4326);
         } catch (ParseException ex) {
             log.error("Cannot parse geometry", ex);
         }catch (NullPointerException ex){
@@ -259,72 +266,43 @@ public abstract class Importer {
         }
         if (assetExists(asset)) {
          
-            StringBuilder sb = new StringBuilder();
-            sb.append("select id from ");
-            sb.append(DB.ASSETS_TABLE);
-            sb.append(" where pm_guid = '");
-            sb.append(asset.get("ID"));
-            sb.append("';");
-            id = (Integer) DB.qr().query(sb.toString(), new ScalarHandler<>());
+            id = getId(asset);
 
-            sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
             sb.append("UPDATE ").append(DB.ASSETS_TABLE);
-            sb.append(" set installeddate = ");
-            valueOrNull(sb, "InstalledDate", asset);
-            sb.append("location = ");
-            sb.append(locationId).append(",");
-            sb.append("name = ");
-            valueOrNull(sb, "Name", asset);
-            sb.append("type_ = ");
-            sb.append(assetTypeId).append(",");
-            sb.append("equipment = ");
-            sb.append(equipmentTypeId).append(",");
-            sb.append("latitude = ");
-            sb.append(asset.get("Lat")).append(",");
-            sb.append("longitude = ");
-            sb.append(asset.get("Lng")).append(",");
-            sb.append("priceindexation = ");
-            sb.append(asset.get("PriceIndexation")).append(",");
-            sb.append("priceinstallation = ");
-            sb.append(asset.get("PriceInstallation")).append(",");
-            sb.append("pricemaintenance = ");
-            sb.append(asset.get("PriceMaintenance")).append(",");
-            sb.append("pricepurchase = ");
-            sb.append(asset.get("PricePurchase")).append(",");
-            sb.append("pricereinvestment = ");
-            sb.append(asset.get("PriceReInvestment")).append(",");
-            sb.append("depth = ");
-            sb.append(asset.get("Depth")).append(",");
-            sb.append("width = ");
-            sb.append(asset.get("Width")).append(",");
-            sb.append("height = ");
-            sb.append(asset.get("Height")).append(",");
-            sb.append("endoflifeyear = ");
-            sb.append(asset.get("EndOfLifeYear")).append(",");
-            sb.append("freefallheight = ");
-            sb.append(asset.get("FreefallHeight")).append(",");
-            sb.append("safetyzonelength = ");
-            sb.append(asset.get("SafetyZoneLength")).append(",");
-            sb.append("safetyzonewidth = ");
-            sb.append(asset.get("SafetyZoneWidth")).append(",");
-            sb.append("manufacturer = ");
-            valueOrNull(sb, "Manufacturer", asset);
-            sb.append("material = ");
-            valueOrNull(sb, "Material", asset);
-            sb.append("product = ");
-            valueOrNull(sb, "Product", asset);
-            sb.append("productid = ");
-            valueOrNull(sb, "ProductID", asset);
-            sb.append("productvariantid = ");
-            valueOrNull(sb, "ProductVariantID", asset);
-            sb.append("serialnumber = ");
-            valueOrNull(sb, "SerialNumber", asset);
+            sb.append(" set installeddate = ?,");
+            sb.append("location = ?,");
+            sb.append("name = ?,");
+            sb.append("type_ = ?,");
+            sb.append("equipment = ?,");
+            sb.append("latitude = ?,");
+            sb.append("longitude = ?,");
+            sb.append("priceindexation = ?,");
+            sb.append("priceinstallation = ?,");
+            sb.append("pricemaintenance = ?,");
+            sb.append("pricepurchase = ?,");
+            sb.append("pricereinvestment = ?,");
+            sb.append("depth = ?,");
+            sb.append("width = ?,");
+            sb.append("height = ?,");
+            sb.append("endoflifeyear = ?,");
+            sb.append("freefallheight = ?,");
+            sb.append("safetyzonelength = ?,");
+            sb.append("safetyzonewidth = ?,");
+            sb.append("manufacturer = ?,");
+            sb.append("material = ?,");
+            sb.append("product = ?,");
+            sb.append("productid = ?,");
+            sb.append("productvariantid = ?,");
+            sb.append("serialnumber = ?,");
             sb.append("geom = ?,");
-            sb.append("pm_guid = ");
-            sb.append("'").append(asset.get("ID")).append("'");
+            sb.append("pm_guid = ?");
             sb.append(" WHERE id = ").append(id);
-            DB.qr().update(sb.toString(),geom);
-            report.increaseUpdated();            
+            DB.qr().update(sb.toString(),asset.getInstalleddate(),asset.getLocation(), asset.getName(),asset.getType_(), asset.getEquipment(), asset.getLatitude(), 
+                    asset.getLongitude(), asset.getPriceindexation(), asset.getPriceinstallation(), asset.getPricemaintenance(), asset.getPricepurchase(), asset.getPricereinvestment(),
+                    asset.getDepth(), asset.getWidth(), asset.getHeight(), asset.getEndoflifeyear(), asset.getFreefallheight(), asset.getSafetyzonelength(), asset.getSafetyzonewidth(), 
+                    asset.getManufacturer(),asset.getMaterial(), asset.getProduct(), asset.getProductid(), asset.getProductvariantid(), asset.getSerialnumber(),geom, asset.getPm_guid());
+            report.increaseUpdated();
         }else{
             StringBuilder sb = new StringBuilder();
             sb.append("INSERT ");
@@ -358,70 +336,52 @@ public abstract class Importer {
             sb.append("serialnumber,");
             sb.append("geom,");
             sb.append("pm_guid) ");
-            sb.append("VALUES( ");
-            valueOrNull(sb, "InstalledDate", asset);
-            sb.append(locationId).append(",");
-            valueOrNull(sb, "Name", asset);
-            sb.append(assetTypeId).append(",");
-            sb.append(equipmentTypeId).append(",");
-            sb.append(asset.get("Lat")).append(",");
-            sb.append(asset.get("Lng")).append(",");
-            sb.append(asset.get("PriceIndexation")).append(",");
-            sb.append(asset.get("PriceInstallation")).append(",");
-            sb.append(asset.get("PriceMaintenance")).append(",");
-            sb.append(asset.get("PricePurchase")).append(",");
-            sb.append(asset.get("PriceReInvestment")).append(",");
-            sb.append(asset.get("Depth")).append(",");
-            sb.append(asset.get("Width")).append(",");
-            sb.append(asset.get("Height")).append(",");
-            sb.append(asset.get("EndOfLifeYear")).append(",");
-            sb.append(asset.get("FreefallHeight")).append(",");
-            sb.append(asset.get("SafetyZoneLength")).append(",");
-            sb.append(asset.get("SafetyZoneWidth")).append(",");
-            valueOrNull(sb, "Manufacturer", asset);
-            valueOrNull(sb, "Material", asset);
-            valueOrNull(sb, "Product", asset);
-            valueOrNull(sb, "ProductID", asset);
-            valueOrNull(sb, "ProductVariantID", asset);
-            valueOrNull(sb, "SerialNumber", asset);
-            sb.append("?,");
-            sb.append("'").append(asset.get("ID")).append("');");
-            id = DB.qr().insert(sb.toString(), new ScalarHandler<Integer>(),geom);
+            sb.append("VALUES(  ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);");
+    
+            Asset as = DB.qr().insert(sb.toString(), handler,asset.getInstalleddate(),asset.getLocation(), asset.getName(),asset.getType_(), asset.getEquipment(), asset.getLatitude(), 
+                    asset.getLongitude(), asset.getPriceindexation(), asset.getPriceinstallation(), asset.getPricemaintenance(), asset.getPricepurchase(), asset.getPricereinvestment(),
+                    asset.getDepth(), asset.getWidth(), asset.getHeight(), asset.getEndoflifeyear(), asset.getFreefallheight(), asset.getSafetyzonelength(), asset.getSafetyzonewidth(), 
+                    asset.getManufacturer(),asset.getMaterial(), asset.getProduct(), asset.getProductid(), asset.getProductvariantid(), asset.getSerialnumber(),geom, asset.getPm_guid());
+            id = as.getId();
             report.increaseInserted();
         }
         
         
         saveAssetsAgeCategories(asset, id);
-        saveImagesAndWords((List<Map<String, Object>>)asset.get("Images"), id, locationId, DB.IMAGES_TABLE);
-        saveImagesAndWords((List<Map<String, Object>>)asset.get("Documents"), id, locationId, DB.ASSETS_DOCUMENTS_TABLE);
+        saveImagesAndWords(asset.getImages(), id, locationId, DB.IMAGES_TABLE);
+        saveImagesAndWords(asset.getDocuments(), id, locationId, DB.ASSETS_DOCUMENTS_TABLE);
     }
     
-    protected boolean assetExists(Map<String, Object> asset) {
-        try {
-            if (asset.get("ID") == null) {
-                int assetType = getEquipmentType(asset);
+    protected boolean assetExists(Asset asset) {
+       return getId(asset) != null;
+    }
+    
+    protected Integer getId(Asset asset){
+         try {
+            ResultSetHandler<Asset> handler = new BeanHandler(Asset.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
+            Asset o;
+            if (asset.getPm_guid() == null) {
+                int equipment = asset.getEquipment();
                 StringBuilder sb = new StringBuilder();
                 sb.append("select * from ");
                 sb.append(DB.ASSETS_TABLE);
                 sb.append(" where location = ? and equipment = ?");
             
-                ArrayListHandler rsh = new ArrayListHandler();
-                List<Object[]> o = DB.qr().query(sb.toString(), rsh, asset.get("LocationPAID"), assetType);
-                return o.size() > 0;
+                o = DB.qr().query(sb.toString(), handler, asset.getLocation(), equipment);
+                
             } else {
                 StringBuilder sb = new StringBuilder();
                 sb.append("select * from ");
                 sb.append(DB.ASSETS_TABLE);
                 sb.append(" where pm_guid = '");
-                sb.append(asset.get("ID"));
+                sb.append(asset.getPm_guid());
                 sb.append("';");
-                ArrayListHandler rsh = new ArrayListHandler();
-                List<Object[]> o = DB.qr().query(sb.toString(), rsh);
-                return o.size() > 0;
+                o = DB.qr().query(sb.toString(), handler);
             }
+            return o != null ? o.getId() : null;
         } catch (NamingException | SQLException ex) {
             log.error("Cannot query if asset exists: ", ex);
-            return false;
+            return null;
         }
     }
     
@@ -435,7 +395,7 @@ public abstract class Importer {
         }
     }
   
-    protected void saveAssetsAgeCategory(Integer location, List<Integer> agecategories) throws NamingException, SQLException {
+    protected void saveAssetsAgeCategory(Integer location, Integer[] agecategories) throws NamingException, SQLException {
         DB.qr().update("DELETE FROM " + DB.ASSETS_AGECATEGORIES_TABLE + " WHERE location_equipment = " + location);
         for (Integer agecategory : agecategories) {
             StringBuilder sb = new StringBuilder();
@@ -497,14 +457,12 @@ public abstract class Importer {
         }
     }    
     
-    protected Integer getAssetType(Map<String, Object> asset){
-        String type = (String)asset.get("AssetType");
+    protected Integer getAssetType(String type){
         Integer id = assetTypes.get(type);
         return id;
     }
     
-    protected Integer getEquipmentType(Map<String, Object> asset){
-        String type = (String)asset.get("EquipmentType");
+    protected Integer getEquipmentType(String type){
         Integer id = equipmentTypes.get(type);
         return id;
     }
@@ -529,6 +487,11 @@ public abstract class Importer {
             throw new IllegalArgumentException ("Meerdere locaties gevonden met id " + locationId);
         }
     }
-    
-    protected abstract void saveAssetsAgeCategories(Map<String, Object> asset, Integer id) throws NamingException, SQLException;
+
+    protected void saveAssetsAgeCategories(Asset asset, Integer location) throws NamingException, SQLException {
+        // delete old entries
+        DB.qr().update("DELETE FROM " + DB.ASSETS_AGECATEGORIES_TABLE + " WHERE location_equipment = " + location);
+        saveAssetsAgeCategory(location, asset.getAgecategories());
+    }
+
 }

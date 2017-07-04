@@ -101,7 +101,7 @@ public class PlayadvisorImporterTest extends TestUtil{
         instance.importStream(in, report);
         in.close();
         assertEquals(0, report.getErrors().size());
-        assertEquals(0, report.getNumberInserted()); // 4 assets, die worden opnieuw opgeslagen, niet geupdatet
+        assertEquals(0, report.getNumberInserted()); 
         assertEquals(5, report.getNumberUpdated());
         locations = DB.qr().query("Select * from " + DB.LOCATION_TABLE, new ArrayListHandler());
         assertEquals(1, locations.size());

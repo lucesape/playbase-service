@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,8 @@ import javax.naming.NamingException;
 import nl.b3p.commons.csv.CsvFormatException;
 import nl.b3p.commons.csv.CsvInputStream;
 import nl.b3p.playbase.db.DB;
+import nl.b3p.playbase.entities.Asset;
+import org.apache.commons.dbutils.handlers.ArrayListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -90,9 +93,9 @@ public class PlayadvisorImporter extends Importer {
 
                 int id = saveLocation(location, report);
 
-                List<Map<String, Object>> assets = parseAssets(location, id);
+                List<Asset> assets = parseAssets(location, id);
 
-                for (Map<String, Object> asset : assets) {
+                for (Asset asset : assets) {
                     saveAsset(asset, report);
                 }
 
@@ -162,19 +165,25 @@ public class PlayadvisorImporter extends Importer {
         return dbvalues;
     }
 
-    private List<Map<String, Object>> parseAssets(Map<String, Object> location, Integer locationId) throws NamingException, SQLException {
-
-    //    DB.qr().update("DELETE FROM " + DB.ASSETS_TABLE + " WHERE location = " + locationId);
-        List<Map<String, Object>> assets = new ArrayList<>();
+    private List<Asset> parseAssets(Map<String, Object> location, Integer locationId) throws NamingException, SQLException {
+        List<Asset> assets = new ArrayList<>();
         String assetString = (String) location.get("assets");
         String[] assetArray = assetString.split("\\|");
         for (String asset : assetArray) {
-            Map<String, Object> assMap = new HashMap<>();
-            assMap.put("Name", asset);
-            assMap.put("LocationPAID", locationId);
-            assMap.put(AGECATEGORIES, location.get(AGECATEGORIES));
-            assMap.put("EquipmentType", asset);
-            assets.add(assMap);
+            Asset ass = new Asset();
+            ass.setName(asset);
+            ass.setLocation(locationId);
+            Object cats = location.get(AGECATEGORIES);
+            if (cats != null) {
+                String [] categories =((String) cats).split("\\|");
+                List<Integer> ids = new ArrayList<>();
+                for (String cat : categories) {
+                    ids.add(agecategoryTypes.get(cat));
+                }
+                ass.setAgecategories(ids.toArray(new Integer[0]));
+            }
+            ass.setEquipment(getEquipmentType(asset));
+            assets.add(ass);
         }
         return assets;
     }
@@ -288,18 +297,5 @@ public class PlayadvisorImporter extends Importer {
         DB.qr().insert(sb.toString(), new ScalarHandler<>());
     }
 
-    @Override
-    protected void saveAssetsAgeCategories(Map<String, Object> asset, Integer location) throws NamingException, SQLException {
-        String agecategoriesString = (String) asset.get("agecategories");
-        if (agecategoriesString != null) {
-            String[] agecategories = agecategoriesString.split("\\|");
-            List<Integer> ids = new ArrayList<>();
-            for (String agecategory : agecategories) {
-                int id = agecategoryTypes.get(agecategory);
-                ids.add(id);
-            }
-            saveAssetsAgeCategory(location, ids);
-        }
-    }
     // </editor-fold>
 }

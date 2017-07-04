@@ -24,7 +24,9 @@ import java.util.List;
 import java.util.Map;
 import javax.naming.NamingException;
 import nl.b3p.playbase.db.DB;
+import nl.b3p.playbase.entities.Asset;
 import org.apache.commons.dbutils.handlers.ArrayListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
@@ -82,9 +84,10 @@ public class PlaymappingImporter extends Importer {
     }
 
     public ImportReport processAssets(String assetsString) throws NamingException, SQLException {
-        List<Map<String, Object>> assets = parseAssets(assetsString);
+        
+        List<Asset> assets = parseAssets(assetsString);
         ImportReport report = new ImportReport("assets");
-        for (Map<String, Object> asset : assets) {
+        for (Asset asset : assets) {
             try {
                 saveAsset(asset, report);
             } catch (NamingException | SQLException | IllegalArgumentException ex) {
@@ -105,81 +108,80 @@ public class PlaymappingImporter extends Importer {
     }
 
     // <editor-fold desc="Assets" defaultstate="collapsed">
-    protected List<Map<String, Object>> parseAssets(String assetsString) {
-        List<Map<String, Object>> assets = new ArrayList<>();
+    protected List<Asset> parseAssets(String assetsString) throws NamingException, SQLException {
+        List<Asset> assets = new ArrayList<>();
         JSONArray assetsArray = new JSONArray(assetsString);
 
         for (int i = 0; i < assetsArray.length(); i++) {
             JSONObject asset = assetsArray.getJSONObject(i);
-            assets.add(parseAsset(asset));
+            Integer locationId = getLocationId(asset.getString("LocationID"));
+            assets.add(parseAsset(asset, locationId));
             String linkedAssets = asset.getJSONArray("LinkedAssets").toString();
             assets.addAll(parseAssets(linkedAssets));
         }
         return assets;
     }
 
-    protected Map<String, Object> parseAsset(JSONObject assetJSON) {
-        Map<String, Object> asset = new HashMap<>();
-        asset.put("$id", assetJSON.optString("$id"));
-        asset.put("ID", assetJSON.optString("ID"));
-        asset.put("LocationPMID", assetJSON.optString("LocationID"));
-        asset.put("LocationName", assetJSON.optString("LocationName").replaceAll("\'", "\'\'"));
-        asset.put("LastUpdated", assetJSON.optString("LastUpdated"));
-        asset.put("Name", assetJSON.optString("Name").replaceAll("\'", "\'\'"));
-        asset.put("AssetType", assetJSON.optString("AssetType"));
-        asset.put("Manufacturer", assetJSON.optString("Manufacturer"));
-        asset.put("Product", assetJSON.optString("Product"));
-        asset.put("SerialNumber", assetJSON.optString("SerialNumber"));
-        asset.put("Material", assetJSON.optString("Material"));
-        asset.put("InstalledDate", assetJSON.optString("InstalledDate"));
-        asset.put("EndOfLifeYear", assetJSON.optInt("EndOfLifeYear"));
-        asset.put("ProductID", assetJSON.optString("ProductID"));
-        asset.put("ProductVariantID", assetJSON.optString("ProductVariantID"));
-        asset.put("Height", assetJSON.optInt("Height"));
-        asset.put("Depth", assetJSON.optInt("Depth"));
-        asset.put("Width", assetJSON.optInt("Width"));
-        asset.put("FreefallHeight", assetJSON.optInt("FreefallHeight"));
-        asset.put("SafetyZoneLength", assetJSON.optInt("SafetyZoneLength"));
-        asset.put("SafetyZoneWidth", assetJSON.optInt("SafetyZoneWidth"));
-        asset.put("AgeGroupToddlers", assetJSON.optBoolean("AgeGroupToddlers"));
-        asset.put("AgeGroupJuniors", assetJSON.optBoolean("AgeGroupJuniors"));
-        asset.put("AgeGroupSeniors", assetJSON.optBoolean("AgeGroupSeniors"));
-        asset.put("PricePurchase", assetJSON.optDouble("PricePurchase"));
-        asset.put("PriceInstallation", assetJSON.optDouble("PriceInstallation"));
-        asset.put("PriceReInvestment", assetJSON.optDouble("PriceReInvestment"));
-        asset.put("PriceMaintenance", assetJSON.optDouble("PriceMaintenance"));
-        asset.put("PriceIndexation", assetJSON.optDouble("PriceIndexation"));
-        asset.put("Lat", Double.parseDouble(assetJSON.optString("Lat").replaceAll(",", ".")));
-        asset.put("Lng", Double.parseDouble(assetJSON.optString("Lng").replaceAll(",", ".")));
-        asset.put("Documents", parseImagesAndWords(assetJSON.optJSONArray("Documents")));
-        asset.put("Hyperlinks", assetJSON.optJSONArray("Hyperlinks"));
-        asset.put("Images", parseImagesAndWords(assetJSON.optJSONArray("Images")));
-        asset.put("LinkedAssets", assetJSON.optJSONArray("LinkedAssets"));
+    protected Asset parseAsset(JSONObject assetJSON, Integer locationId) {
+        Asset asset = new Asset();
+        asset.setPm_guid(assetJSON.optString("ID"));
+        asset.setLocation(locationId);
+        asset.setName(assetJSON.optString("Name").replaceAll("\'", "\'\'"));
+        asset.setType_(getAssetType(assetJSON.optString("AssetType")));
+        asset.setManufacturer( assetJSON.optString("Manufacturer"));
+        asset.setProduct(assetJSON.optString("Product"));
+        asset.setSerialnumber(assetJSON.optString("SerialNumber"));
+        asset.setMaterial(assetJSON.optString("Material"));
+        asset.setInstalleddate(assetJSON.optString("InstalledDate"));
+        asset.setEndoflifeyear(assetJSON.optInt("EndOfLifeYear"));
+        asset.setProductid(assetJSON.optString("ProductID"));
+        asset.setProductvariantid(assetJSON.optString("ProductVariantID"));
+        asset.setHeight(assetJSON.optInt("Height"));
+        asset.setDepth(assetJSON.optInt("Depth"));
+        asset.setWidth(assetJSON.optInt("Width"));
+        asset.setFreefallheight( assetJSON.optInt("FreefallHeight"));
+        asset.setSafetyzonelength(assetJSON.optInt("SafetyZoneLength"));
+        asset.setSafetyzonewidth(assetJSON.optInt("SafetyZoneWidth"));
+        asset.setPricepurchase( assetJSON.optInt("PricePurchase"));
+        asset.setPriceinstallation( assetJSON.optInt("PriceInstallation"));
+        asset.setPricereinvestment( assetJSON.optInt("PriceReInvestment"));
+        asset.setPricemaintenance( assetJSON.optInt("PriceMaintenance"));
+        asset.setPriceindexation(assetJSON.optInt("PriceIndexation"));
+        asset.setLatitude(Double.parseDouble(assetJSON.optString("Lat").replaceAll(",", ".")));
+        asset.setLongitude( Double.parseDouble(assetJSON.optString("Lng").replaceAll(",", ".")));
+        asset.setDocuments( parseImagesAndWords(assetJSON.optJSONArray("Documents")));
+        asset.setImages(parseImagesAndWords(assetJSON.optJSONArray("Images")));
+        asset.setAgecategories(parseAgecategories(assetJSON));
+        
+        // ToDo hyperlinks: asset.put("Hyperlinks", assetJSON.optJSONArray("Hyperlinks"));
+        
         return asset;
     }
-
-    @Override
-    protected void saveAssetsAgeCategories(Map<String, Object> asset, Integer location) throws NamingException, SQLException {
-        boolean toddler = (boolean) asset.getOrDefault(AGECATEGORY_TODDLER_KEY, false);
-        boolean junior = (boolean) asset.getOrDefault(AGECATEGORY_JUNIOR_KEY, false);
-        boolean senior = (boolean) asset.getOrDefault(AGECATEGORY_SENIOR_KEY, false);
-
-        // delete old entries
-        DB.qr().update("DELETE FROM " + DB.ASSETS_AGECATEGORIES_TABLE + " WHERE location_equipment = " + location);
+    
+    protected Integer[] parseAgecategories(JSONObject assetJSON){
+        
+        boolean toddler = assetJSON.optBoolean(AGECATEGORY_TODDLER_KEY, false);
+        boolean junior = assetJSON.optBoolean(AGECATEGORY_JUNIOR_KEY, false);
+        boolean senior = assetJSON.optBoolean(AGECATEGORY_SENIOR_KEY, false);
+        List<Integer> agecategoriesList = new ArrayList<>();
+        
         if (toddler) {
-            saveAssetsAgeCategory(location, agecategories.get(AGECATEGORY_TODDLER_KEY));
+            agecategoriesList.addAll(agecategories.get(AGECATEGORY_TODDLER_KEY));
         }
 
         if (junior) {
-            saveAssetsAgeCategory(location, agecategories.get(AGECATEGORY_JUNIOR_KEY));
+            agecategoriesList.addAll(agecategories.get(AGECATEGORY_JUNIOR_KEY));
         }
 
         if (senior) {
-            saveAssetsAgeCategory(location, agecategories.get(AGECATEGORY_SENIOR_KEY));
+            agecategoriesList.addAll(agecategories.get(AGECATEGORY_SENIOR_KEY));
         }
+        return agecategoriesList.toArray(new Integer[0]);
     }
 
+
     // </editor-fold>
+    
     // <editor-fold desc="Locations" defaultstate="collapsed">
     protected List<Map<String, Object>> parseChildLocations(String locations) {
         List<Map<String, Object>> locs = new ArrayList<>();
@@ -242,6 +244,19 @@ public class PlaymappingImporter extends Importer {
         map.put("URI", image.optString("URI"));
         map.put("Description", image.optString("Description"));
         return map;
+    }
+    
+    protected Integer getLocationId(String pmguid) throws NamingException, SQLException {
+        StringBuilder sb = new StringBuilder();
+        sb.append("select id from ");
+
+        sb.append(DB.LOCATION_TABLE);
+        sb.append(" where pm_guid = '");
+        sb.append(pmguid);
+
+        sb.append("';");
+        Integer id = (Integer) DB.qr().query(sb.toString(), new ScalarHandler<>());
+        return id;
     }
     // </editor-fold>
 
