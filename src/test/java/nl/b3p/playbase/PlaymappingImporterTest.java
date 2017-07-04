@@ -22,7 +22,9 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import javax.naming.NamingException;
+import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.db.TestUtil;
+import org.apache.commons.dbutils.handlers.ArrayListHandler;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -34,9 +36,9 @@ import org.junit.Before;
  *
  * @author meine
  */
-public class PlaymappingProcessorTest extends TestUtil {
+public class PlaymappingImporterTest extends TestUtil {
 
-    public PlaymappingProcessorTest() {
+    public PlaymappingImporterTest() {
         this.useDB = true;
         this.initData = true;
     }
@@ -51,7 +53,7 @@ public class PlaymappingProcessorTest extends TestUtil {
 
     @Test
     public void testGetChildLocation3Levels() throws IOException {
-        InputStream in = PlaymappingProcessorTest.class.getResourceAsStream("pijnacker3Locations.json");
+        InputStream in = PlaymappingImporterTest.class.getResourceAsStream("pijnacker3Locations.json");
         String location = IOUtils.toString(in);
         List<Map<String, Object>> returnValue = instance.parseChildLocations(location);
         assertEquals(195, returnValue.size());
@@ -59,7 +61,7 @@ public class PlaymappingProcessorTest extends TestUtil {
 
     @Test
     public void testGetChildLocation2Levels() throws IOException {
-        InputStream in = PlaymappingProcessorTest.class.getResourceAsStream("haarlemLocations.json");
+        InputStream in = PlaymappingImporterTest.class.getResourceAsStream("haarlemLocations.json");
         String location = IOUtils.toString(in);
         List<Map<String, Object>> returnValue = instance.parseChildLocations(location);
         assertEquals(273, returnValue.size());
@@ -90,7 +92,7 @@ public class PlaymappingProcessorTest extends TestUtil {
 
     @Test
     public void testParseAssets() throws IOException {
-        InputStream in = PlaymappingProcessorTest.class.getResourceAsStream("haarlemAssets.json");
+        InputStream in = PlaymappingImporterTest.class.getResourceAsStream("haarlemAssets.json");
         String location = IOUtils.toString(in);
         List<Map<String, Object>> returnValue = instance.parseAssets(location);
         assertEquals(3479, returnValue.size());
@@ -140,7 +142,7 @@ public class PlaymappingProcessorTest extends TestUtil {
 
     @Test
     public void testParseAssetWithLinkedAsset() throws IOException {
-        InputStream in = PlaymappingProcessorTest.class.getResourceAsStream("singleAssetWithLinked.json");
+        InputStream in = PlaymappingImporterTest.class.getResourceAsStream("singleAssetWithLinked.json");
         String asset = IOUtils.toString(in);
         List<Map<String, Object>> returnValue = instance.parseAssets(asset);
         assertEquals(2, returnValue.size());
@@ -149,11 +151,48 @@ public class PlaymappingProcessorTest extends TestUtil {
 
     @Test
     public void testSaveAssets() throws IOException, NamingException, SQLException {
-        InputStream in = PlaymappingProcessorTest.class.getResourceAsStream("singleAssetWithLinked.json");
+        InputStream in = PlaymappingImporterTest.class.getResourceAsStream("singleAssetWithLinked.json");
         String asset = IOUtils.toString(in);
         ImportReport report= instance.processAssets(asset);
         
         assertEquals(0, report.getErrors().size());
         assertEquals(2, report.getNumberInserted());
+        assertEquals(0, report.getNumberUpdated());
+    }
+    
+    @Test
+    public void testSaveAssetType() throws IOException, NamingException, SQLException {
+        InputStream in = PlaymappingImporterTest.class.getResourceAsStream("singleAssetWithLinked.json");
+        String assetString = IOUtils.toString(in);
+        ImportReport report= instance.processAssets(assetString);
+        
+        assertEquals(0, report.getErrors().size());
+        assertEquals(2, report.getNumberInserted());
+        assertEquals(0, report.getNumberUpdated());
+        
+        List<Object[]> assets = DB.qr().query("select id, equipment from " + DB.ASSETS_TABLE, new ArrayListHandler());
+        assertEquals(2, assets.size());
+        for (Object[] asset : assets) {
+            assertNotNull("equipmenttype not set.", asset[1]);
+        }
+    }
+
+    @Test
+    public void testUpdateAssets() throws IOException, NamingException, SQLException {
+        InputStream in = PlaymappingImporterTest.class.getResourceAsStream("singleAssetWithLinked.json");
+        String asset = IOUtils.toString(in);
+        
+        
+        ImportReport report= instance.processAssets(asset);
+        
+        assertEquals(0, report.getErrors().size());
+        assertEquals(2, report.getNumberInserted());
+        assertEquals(0, report.getNumberUpdated());
+        
+        report= instance.processAssets(asset);
+        
+        assertEquals(0, report.getErrors().size());
+        assertEquals(0, report.getNumberInserted());
+        assertEquals(2, report.getNumberUpdated());
     }
 }

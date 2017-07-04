@@ -382,7 +382,15 @@ public abstract class Importer {
     protected boolean assetExists(Map<String, Object> asset) {
         try {
             if (asset.get("ID") == null) {
-                return false;
+                int assetType = getAssetType(asset);
+                StringBuilder sb = new StringBuilder();
+                sb.append("select * from ");
+                sb.append(DB.ASSETS_TABLE);
+                sb.append(" where location = ? and type_ = ?");
+            
+                ArrayListHandler rsh = new ArrayListHandler();
+                List<Object[]> o = DB.qr().query(sb.toString(), rsh, asset.get("LocationPAID"), assetType);
+                return o.size() > 0;
             } else {
                 StringBuilder sb = new StringBuilder();
                 sb.append("select * from ");
@@ -411,6 +419,7 @@ public abstract class Importer {
     }
   
     protected void saveAssetsAgeCategory(Integer location, List<Integer> agecategories) throws NamingException, SQLException {
+        DB.qr().update("DELETE FROM " + DB.ASSETS_AGECATEGORIES_TABLE + " WHERE location_equipment = " + location);
         for (Integer agecategory : agecategories) {
             StringBuilder sb = new StringBuilder();
             sb.append("INSERT ");

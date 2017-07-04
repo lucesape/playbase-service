@@ -48,12 +48,12 @@ public class PlayadvisorImporterTest extends TestUtil{
      */
     @Test
     public void testImportStream() throws Exception {
-        InputStream in = PlaymappingProcessorTest.class.getResourceAsStream("playadvisor_single_location.csv");
+        InputStream in = PlaymappingImporterTest.class.getResourceAsStream("playadvisor_single_location.csv");
         ImportReport report = new ImportReport("locaties");
         instance.importStream(in, report);
         in.close();
         assertEquals(0, report.getErrors().size());
-        assertEquals(5,report.getNumberInserted());
+        assertEquals(2,report.getNumberInserted());
         List locations = DB.qr().query("Select * from " + DB.LOCATION_TABLE, new ArrayListHandler());
         assertEquals(1, locations.size());
         List images = DB.qr().query("Select * from " + DB.IMAGES_TABLE, new ArrayListHandler());
@@ -89,20 +89,20 @@ public class PlayadvisorImporterTest extends TestUtil{
     
     @Test
     public void testUpdateLocation() throws Exception {
-        InputStream in = PlaymappingProcessorTest.class.getResourceAsStream("playadvisor_single_location.csv");
+        InputStream in = PlaymappingImporterTest.class.getResourceAsStream("playadvisor_single_location.csv");
         ImportReport report = new ImportReport("locaties");
         instance.importStream(in, report);
         in.close();
-        assertEquals(5,report.getNumberInserted());
+        assertEquals(2,report.getNumberInserted());
         List locations = DB.qr().query("Select * from " + DB.LOCATION_TABLE, new ArrayListHandler());
         assertEquals(1, locations.size());
         report = new ImportReport("locaties");
-        in = PlaymappingProcessorTest.class.getResourceAsStream("playadvisor_single_location.csv");
+        in = PlaymappingImporterTest.class.getResourceAsStream("playadvisor_single_location.csv");
         instance.importStream(in, report);
         in.close();
         assertEquals(0, report.getErrors().size());
-        assertEquals(4, report.getNumberInserted()); // 4 assets, die worden opnieuw opgeslagen, niet geupdatet
-        assertEquals(1, report.getNumberUpdated());
+        assertEquals(0, report.getNumberInserted()); // 4 assets, die worden opnieuw opgeslagen, niet geupdatet
+        assertEquals(5, report.getNumberUpdated());
         locations = DB.qr().query("Select * from " + DB.LOCATION_TABLE, new ArrayListHandler());
         assertEquals(1, locations.size());
         List types = DB.qr().query("Select * from " + DB.LOCATION_CATEGORY_TABLE , new ArrayListHandler());
