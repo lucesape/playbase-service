@@ -137,6 +137,8 @@ public abstract class Importer {
         }
     }
     
+    // <editor-fold desc="Locations" defaultstate="collapsed">
+    
     protected int saveLocation(Map<String, Object> location, ImportReport report) throws NamingException, SQLException {
         StringBuilder sb = new StringBuilder();
         boolean exists = locationExists(location);        
@@ -212,6 +214,24 @@ public abstract class Importer {
         return id;        
     }
 
+       protected void saveLocationAgeCategory(Integer location, List<Integer> agecategories) throws NamingException, SQLException {
+        for (Integer agecategory : agecategories) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("INSERT ");
+            sb.append("INTO ");
+            sb.append(DB.LOCATION_AGE_CATEGORY_TABLE);
+            sb.append("(");
+            sb.append("location,");
+            sb.append("agecategory)");
+            sb.append("VALUES( ");
+            sb.append(location);
+            sb.append(",");
+            sb.append(agecategory);
+            sb.append(");");
+            DB.qr().insert(sb.toString(), new ScalarHandler<>());
+        }
+    }
+    
     protected boolean locationExists(Map<String, Object> location) {
         try {
             StringBuilder sb = new StringBuilder();
@@ -234,24 +254,10 @@ public abstract class Importer {
         }
     }
 
+    // </editor-fold>
     
+    // <editor-fold desc="Assets" defaultstate="collapsed">
     protected void saveAsset(Asset asset, ImportReport report) throws NamingException, SQLException {
-        
-        // xlocation
-        // xagecategories
-        // xcategories
-        // xequipment
-        // ximages
-        // xdocuments
-        // linked assets
-        // facilities
-        // accessibility
-        // check if asset exists
-        // ja: update 
-       // nee: insert
-        Integer locationId = asset.getLocation();//getLocation(asset);
-        Integer assetTypeId = asset.getType_(); //getAssetType(asset);
-        Integer equipmentTypeId = asset.getEquipment();// getEquipmentType(asset);
         Integer id = null;
         Object geom = null;
         
@@ -266,7 +272,7 @@ public abstract class Importer {
         }
         if (assetExists(asset)) {
          
-            id = getId(asset);
+            id = getAssetId(asset);
 
             StringBuilder sb = new StringBuilder();
             sb.append("UPDATE ").append(DB.ASSETS_TABLE);
@@ -346,17 +352,40 @@ public abstract class Importer {
             report.increaseInserted();
         }
         
-        
         saveAssetsAgeCategories(asset, id);
+        
+        
+        Integer locationId = asset.getLocation();
+        
         saveImagesAndWords(asset.getImages(), id, locationId, DB.IMAGES_TABLE);
         saveImagesAndWords(asset.getDocuments(), id, locationId, DB.ASSETS_DOCUMENTS_TABLE);
     }
     
+    protected void saveAssetsAgeCategories(Asset asset, Integer location) throws NamingException, SQLException {
+        // delete old entries        
+        DB.qr().update("DELETE FROM " + DB.ASSETS_AGECATEGORIES_TABLE + " WHERE location_equipment = " + location);
+        for (Integer agecategory : asset.getAgecategories()) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("INSERT ");
+            sb.append("INTO ");
+            sb.append(DB.ASSETS_AGECATEGORIES_TABLE);
+            sb.append("(");
+            sb.append("location_equipment,");
+            sb.append("agecategory)");
+            sb.append("VALUES( ");
+            sb.append(location);
+            sb.append(",");
+            sb.append(agecategory);
+            sb.append(");");
+            DB.qr().insert(sb.toString(), new ScalarHandler<>());
+        }
+    }  
+   
     protected boolean assetExists(Asset asset) {
-       return getId(asset) != null;
+       return getAssetId(asset) != null;
     }
     
-    protected Integer getId(Asset asset){
+    protected Integer getAssetId(Asset asset){
          try {
             ResultSetHandler<Asset> handler = new BeanHandler(Asset.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
             Asset o;
@@ -384,53 +413,8 @@ public abstract class Importer {
             return null;
         }
     }
-    
-    protected void valueOrNull (StringBuilder sb, String type,Map<String, Object> valueMap){
-        String value = (String)valueMap.get(type);
-        
-        if(value == null || value.isEmpty()){
-            sb.append("null,");
-        }else{
-            sb.append("'").append(value).append("',");
-        }
-    }
   
-    protected void saveAssetsAgeCategory(Integer location, Integer[] agecategories) throws NamingException, SQLException {
-        DB.qr().update("DELETE FROM " + DB.ASSETS_AGECATEGORIES_TABLE + " WHERE location_equipment = " + location);
-        for (Integer agecategory : agecategories) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("INSERT ");
-            sb.append("INTO ");
-            sb.append(DB.ASSETS_AGECATEGORIES_TABLE);
-            sb.append("(");
-            sb.append("location_equipment,");
-            sb.append("agecategory)");
-            sb.append("VALUES( ");
-            sb.append(location);
-            sb.append(",");
-            sb.append(agecategory);
-            sb.append(");");
-            DB.qr().insert(sb.toString(), new ScalarHandler<>());
-        }
-    }
-  
-    protected void saveLocationAgeCategory(Integer location, List<Integer> agecategories) throws NamingException, SQLException {
-        for (Integer agecategory : agecategories) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("INSERT ");
-            sb.append("INTO ");
-            sb.append(DB.LOCATION_AGE_CATEGORY_TABLE);
-            sb.append("(");
-            sb.append("location,");
-            sb.append("agecategory)");
-            sb.append("VALUES( ");
-            sb.append(location);
-            sb.append(",");
-            sb.append(agecategory);
-            sb.append(");");
-            DB.qr().insert(sb.toString(), new ScalarHandler<>());
-        }
-    }
+    // </editor-fold>
     
     protected void saveImagesAndWords(List<Map<String, Object>> images, Integer assetId, Integer locationId, String table) throws NamingException, SQLException{
         DB.qr().update("DELETE FROM " + table + " WHERE equipment = " + assetId);
@@ -446,17 +430,13 @@ public abstract class Importer {
                 sb.append("location,");
                 sb.append("equipment,");
                 sb.append("pm_guid)");
-                sb.append("VALUES( ");
-                valueOrNull(sb, "Description", image);
-                sb.append("'").append(image.get("URI")).append("',");
-                sb.append(locationId).append(",");
-                sb.append(assetId).append(",");
-                sb.append("'").append(image.get("ID")).append("');");
-                DB.qr().insert(sb.toString(), new ScalarHandler<>());
+                sb.append("VALUES(?,?,?,?,?);");
+                DB.qr().insert(sb.toString(), new ScalarHandler<>(), image.get("Description"), image.get("URI"), locationId, assetId, image.get("ID"));
             }
         }
     }    
     
+    // <editor-fold desc="Helpers" defaultstate="collapsed">
     protected Integer getAssetType(String type){
         Integer id = assetTypes.get(type);
         return id;
@@ -467,31 +447,6 @@ public abstract class Importer {
         return id;
     }
 
-    protected Integer getLocation(Map<String, Object> asset) throws NamingException, SQLException {
-        ArrayListHandler rsh = new ArrayListHandler();
-        String locationId = null;
-        if(asset.containsKey("LocationPMID")){
-            locationId = (String) asset.get("LocationPMID");
-        }else if (asset.containsKey("LocationPAID")){
-            // In Playadvisor we already retrieved the database id for the location.
-            return (Integer)asset.get("LocationPAID");
-        }
-        
-        List<Object[]> o = DB.qr().query("SELECT id FROM " + DB.LOCATION_TABLE + " WHERE pm_guid = '" + locationId + "'", rsh);
-        if(o.isEmpty()){
-            String locationName = (String) asset.get("LocationName");
-            throw new IllegalArgumentException ("Kan geen locatie vinden met naam (id) " + locationName + "(" + locationId + ")");
-        }else if (o.size() == 1){
-            return (Integer) o.get(0)[0];
-        }else{
-            throw new IllegalArgumentException ("Meerdere locaties gevonden met id " + locationId);
-        }
-    }
-
-    protected void saveAssetsAgeCategories(Asset asset, Integer location) throws NamingException, SQLException {
-        // delete old entries
-        DB.qr().update("DELETE FROM " + DB.ASSETS_AGECATEGORIES_TABLE + " WHERE location_equipment = " + location);
-        saveAssetsAgeCategory(location, asset.getAgecategories());
-    }
-
+    // </editor-fold>
+    
 }
