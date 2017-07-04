@@ -158,9 +158,12 @@ public class PlaymappingImporterTest extends TestUtil {
         assertEquals(0, report.getErrors().size());
         assertEquals(2, report.getNumberInserted());
         assertEquals(0, report.getNumberUpdated());
+        
+        List<Object[]> assets = DB.qr().query("select id, equipment from " + DB.ASSETS_TABLE, new ArrayListHandler());
+        assertEquals(2, assets.size());
     }
     
-    @Test
+    //@Test
     public void testSaveAssetType() throws IOException, NamingException, SQLException {
         InputStream in = PlaymappingImporterTest.class.getResourceAsStream("singleAssetWithLinked.json");
         String assetString = IOUtils.toString(in);
