@@ -39,6 +39,7 @@ public abstract class Importer {
     private GeometryJdbcConverter geometryConverter;
     
     private Map<String, Integer> assetTypes;
+    private Map<String, Integer> equipmentTypes;
     
     protected Map<String,Map<String,Integer>> locationTypes;
     protected Map<String,Integer> facilityTypes;
@@ -55,6 +56,17 @@ public abstract class Importer {
                 Integer id = (Integer) type[0];
                 String cat = (String) type[1];
                 assetTypes.put(cat, id);
+            }
+        } catch (NamingException | SQLException ex) {
+            log.error("Cannot initialize playmapping assettypes:", ex);
+        }
+        try {
+            equipmentTypes = new HashMap<>();
+            List<Object[]> o = DB.qr().query("SELECT id, equipment from " + DB.LIST_EQUIPMENT_TYPE_TABLE, rsh);
+            for (Object[] type : o) {
+                Integer id = (Integer) type[0];
+                String cat = (String) type[1];
+                equipmentTypes.put(cat, id);
             }
         } catch (NamingException | SQLException ex) {
             log.error("Cannot initialize playmapping assettypes:", ex);
@@ -234,6 +246,7 @@ public abstract class Importer {
        // nee: insert
         Integer locationId = getLocation(asset);
         Integer assetTypeId = getAssetType(asset);
+        Integer equipmentTypeId = getEquipmentType(asset);
         Integer id = null;
         Object geom = null;
         
@@ -264,6 +277,8 @@ public abstract class Importer {
             valueOrNull(sb, "Name", asset);
             sb.append("type_ = ");
             sb.append(assetTypeId).append(",");
+            sb.append("equipment = ");
+            sb.append(equipmentTypeId).append(",");
             sb.append("latitude = ");
             sb.append(asset.get("Lat")).append(",");
             sb.append("longitude = ");
@@ -320,6 +335,7 @@ public abstract class Importer {
             sb.append("location,");
             sb.append("name,");
             sb.append("type_,");
+            sb.append("equipment,");
             sb.append("latitude,");
             sb.append("longitude,");
             sb.append("priceindexation,");
@@ -347,6 +363,7 @@ public abstract class Importer {
             sb.append(locationId).append(",");
             valueOrNull(sb, "Name", asset);
             sb.append(assetTypeId).append(",");
+            sb.append(equipmentTypeId).append(",");
             sb.append(asset.get("Lat")).append(",");
             sb.append(asset.get("Lng")).append(",");
             sb.append(asset.get("PriceIndexation")).append(",");
@@ -382,11 +399,11 @@ public abstract class Importer {
     protected boolean assetExists(Map<String, Object> asset) {
         try {
             if (asset.get("ID") == null) {
-                int assetType = getAssetType(asset);
+                int assetType = getEquipmentType(asset);
                 StringBuilder sb = new StringBuilder();
                 sb.append("select * from ");
                 sb.append(DB.ASSETS_TABLE);
-                sb.append(" where location = ? and type_ = ?");
+                sb.append(" where location = ? and equipment = ?");
             
                 ArrayListHandler rsh = new ArrayListHandler();
                 List<Object[]> o = DB.qr().query(sb.toString(), rsh, asset.get("LocationPAID"), assetType);
@@ -483,6 +500,12 @@ public abstract class Importer {
     protected Integer getAssetType(Map<String, Object> asset){
         String type = (String)asset.get("AssetType");
         Integer id = assetTypes.get(type);
+        return id;
+    }
+    
+    protected Integer getEquipmentType(Map<String, Object> asset){
+        String type = (String)asset.get("EquipmentType");
+        Integer id = equipmentTypes.get(type);
         return id;
     }
 

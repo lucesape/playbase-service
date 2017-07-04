@@ -173,6 +173,7 @@ public class PlayadvisorImporter extends Importer {
             assMap.put("Name", asset);
             assMap.put("LocationPAID", locationId);
             assMap.put(AGECATEGORIES, location.get(AGECATEGORIES));
+            assMap.put("EquipmentType", asset);
             assets.add(assMap);
         }
         return assets;

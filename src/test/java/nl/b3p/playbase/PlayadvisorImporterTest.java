@@ -53,7 +53,7 @@ public class PlayadvisorImporterTest extends TestUtil{
         instance.importStream(in, report);
         in.close();
         assertEquals(0, report.getErrors().size());
-        assertEquals(2,report.getNumberInserted());
+        assertEquals(5,report.getNumberInserted());
         List locations = DB.qr().query("Select * from " + DB.LOCATION_TABLE, new ArrayListHandler());
         assertEquals(1, locations.size());
         List images = DB.qr().query("Select * from " + DB.IMAGES_TABLE, new ArrayListHandler());
@@ -93,7 +93,7 @@ public class PlayadvisorImporterTest extends TestUtil{
         ImportReport report = new ImportReport("locaties");
         instance.importStream(in, report);
         in.close();
-        assertEquals(2,report.getNumberInserted());
+        assertEquals(5,report.getNumberInserted());
         List locations = DB.qr().query("Select * from " + DB.LOCATION_TABLE, new ArrayListHandler());
         assertEquals(1, locations.size());
         report = new ImportReport("locaties");

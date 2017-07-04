@@ -45,6 +45,7 @@ public class DB {
     public static final String LIST_ACCESSIBILITY_TABLE = "playservice_accessibility_list";
     public static final String LIST_FACILITIES_TABLE = "playservice_facilities_list";
     public static final String LIST_PARKING_TABLE = "playservice_parking_list";
+    public static final String LIST_EQUIPMENT_TYPE_TABLE = "playservice_equipment_list";
     
     public static final String ASSETS_TABLE = "playservice_location_equipment";
     public static final String ASSETS_AGECATEGORIES_TABLE = "playservice_location_equipment_agecategories";
