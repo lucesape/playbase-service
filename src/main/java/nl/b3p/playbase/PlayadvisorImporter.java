@@ -49,6 +49,7 @@ public class PlayadvisorImporter extends Importer {
     private static final String ACCESSIBLITIY = "accessibility";
     private static final String AGECATEGORIES = "agecategories";
 
+    private Map<String, String> parkingMapping;
     public PlayadvisorImporter() {
         super();
         playadvisorColumnToPlaybase = new HashMap<>();
@@ -64,7 +65,7 @@ public class PlayadvisorImporter extends Importer {
         playadvisorColumnToPlaybase.put(9, "imagecaption");
         playadvisorColumnToPlaybase.put(10, "imagedescription");
         playadvisorColumnToPlaybase.put(11, "imagealttext");
-        playadvisorColumnToPlaybase.put(12, "url_2");
+        playadvisorColumnToPlaybase.put(12, "url");
         playadvisorColumnToPlaybase.put(13, LOCATIONSUBTYPE);
         playadvisorColumnToPlaybase.put(14, "country");
         playadvisorColumnToPlaybase.put(15, "municipality");
@@ -77,6 +78,10 @@ public class PlayadvisorImporter extends Importer {
         playadvisorColumnToPlaybase.put(22, "average_rating");
         playadvisorColumnToPlaybase.put(23, "Lng");
         playadvisorColumnToPlaybase.put(24, "Lat");
+        
+        parkingMapping = new HashMap<>();
+        parkingMapping.put("Betaald", "ja - betaald");
+        parkingMapping.put("Gratis", "ja - gratis");
     }
 
     public void init(String[] header) {
@@ -103,6 +108,7 @@ public class PlayadvisorImporter extends Importer {
         Location location = parseMap(locationMap);
 
         int id = saveLocation(location, report);
+        location.setId(id);
         List<Asset> assets = parseAssets(location, locationMap);
 
         for (Asset asset : assets) {
@@ -162,10 +168,39 @@ public class PlayadvisorImporter extends Importer {
         return dbvalues;
     }
 
-    protected Location parseMap(Map<String, Object> locationMap){
-        Location location = new Location();
+    protected Location parseMap(Map<String, Object> lM){
+        Location l = new Location();
+        l.setPa_id((String)lM.get("pa_id"));
+        l.setArea((String)lM.get("area"));
+        l.setCountry((String)lM.get("country"));
+        l.setContent((String)lM.get("content"));
+        l.setEmail((String)lM.get("e-mail"));
+        l.setImages((List<Map<String, Object>>)lM.get("images"));
+        l.setDocuments((List<Map<String,Object>>)lM.get("documents"));
+        l.setMunicipality((String)lM.get("municipality"));
+        l.setNumber((String)lM.get("number"));
+        l.setNumberextra((String)lM.get("NumberExtra"));
+        l.setPhone((String)lM.get("Phone"));
+        l.setPostalcode((String)lM.get("Postcode"));
+        l.setStreet((String)lM.get("Street"));
+        l.setSummary((String)lM.get("Excerpt"));
+        l.setTitle((String)lM.get("title"));
+        l.setWebsite((String)lM.get("website"));
+        l.setLatitude((Double)lM.get("Lat"));
+        l.setLongitude((Double)lM.get("Lng"));
         
-        return location;
+        
+        String parking = (String)lM.get("parking");
+        l.setParking(parkingTypes.get(parkingMapping.get(parking)));
+        String agecats =(String)lM.get(AGECATEGORIES);
+        String [] agecategories = agecats.split("\\|");
+        List<Integer> ids = new ArrayList<>();
+        for (String agecategory : agecategories) {
+            ids.add(agecategoryTypes.get(agecategory));
+        }
+        l.setAgecategories(ids.toArray(new Integer[0]));
+        
+        return l;
     }
     
     private List<Asset> parseAssets( Location location, Map<String,Object> locationMap) throws NamingException, SQLException {

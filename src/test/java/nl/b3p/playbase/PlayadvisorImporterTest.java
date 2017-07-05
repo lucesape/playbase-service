@@ -31,6 +31,7 @@ import nl.b3p.playbase.entities.Location;
 import org.apache.commons.dbutils.handlers.ArrayListHandler;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -153,28 +154,27 @@ public class PlayadvisorImporterTest extends TestUtil {
         Map<String, Object> input = instance.parseRecord(s);
 
         Location l = instance.parseMap(input);
-        assertEquals(30324, l.getPa_id());
+        assertEquals("30324", l.getPa_id());
         assertEquals("Speeltuinvereniging De Oranjetuin", l.getTitle());
         assertEquals(2, l.getAgecategories().length);
-        assertEquals("", l.getArea());
+        assertNull(l.getArea());
         assertEquals("<span class=C-6>De Oranjespeeltuin is de mooiste, gezelligste en groenste speeltuin in héél Barendrecht!<br>De speeltuin is sinds 1958 gevestigd in de Oranjewijk in Barendrecht. In de speeltuin zijn diverse glijbanen, klimtoestellen, schommels, een waterbak en een zandbak te vinden die het tot een waar speelparadijs voor de kinderen maken. De Oranjetuin is op een parkachtige wijze aangelegd en biedt een groene speelomgeving. In de speeltuin zijn eenvoudige consumpties in de vorm van koffie, thee, limonade en ijsjes te verkrijgen.<br></span>", l.getContent());
         assertEquals("Nederland", l.getCountry());
-        assertEquals("", l.getDocuments().size());
-        assertEquals("", l.getEmail());
-        assertEquals("", l.getGeom());
-        assertEquals("", l.getImages());
-        assertEquals("", l.getId());
+        assertNull(l.getDocuments());
+        assertNull(l.getEmail());
+        assertEquals(2, l.getImages().size());
+        assertNull(l.getId());
         assertEquals(51.8490438089326, l.getLatitude(), 0.01);
         assertEquals(4.5561209321022, l.getLongitude(), 0.01);
         assertEquals("Barendrecht", l.getMunicipality());
-        assertEquals("", l.getNumber());
-        assertEquals("", l.getNumberextra());
+        assertNull( l.getNumber());
+        assertNull( l.getNumberextra());
         assertEquals(1, (int) l.getParking());
-        assertEquals("", l.getPhone());
-        assertEquals("", l.getPm_guid());
-        assertEquals("", l.getPostalcode());
-        assertEquals("", l.getStreet());
-        assertEquals("", l.getSummary());
+        assertNull( l.getPhone());
+        assertNull( l.getPm_guid());
+        assertNull( l.getPostalcode());
+        assertNull( l.getStreet());
+        assertNull( l.getSummary());
         assertEquals("http://playadvisor.b3p.nl/speelplek/openbare-speeltuin/speeltuinvereniging-%c2%93de-oranjetuin%c2%94/", l.getWebsite());
 
     }

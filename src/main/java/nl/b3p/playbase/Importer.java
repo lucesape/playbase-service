@@ -41,19 +41,20 @@ import org.apache.commons.logging.LogFactory;
  * @author Meine Toonen
  */
 public abstract class Importer {
+
     private static final Log log = LogFactory.getLog("Importer");
     private GeometryJdbcConverter geometryConverter;
-    
+
     private Map<String, Integer> assetTypes;
     private Map<String, Integer> equipmentTypes;
-    
-    protected Map<String,Map<String,Integer>> locationTypes;
-    protected Map<String,Integer> facilityTypes;
-    protected Map<String,Integer> accessibilityTypes;
-    protected Map<String,Integer> agecategoryTypes;
+    protected Map<String, Map<String, Integer>> locationTypes;
+    protected Map<String, Integer> facilityTypes;
+    protected Map<String, Integer> accessibilityTypes;
+    protected Map<String, Integer> agecategoryTypes;
+    protected Map<String, Integer> parkingTypes;
 
-    public Importer(){
-       
+    public Importer() {
+
         ArrayListHandler rsh = new ArrayListHandler();
         try {
             assetTypes = new HashMap<>();
@@ -77,13 +78,13 @@ public abstract class Importer {
         } catch (NamingException | SQLException ex) {
             log.error("Cannot initialize playmapping assettypes:", ex);
         }
-       
+
         try {
             geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(DB.getConnection());
         } catch (NamingException | SQLException ex) {
             log.error("Cannot get geometryConverter: ", ex);
         }
-         
+
         try {
             locationTypes = new HashMap<>();
             List<Object[]> o = DB.qr().query("SELECT id, category, main from " + DB.LIST_CATEGORY_TABLE, rsh);
@@ -91,11 +92,11 @@ public abstract class Importer {
                 Integer id = (Integer) type[0];
                 String category = (String) type[1];
                 String main = (String) type[2];
-                if(!locationTypes.containsKey(main)){
+                if (!locationTypes.containsKey(main)) {
                     locationTypes.put(main, new HashMap<String, Integer>());
                 }
                 locationTypes.get(main).put(category, id);
-                
+
             }
         } catch (NamingException | SQLException ex) {
             log.error("Cannot initialize playadvisor location types:", ex);
@@ -112,7 +113,7 @@ public abstract class Importer {
         } catch (NamingException | SQLException ex) {
             log.error("Cannot initialize playadvisory facilitytypes:", ex);
         }
-        
+
         try {
             accessibilityTypes = new HashMap<>();
             List<Object[]> o = DB.qr().query("SELECT id, accessibility from " + DB.LIST_ACCESSIBILITY_TABLE, rsh);
@@ -124,8 +125,8 @@ public abstract class Importer {
         } catch (NamingException | SQLException ex) {
             log.error("Cannot initialize playadvisory facilitytypes:", ex);
         }
-        
-         try {
+
+        try {
             agecategoryTypes = new HashMap<>();
             List<Object[]> o = DB.qr().query("SELECT id, agecategory from " + DB.LIST_AGECATEGORIES_TABLE, rsh);
             for (Object[] type : o) {
@@ -136,19 +137,29 @@ public abstract class Importer {
         } catch (NamingException | SQLException ex) {
             log.error("Cannot initialize playadvisory facilitytypes:", ex);
         }
+        try {
+            parkingTypes = new HashMap<>();
+            List<Object[]> o = DB.qr().query("SELECT id, parking from " + DB.LIST_PARKING_TABLE, rsh);
+            for (Object[] type : o) {
+                Integer id = (Integer) type[0];
+                String parking = (String) type[1];
+                parkingTypes.put(parking.toLowerCase(), id);
+            }
+        } catch (NamingException | SQLException ex) {
+            log.error("Cannot initialize playadvisory parkingtypes:", ex);
+        }
     }
-    
+
     // <editor-fold desc="Locations" defaultstate="collapsed">
-    
     protected int saveLocation(Location location, ImportReport report) throws NamingException, SQLException {
         StringBuilder sb = new StringBuilder();
-        boolean exists = locationExists(location);        
+        boolean exists = locationExists(location);
         Object geom = null;
         try {
             geom = geometryConverter.createNativePoint(location.getLatitude(), location.getLongitude(), 4326);
         } catch (ParseException ex) {
             log.error("Cannot parse geometry", ex);
-        }catch (NullPointerException ex){
+        } catch (NullPointerException ex) {
             log.info("no geom for asset");
         }
         ResultSetHandler<Location> handler = new BeanHandler(Location.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
@@ -165,16 +176,15 @@ public abstract class Importer {
             sb.append("pa_id,");
             sb.append("pm_guid) ");
             sb.append("VALUES( ?,?,?,?,?,?);");
-          
+
             savedLocation = DB.qr().insert(sb.toString(), handler, location.getTitle(), location.getLatitude(), location.getLongitude(), geom, location.getPa_id(), location.getPm_guid());
             id = savedLocation.getId();
             report.increaseInserted();
-            List<Map<String,Object>> images = location.getImages();
+            List<Map<String, Object>> images = location.getImages();
             saveImagesAndWords(images, null, savedLocation.getId(), DB.IMAGES_TABLE);
         } else {
             id = getLocationId(location);
 
-            
             sb = new StringBuilder();
             sb.append("update ");
             sb.append(DB.LOCATION_TABLE);
@@ -184,16 +194,17 @@ public abstract class Importer {
             sb.append("longitude = ?,");
             sb.append("geom = ?,");
             sb.append("pa_id = ?,");
-            sb.append("pm_guid = ?,");
+            sb.append("pm_guid = ?");
             sb.append("where id = ?;");
-            
-            DB.qr().update(sb.toString(),location.getLatitude(), location.getLongitude(), geom, location.getPa_id(), location.getPm_guid(), id);
+
+            DB.qr().update(sb.toString(), location.getTitle(), location.getLatitude(), location.getLongitude(), geom, location.getPa_id(), location.getPm_guid(), id);
             report.increaseUpdated();
         }
         return id;
     }
 
-        protected void saveLocationAgeCategory(Integer location, List<Integer> agecategories) throws NamingException, SQLException {
+    protected void saveLocationAgeCategory(Integer location, List<Integer> agecategories) throws NamingException, SQLException {
+        DB.qr().update("DELETE FROM " + DB.LOCATION_AGE_CATEGORY_TABLE + " WHERE location = " + location);
         for (Integer agecategory : agecategories) {
             StringBuilder sb = new StringBuilder();
             sb.append("INSERT ");
@@ -210,11 +221,11 @@ public abstract class Importer {
             DB.qr().insert(sb.toString(), new ScalarHandler<>());
         }
     }
-    
+
     protected boolean locationExists(Location location) throws NamingException, SQLException {
         return getLocationId(location) != null;
     }
-    
+
     protected Integer getLocationId(Location location) throws NamingException, SQLException {
         StringBuilder sb = new StringBuilder();
         sb.append("select id from ");
@@ -226,7 +237,7 @@ public abstract class Importer {
         } else if (location.getPa_id() != null) {
             sb.append(" where pa_id = '");
             sb.append(location.getPa_id());
-        }else{
+        } else {
             throw new IllegalArgumentException("No id found on location (either pa_id or pm_guid was not set)");
         }
         sb.append("';");
@@ -234,25 +245,23 @@ public abstract class Importer {
         return id;
     }
 
-
     // </editor-fold>
-    
     // <editor-fold desc="Assets" defaultstate="collapsed">
     protected void saveAsset(Asset asset, ImportReport report) throws NamingException, SQLException {
         Integer id = null;
         Object geom = null;
-        
+
         ResultSetHandler<Asset> handler = new BeanHandler(Asset.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
-        
+
         try {
             geom = geometryConverter.createNativePoint(asset.getLatitude(), asset.getLongitude(), 4326);
         } catch (ParseException ex) {
             log.error("Cannot parse geometry", ex);
-        }catch (NullPointerException ex){
+        } catch (NullPointerException ex) {
             log.info("no geom for asset");
         }
         if (assetExists(asset)) {
-         
+
             id = getAssetId(asset);
 
             StringBuilder sb = new StringBuilder();
@@ -285,12 +294,12 @@ public abstract class Importer {
             sb.append("geom = ?,");
             sb.append("pm_guid = ?");
             sb.append(" WHERE id = ").append(id);
-            DB.qr().update(sb.toString(),asset.getInstalleddate(),asset.getLocation(), asset.getName(),asset.getType_(), asset.getEquipment(), asset.getLatitude(), 
+            DB.qr().update(sb.toString(), asset.getInstalleddate(), asset.getLocation(), asset.getName(), asset.getType_(), asset.getEquipment(), asset.getLatitude(),
                     asset.getLongitude(), asset.getPriceindexation(), asset.getPriceinstallation(), asset.getPricemaintenance(), asset.getPricepurchase(), asset.getPricereinvestment(),
-                    asset.getDepth(), asset.getWidth(), asset.getHeight(), asset.getEndoflifeyear(), asset.getFreefallheight(), asset.getSafetyzonelength(), asset.getSafetyzonewidth(), 
-                    asset.getManufacturer(),asset.getMaterial(), asset.getProduct(), asset.getProductid(), asset.getProductvariantid(), asset.getSerialnumber(),geom, asset.getPm_guid());
+                    asset.getDepth(), asset.getWidth(), asset.getHeight(), asset.getEndoflifeyear(), asset.getFreefallheight(), asset.getSafetyzonelength(), asset.getSafetyzonewidth(),
+                    asset.getManufacturer(), asset.getMaterial(), asset.getProduct(), asset.getProductid(), asset.getProductvariantid(), asset.getSerialnumber(), geom, asset.getPm_guid());
             report.increaseUpdated();
-        }else{
+        } else {
             StringBuilder sb = new StringBuilder();
             sb.append("INSERT ");
             sb.append("INTO ");
@@ -324,24 +333,23 @@ public abstract class Importer {
             sb.append("geom,");
             sb.append("pm_guid) ");
             sb.append("VALUES(  ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);");
-    
-            Asset as = DB.qr().insert(sb.toString(), handler,asset.getInstalleddate(),asset.getLocation(), asset.getName(),asset.getType_(), asset.getEquipment(), asset.getLatitude(), 
+
+            Asset as = DB.qr().insert(sb.toString(), handler, asset.getInstalleddate(), asset.getLocation(), asset.getName(), asset.getType_(), asset.getEquipment(), asset.getLatitude(),
                     asset.getLongitude(), asset.getPriceindexation(), asset.getPriceinstallation(), asset.getPricemaintenance(), asset.getPricepurchase(), asset.getPricereinvestment(),
-                    asset.getDepth(), asset.getWidth(), asset.getHeight(), asset.getEndoflifeyear(), asset.getFreefallheight(), asset.getSafetyzonelength(), asset.getSafetyzonewidth(), 
-                    asset.getManufacturer(),asset.getMaterial(), asset.getProduct(), asset.getProductid(), asset.getProductvariantid(), asset.getSerialnumber(),geom, asset.getPm_guid());
+                    asset.getDepth(), asset.getWidth(), asset.getHeight(), asset.getEndoflifeyear(), asset.getFreefallheight(), asset.getSafetyzonelength(), asset.getSafetyzonewidth(),
+                    asset.getManufacturer(), asset.getMaterial(), asset.getProduct(), asset.getProductid(), asset.getProductvariantid(), asset.getSerialnumber(), geom, asset.getPm_guid());
             id = as.getId();
             report.increaseInserted();
         }
-        
+
         saveAssetsAgeCategories(asset, id);
-        
-        
+
         Integer locationId = asset.getLocation();
-        
+
         saveImagesAndWords(asset.getImages(), id, locationId, DB.IMAGES_TABLE);
         saveImagesAndWords(asset.getDocuments(), id, locationId, DB.ASSETS_DOCUMENTS_TABLE);
     }
-    
+
     protected void saveAssetsAgeCategories(Asset asset, Integer location) throws NamingException, SQLException {
         // delete old entries        
         DB.qr().update("DELETE FROM " + DB.ASSETS_AGECATEGORIES_TABLE + " WHERE location_equipment = " + location);
@@ -360,14 +368,14 @@ public abstract class Importer {
             sb.append(");");
             DB.qr().insert(sb.toString(), new ScalarHandler<>());
         }
-    }  
-   
-    protected boolean assetExists(Asset asset) {
-       return getAssetId(asset) != null;
     }
-    
-    protected Integer getAssetId(Asset asset){
-         try {
+
+    protected boolean assetExists(Asset asset) {
+        return getAssetId(asset) != null;
+    }
+
+    protected Integer getAssetId(Asset asset) {
+        try {
             ResultSetHandler<Asset> handler = new BeanHandler(Asset.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
             Asset o;
             if (asset.getPm_guid() == null) {
@@ -376,9 +384,9 @@ public abstract class Importer {
                 sb.append("select * from ");
                 sb.append(DB.ASSETS_TABLE);
                 sb.append(" where location = ? and equipment = ?");
-            
+
                 o = DB.qr().query(sb.toString(), handler, asset.getLocation(), equipment);
-                
+
             } else {
                 StringBuilder sb = new StringBuilder();
                 sb.append("select * from ");
@@ -394,10 +402,9 @@ public abstract class Importer {
             return null;
         }
     }
-  
+
     // </editor-fold>
-    
-    protected void saveImagesAndWords(List<Map<String, Object>> images, Integer assetId, Integer locationId, String table) throws NamingException, SQLException{
+    protected void saveImagesAndWords(List<Map<String, Object>> images, Integer assetId, Integer locationId, String table) throws NamingException, SQLException {
         DB.qr().update("DELETE FROM " + table + " WHERE equipment = " + assetId);
         if (images != null) {
             for (Map<String, Object> image : images) {
@@ -415,19 +422,18 @@ public abstract class Importer {
                 DB.qr().insert(sb.toString(), new ScalarHandler<>(), image.get("Description"), image.get("URI"), locationId, assetId, image.get("ID"));
             }
         }
-    }    
-    
+    }
+
     // <editor-fold desc="Helpers" defaultstate="collapsed">
-    protected Integer getAssetType(String type){
+    protected Integer getAssetType(String type) {
         Integer id = assetTypes.get(type);
         return id;
     }
-    
-    protected Integer getEquipmentType(String type){
+
+    protected Integer getEquipmentType(String type) {
         Integer id = equipmentTypes.get(type);
         return id;
     }
 
     // </editor-fold>
-    
 }
