@@ -16,11 +16,18 @@
  */
 package nl.b3p.playbase;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import nl.b3p.commons.csv.CsvFormatException;
+import nl.b3p.commons.csv.CsvInputStream;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.db.TestUtil;
+import nl.b3p.playbase.entities.Location;
 import org.apache.commons.dbutils.handlers.ArrayListHandler;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -31,18 +38,19 @@ import org.junit.Test;
  *
  * @author Meine Toonen
  */
-public class PlayadvisorImporterTest extends TestUtil{
-    
+public class PlayadvisorImporterTest extends TestUtil {
+
     private PlayadvisorImporter instance;
-    
+
     public PlayadvisorImporterTest() {
         this.useDB = true;
     }
 
     @Before
-    public void beforeTest(){
+    public void beforeTest() {
         instance = new PlayadvisorImporter();
     }
+
     /**
      * Test of importStream method, of class PlayadvisorImporter.
      */
@@ -53,22 +61,22 @@ public class PlayadvisorImporterTest extends TestUtil{
         instance.importStream(in, report);
         in.close();
         assertEquals(0, report.getErrors().size());
-        assertEquals(5,report.getNumberInserted());
+        assertEquals(5, report.getNumberInserted());
         List locations = DB.qr().query("Select * from " + DB.LOCATION_TABLE, new ArrayListHandler());
         assertEquals(1, locations.size());
         List images = DB.qr().query("Select * from " + DB.IMAGES_TABLE, new ArrayListHandler());
         assertEquals(2, images.size());
-        List types = DB.qr().query("Select * from " + DB.LOCATION_CATEGORY_TABLE , new ArrayListHandler());
+        List types = DB.qr().query("Select * from " + DB.LOCATION_CATEGORY_TABLE, new ArrayListHandler());
         assertEquals(1, types.size());
-        List facilities = DB.qr().query("Select * from " + DB.LOCATION_FACILITIES_TABLE , new ArrayListHandler());
+        List facilities = DB.qr().query("Select * from " + DB.LOCATION_FACILITIES_TABLE, new ArrayListHandler());
         assertEquals(3, facilities.size());
-        List accessiblities = DB.qr().query("Select * from " + DB.LOCATION_ACCESSIBILITY_TABLE , new ArrayListHandler());
+        List accessiblities = DB.qr().query("Select * from " + DB.LOCATION_ACCESSIBILITY_TABLE, new ArrayListHandler());
         assertEquals(2, accessiblities.size());
-        List assets = DB.qr().query("Select * from " + DB.ASSETS_TABLE , new ArrayListHandler());
+        List assets = DB.qr().query("Select * from " + DB.ASSETS_TABLE, new ArrayListHandler());
         assertEquals(4, assets.size());
-        List assetsAgecategories = DB.qr().query("Select * from " + DB.ASSETS_AGECATEGORIES_TABLE , new ArrayListHandler());
+        List assetsAgecategories = DB.qr().query("Select * from " + DB.ASSETS_AGECATEGORIES_TABLE, new ArrayListHandler());
         assertEquals(8, assetsAgecategories.size());
-        List locationAgecategories = DB.qr().query("Select * from " + DB.LOCATION_AGE_CATEGORY_TABLE , new ArrayListHandler());
+        List locationAgecategories = DB.qr().query("Select * from " + DB.LOCATION_AGE_CATEGORY_TABLE, new ArrayListHandler());
         assertEquals(2, locationAgecategories.size());
     }
 
@@ -78,7 +86,7 @@ public class PlayadvisorImporterTest extends TestUtil{
     @Test
     public void testParseRecord() {
         String s = "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24";
-        String [] tokens = s.split(",");
+        String[] tokens = s.split(",");
         Map<String, Object> m = instance.parseRecord(tokens);
         assertNotNull(m);
         assertEquals(25, m.keySet().size());
@@ -86,14 +94,14 @@ public class PlayadvisorImporterTest extends TestUtil{
             assertNotNull(m.get(key));
         }
     }
-    
+
     @Test
     public void testUpdateLocation() throws Exception {
         InputStream in = PlaymappingImporterTest.class.getResourceAsStream("playadvisor_single_location.csv");
         ImportReport report = new ImportReport("locaties");
         instance.importStream(in, report);
         in.close();
-        assertEquals(5,report.getNumberInserted());
+        assertEquals(5, report.getNumberInserted());
         List locations = DB.qr().query("Select * from " + DB.LOCATION_TABLE, new ArrayListHandler());
         assertEquals(1, locations.size());
         report = new ImportReport("locaties");
@@ -101,25 +109,74 @@ public class PlayadvisorImporterTest extends TestUtil{
         instance.importStream(in, report);
         in.close();
         assertEquals(0, report.getErrors().size());
-        assertEquals(0, report.getNumberInserted()); 
+        assertEquals(0, report.getNumberInserted());
         assertEquals(5, report.getNumberUpdated());
         locations = DB.qr().query("Select * from " + DB.LOCATION_TABLE, new ArrayListHandler());
         assertEquals(1, locations.size());
-        List types = DB.qr().query("Select * from " + DB.LOCATION_CATEGORY_TABLE , new ArrayListHandler());
+        List types = DB.qr().query("Select * from " + DB.LOCATION_CATEGORY_TABLE, new ArrayListHandler());
         assertEquals(1, types.size());
-        List facilities = DB.qr().query("Select * from " + DB.LOCATION_FACILITIES_TABLE , new ArrayListHandler());
+        List facilities = DB.qr().query("Select * from " + DB.LOCATION_FACILITIES_TABLE, new ArrayListHandler());
         assertEquals(3, facilities.size());
-        
-        List accessiblities = DB.qr().query("Select * from " + DB.LOCATION_ACCESSIBILITY_TABLE , new ArrayListHandler());
+
+        List accessiblities = DB.qr().query("Select * from " + DB.LOCATION_ACCESSIBILITY_TABLE, new ArrayListHandler());
         assertEquals(2, accessiblities.size());
-        
-        List assets = DB.qr().query("Select * from " + DB.ASSETS_TABLE , new ArrayListHandler());
+
+        List assets = DB.qr().query("Select * from " + DB.ASSETS_TABLE, new ArrayListHandler());
         assertEquals(4, assets.size());
-        List assetsAgecategories = DB.qr().query("Select * from " + DB.ASSETS_AGECATEGORIES_TABLE , new ArrayListHandler());
+        List assetsAgecategories = DB.qr().query("Select * from " + DB.ASSETS_AGECATEGORIES_TABLE, new ArrayListHandler());
         assertEquals(8, assetsAgecategories.size());
-        List locationAgecategories = DB.qr().query("Select * from " + DB.LOCATION_AGE_CATEGORY_TABLE , new ArrayListHandler());
+        List locationAgecategories = DB.qr().query("Select * from " + DB.LOCATION_AGE_CATEGORY_TABLE, new ArrayListHandler());
         assertEquals(2, locationAgecategories.size());
-        
+
+    }
+
+    @Test
+    public void testParseRecordRealData() throws IOException, CsvFormatException {
+        String i = "30324,Speeltuinvereniging De Oranjetuin,\"<span class=C-6>De Oranjespeeltuin is de mooiste, gezelligste en groenste speeltuin in héél Barendrecht!<br>De speeltuin is sinds 1958 gevestigd in de Oranjewijk in Barendrecht. In de speeltuin zijn diverse glijbanen, klimtoestellen, schommels, een waterbak en een zandbak te vinden die het tot een waar speelparadijs voor de kinderen maken. De Oranjetuin is op een parkachtige wijze aangelegd en biedt een groene speelomgeving. In de speeltuin zijn eenvoudige consumpties in de vorm van koffie, thee, limonade en ijsjes te verkrijgen.<br></span>\",,2016-04-20,speelplek,http://playadvisor.b3p.nl/speelplek/openbare-speeltuin/speeltuinvereniging-%c2%93de-oranjetuin%c2%94/,http://playadvisor.b3p.nl/wp-content/uploads/2016/04/001-1.jpg|http://playadvisor.b3p.nl/wp-content/uploads/2016/04/001-1.jpg,001.jpg|001.jpg,|,|,|,,Speeltuinen>Openbare speeltuin,Nederland,Barendrecht,Duikelrek|Glijbaan|Klimtoestel|Wip,Bankje|Toilet|Verschoontafel,0 - 5 jaar|6 - 11 jaar,Gratis,Inclusive playground|Samenspeelplek,,5,4.5561209321022,51.8490438089326,\"a:1:{i:0;a:2:{s:13:\"\"attachment_id\"\";i:30309;s:3:\"\"url\"\";s:87:\"\"https://playadvisor.co/wp-content/uploads/2016/04/speeltuinverenigingdeoranjetuin-0.jpg\"\";}}\",,,,,,publish,1,speeltuinvereniging-%c2%93de-oranjetuin%c2%94,,,0,0,0,open,open,,";
+        CsvInputStream cis = new CsvInputStream(new InputStreamReader(new ByteArrayInputStream(i.getBytes(StandardCharsets.UTF_8))));
+
+        String[] s = cis.readRecord();
+
+        Map<String, Object> input = instance.parseRecord(s);
+        for (String key : input.keySet()) {
+            assertNotNull(input.get(key));
+        }
+    }
+
+    @Test
+    public void testParseMap() throws IOException, CsvFormatException {
+        String i = "30324,Speeltuinvereniging De Oranjetuin,\"<span class=C-6>De Oranjespeeltuin is de mooiste, gezelligste en groenste speeltuin in héél Barendrecht!<br>De speeltuin is sinds 1958 gevestigd in de Oranjewijk in Barendrecht. In de speeltuin zijn diverse glijbanen, klimtoestellen, schommels, een waterbak en een zandbak te vinden die het tot een waar speelparadijs voor de kinderen maken. De Oranjetuin is op een parkachtige wijze aangelegd en biedt een groene speelomgeving. In de speeltuin zijn eenvoudige consumpties in de vorm van koffie, thee, limonade en ijsjes te verkrijgen.<br></span>\",,2016-04-20,speelplek,http://playadvisor.b3p.nl/speelplek/openbare-speeltuin/speeltuinvereniging-%c2%93de-oranjetuin%c2%94/,http://playadvisor.b3p.nl/wp-content/uploads/2016/04/001-1.jpg|http://playadvisor.b3p.nl/wp-content/uploads/2016/04/001-1.jpg,001.jpg|001.jpg,|,|,|,,Speeltuinen>Openbare speeltuin,Nederland,Barendrecht,Duikelrek|Glijbaan|Klimtoestel|Wip,Bankje|Toilet|Verschoontafel,0 - 5 jaar|6 - 11 jaar,Gratis,Inclusive playground|Samenspeelplek,,5,4.5561209321022,51.8490438089326,\"a:1:{i:0;a:2:{s:13:\"\"attachment_id\"\";i:30309;s:3:\"\"url\"\";s:87:\"\"https://playadvisor.co/wp-content/uploads/2016/04/speeltuinverenigingdeoranjetuin-0.jpg\"\";}}\",,,,,,publish,1,speeltuinvereniging-%c2%93de-oranjetuin%c2%94,,,0,0,0,open,open,,";
+        CsvInputStream cis = new CsvInputStream(new InputStreamReader(new ByteArrayInputStream(i.getBytes(StandardCharsets.UTF_8))));
+
+        String[] s = cis.readRecord();
+
+        Map<String, Object> input = instance.parseRecord(s);
+
+        Location l = instance.parseMap(input);
+        assertEquals(30324, l.getPa_id());
+        assertEquals("Speeltuinvereniging De Oranjetuin", l.getTitle());
+        assertEquals(2, l.getAgecategories().length);
+        assertEquals("", l.getArea());
+        assertEquals("<span class=C-6>De Oranjespeeltuin is de mooiste, gezelligste en groenste speeltuin in héél Barendrecht!<br>De speeltuin is sinds 1958 gevestigd in de Oranjewijk in Barendrecht. In de speeltuin zijn diverse glijbanen, klimtoestellen, schommels, een waterbak en een zandbak te vinden die het tot een waar speelparadijs voor de kinderen maken. De Oranjetuin is op een parkachtige wijze aangelegd en biedt een groene speelomgeving. In de speeltuin zijn eenvoudige consumpties in de vorm van koffie, thee, limonade en ijsjes te verkrijgen.<br></span>", l.getContent());
+        assertEquals("Nederland", l.getCountry());
+        assertEquals("", l.getDocuments().size());
+        assertEquals("", l.getEmail());
+        assertEquals("", l.getGeom());
+        assertEquals("", l.getImages());
+        assertEquals("", l.getId());
+        assertEquals(51.8490438089326, l.getLatitude(), 0.01);
+        assertEquals(4.5561209321022, l.getLongitude(), 0.01);
+        assertEquals("Barendrecht", l.getMunicipality());
+        assertEquals("", l.getNumber());
+        assertEquals("", l.getNumberextra());
+        assertEquals(1, (int) l.getParking());
+        assertEquals("", l.getPhone());
+        assertEquals("", l.getPm_guid());
+        assertEquals("", l.getPostalcode());
+        assertEquals("", l.getStreet());
+        assertEquals("", l.getSummary());
+        assertEquals("http://playadvisor.b3p.nl/speelplek/openbare-speeltuin/speeltuinvereniging-%c2%93de-oranjetuin%c2%94/", l.getWebsite());
+
     }
 
 }

@@ -25,6 +25,7 @@ import java.util.Map;
 import javax.naming.NamingException;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.Asset;
+import nl.b3p.playbase.entities.Location;
 import org.apache.commons.dbutils.handlers.ArrayListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.logging.Log;
@@ -99,9 +100,9 @@ public class PlaymappingImporter extends Importer {
     }
 
     public ImportReport processLocations(String temp) throws NamingException, SQLException {
-        List<Map<String, Object>> childLocations = parseChildLocations(temp);
+        List<Location> childLocations = parseChildLocations(temp);
         ImportReport report = new ImportReport("locaties");
-        for (Map<String, Object> childLocation : childLocations) {
+        for (Location childLocation : childLocations) {
             saveLocation(childLocation, report);
         }
         return report;
@@ -183,8 +184,8 @@ public class PlaymappingImporter extends Importer {
     // </editor-fold>
     
     // <editor-fold desc="Locations" defaultstate="collapsed">
-    protected List<Map<String, Object>> parseChildLocations(String locations) {
-        List<Map<String, Object>> locs = new ArrayList<>();
+    protected List<Location> parseChildLocations(String locations) {
+        List<Location> locs = new ArrayList<>();
         JSONArray childLocations = new JSONArray(locations);
         for (int i = 0; i < childLocations.length(); i++) {
             JSONObject childLocation = childLocations.getJSONObject(i);
@@ -199,9 +200,9 @@ public class PlaymappingImporter extends Importer {
         return locs;
     }
 
-    protected Map<String, Object> parseLocation(JSONObject json) {
-        Map<String, Object> location = new HashMap<>();
-        location.put("$id", json.optString("$id"));
+    protected Location parseLocation(JSONObject json) {
+        Location location = new Location();
+        /*location.put("$id", json.optString("$id"));
         location.put("ID", json.optString("ID"));
         location.put("LastUpdated", json.optString("LastUpdated"));
         location.put("Name", json.optString("Name").replaceAll("\'", "\'\'"));
@@ -216,7 +217,7 @@ public class PlaymappingImporter extends Importer {
         location.put("Lng", Double.parseDouble(json.optString("Lng").replaceAll(",", ".")));
         location.put("ChildLocations", json.optJSONArray("ChildLocations"));
         location.put("Documents", parseImagesAndWords(json.optJSONArray("Documents")));
-        location.put("Images", parseImagesAndWords(json.optJSONArray("Images")));
+        location.put("Images", parseImagesAndWords(json.optJSONArray("Images")));*/
         return location;
     }
 

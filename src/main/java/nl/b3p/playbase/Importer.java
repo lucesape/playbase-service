@@ -27,6 +27,7 @@ import nl.b3p.loader.jdbc.GeometryJdbcConverterFactory;
 import nl.b3p.loader.util.DbUtilsGeometryColumnConverter;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.Asset;
+import nl.b3p.playbase.entities.Location;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ArrayListHandler;
@@ -139,17 +140,19 @@ public abstract class Importer {
     
     // <editor-fold desc="Locations" defaultstate="collapsed">
     
-    protected int saveLocation(Map<String, Object> location, ImportReport report) throws NamingException, SQLException {
+    protected int saveLocation(Location location, ImportReport report) throws NamingException, SQLException {
         StringBuilder sb = new StringBuilder();
         boolean exists = locationExists(location);        
         Object geom = null;
         try {
-            geom = geometryConverter.createNativePoint((double)location.get("Lat"), (double)location.get("Lng"), 4326);
+            geom = geometryConverter.createNativePoint(location.getLatitude(), location.getLongitude(), 4326);
         } catch (ParseException ex) {
             log.error("Cannot parse geometry", ex);
         }catch (NullPointerException ex){
             log.info("no geom for asset");
         }
+        ResultSetHandler<Location> handler = new BeanHandler(Location.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
+        Location savedLocation = null;
         Integer id = null;
         if (!exists) {
             sb.append("INSERT ");
@@ -161,60 +164,36 @@ public abstract class Importer {
             sb.append("geom,");
             sb.append("pa_id,");
             sb.append("pm_guid) ");
-            sb.append("VALUES( ");
-            sb.append("\'").append(location.get("Name")).append("\',");
-            sb.append(location.get("Lat")).append(",");
-            sb.append(location.get("Lng")).append(",");
-            sb.append("?,");
-            sb.append("\'").append(location.get("pa_id")).append("\',");
-            sb.append("\'").append(location.get("ID")).append("\');");
-            id = DB.qr().insert(sb.toString(), new ScalarHandler<Integer>(),geom);
+            sb.append("VALUES( ?,?,?,?,?,?);");
+          
+            savedLocation = DB.qr().insert(sb.toString(), handler, location.getTitle(), location.getLatitude(), location.getLongitude(), geom, location.getPa_id(), location.getPm_guid());
+            id = savedLocation.getId();
             report.increaseInserted();
-            List<Map<String,Object>> images = (List<Map<String,Object>>) location.get("images");
-            saveImagesAndWords(images, null, id, DB.IMAGES_TABLE);
+            List<Map<String,Object>> images = location.getImages();
+            saveImagesAndWords(images, null, savedLocation.getId(), DB.IMAGES_TABLE);
         } else {
-            sb = new StringBuilder();
-            sb.append("select id from ");
-            
-            sb.append(DB.LOCATION_TABLE);
-              if(location.containsKey("ID")){
-                sb.append(" where pm_guid = '");
-                sb.append(location.get("ID"));
-            } else if (location.containsKey("pa_id")) {
-                sb.append(" where pa_id = '");
-                sb.append(location.get("pa_id"));
-            }
-            sb.append("';");
-            id = (Integer) DB.qr().query(sb.toString(), new ScalarHandler<>());
+            id = getLocationId(location);
 
             
             sb = new StringBuilder();
             sb.append("update ");
             sb.append(DB.LOCATION_TABLE);
             sb.append(" ");
-            sb.append("SET title = ");
-            sb.append("\'").append(location.get("Name")).append("\',");
-            sb.append("latitude = ");
-            sb.append(location.get("Lat")).append(",");
-            sb.append("longitude = ");
-            sb.append(location.get("Lng")).append(", ");
-            sb.append("geom = ? ");
+            sb.append("SET title = ?,");
+            sb.append("latitude = ?,");
+            sb.append("longitude = ?,");
+            sb.append("geom = ?,");
+            sb.append("pa_id = ?,");
+            sb.append("pm_guid = ?,");
+            sb.append("where id = ?;");
             
-             if(location.containsKey("ID")){
-                sb.append("where pm_guid = '");
-                sb.append(location.get("ID"));
-            } else if (location.containsKey("pa_id")) {
-                sb.append("where pa_id = '");
-                sb.append(location.get("pa_id"));
-            }
-            sb.append("';");
-            DB.qr().update(sb.toString(),geom);
+            DB.qr().update(sb.toString(),location.getLatitude(), location.getLongitude(), geom, location.getPa_id(), location.getPm_guid(), id);
             report.increaseUpdated();
         }
-        return id;        
+        return id;
     }
 
-       protected void saveLocationAgeCategory(Integer location, List<Integer> agecategories) throws NamingException, SQLException {
+        protected void saveLocationAgeCategory(Integer location, List<Integer> agecategories) throws NamingException, SQLException {
         for (Integer agecategory : agecategories) {
             StringBuilder sb = new StringBuilder();
             sb.append("INSERT ");
@@ -232,27 +211,29 @@ public abstract class Importer {
         }
     }
     
-    protected boolean locationExists(Map<String, Object> location) {
-        try {
-            StringBuilder sb = new StringBuilder();
-            sb.append("select * from ");
-            sb.append(DB.LOCATION_TABLE);
-            if(location.containsKey("ID")){
-                sb.append(" where pm_guid = '");
-                sb.append(location.get("ID"));
-            } else if (location.containsKey("pa_id")) {
-                sb.append(" where pa_id = '");
-                sb.append(location.get("pa_id"));
-            }
-            sb.append("';");
-            ArrayListHandler rsh = new ArrayListHandler();
-            List<Object[]> o = DB.qr().query(sb.toString(), rsh);
-            return o.size() > 0;
-        } catch (NamingException | SQLException ex) {
-            log.error("Cannot query if location exists: ", ex);
-            return false;
-        }
+    protected boolean locationExists(Location location) throws NamingException, SQLException {
+        return getLocationId(location) != null;
     }
+    
+    protected Integer getLocationId(Location location) throws NamingException, SQLException {
+        StringBuilder sb = new StringBuilder();
+        sb.append("select id from ");
+
+        sb.append(DB.LOCATION_TABLE);
+        if (location.getPm_guid() != null) {
+            sb.append(" where pm_guid = '");
+            sb.append(location.getPm_guid());
+        } else if (location.getPa_id() != null) {
+            sb.append(" where pa_id = '");
+            sb.append(location.getPa_id());
+        }else{
+            throw new IllegalArgumentException("No id found on location (either pa_id or pm_guid was not set)");
+        }
+        sb.append("';");
+        Integer id = DB.qr().query(sb.toString(), new ScalarHandler<Integer>());
+        return id;
+    }
+
 
     // </editor-fold>
     
