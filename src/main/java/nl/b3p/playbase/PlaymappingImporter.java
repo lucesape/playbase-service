@@ -202,22 +202,19 @@ public class PlaymappingImporter extends Importer {
 
     protected Location parseLocation(JSONObject json) {
         Location location = new Location();
-        /*location.put("$id", json.optString("$id"));
-        location.put("ID", json.optString("ID"));
-        location.put("LastUpdated", json.optString("LastUpdated"));
-        location.put("Name", json.optString("Name").replaceAll("\'", "\'\'"));
-        location.put("AddressLine1", json.optString("AddressLine1"));
-        location.put("Suburb", json.optString("Suburb"));
-        location.put("City", json.optString("City"));
-        location.put("Area", json.optString("Area"));
-        location.put("PostCode", json.optString("PostCode"));
-        location.put("Ref", json.optString("Ref"));
-        location.put("AssetCount", json.optInt("AssetCount"));
-        location.put("Lat", Double.parseDouble(json.optString("Lat").replaceAll(",", ".")));
-        location.put("Lng", Double.parseDouble(json.optString("Lng").replaceAll(",", ".")));
-        location.put("ChildLocations", json.optJSONArray("ChildLocations"));
-        location.put("Documents", parseImagesAndWords(json.optJSONArray("Documents")));
-        location.put("Images", parseImagesAndWords(json.optJSONArray("Images")));*/
+        
+        location.setPm_guid(json.optString("ID"));
+        location.setTitle(json.optString("Name").replaceAll("\'", "\'\'"));
+        location.setStreet(json.optString("AddressLine1"));
+        //location.setMunicipality( json.optString("Suburb"));
+        location.setMunicipality( json.optString("City"));
+        location.setArea(json.optString("Area"));
+        location.setPostalcode(json.optString("PostCode"));
+        //location.put("AssetCount", json.optInt("AssetCount"));
+        location.setLatitude(Double.parseDouble(json.optString("Lat").replaceAll(",", ".")));
+        location.setLongitude( Double.parseDouble(json.optString("Lng").replaceAll(",", ".")));
+        location.setDocuments(parseImagesAndWords(json.optJSONArray("Documents")));
+        location.setImages( parseImagesAndWords(json.optJSONArray("Images")));
         return location;
     }
 
