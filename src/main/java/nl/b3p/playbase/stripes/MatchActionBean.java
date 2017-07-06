@@ -16,22 +16,31 @@
  */
 package nl.b3p.playbase.stripes;
 
+import java.io.IOException;
+import java.io.InputStream;
 import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
 import net.sourceforge.stripes.action.DefaultHandler;
 import net.sourceforge.stripes.action.ForwardResolution;
 import net.sourceforge.stripes.action.Resolution;
+import net.sourceforge.stripes.action.StreamingResolution;
+import net.sourceforge.stripes.action.StrictBinding;
+import net.sourceforge.stripes.action.UrlBinding;
+import org.apache.commons.io.IOUtils;
+import org.json.JSONObject;
 
 /**
  *
  * @author Meine Toonen
  */
-public class MatchActionBean implements ActionBean{
+@StrictBinding
+@UrlBinding("/action/match/{$event}")
+public class MatchActionBean implements ActionBean {
 
     private ActionBeanContext context;
 
     private static final String JSP = "/WEB-INF/jsp/admin/match.jsp";
-    
+
     @Override
     public ActionBeanContext getContext() {
         return context;
@@ -41,13 +50,23 @@ public class MatchActionBean implements ActionBean{
     public void setContext(ActionBeanContext context) {
         this.context = context;
     }
-    
-    
+
     @DefaultHandler
-    public Resolution view(){
-        
+    public Resolution view() {
+
         return new ForwardResolution(JSP);
     }
-    
-    
+
+    public Resolution data() throws IOException {
+        
+        InputStream in = ImportPlaymappingActionBean.class.getResourceAsStream("data.json");
+        String theString = IOUtils.toString(in, "UTF-8");
+        in.close();
+        JSONObject result = new JSONObject(theString);
+        StreamingResolution res = new StreamingResolution("application/json", result.toString(4));
+        res.setFilename("");
+        res.setAttachment(true);
+        return res;
+    }
+
 }
