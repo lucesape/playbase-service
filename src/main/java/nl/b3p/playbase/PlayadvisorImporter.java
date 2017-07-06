@@ -87,6 +87,9 @@ public class PlayadvisorImporter extends Importer {
         parkingMapping = new HashMap<>();
         parkingMapping.put("Betaald", "ja - betaald");
         parkingMapping.put("Gratis", "ja - gratis");
+        
+        // Strange english <> dutch mixup
+        locationTypes.get("Speeltuinen").put("Indoor speeltuin", locationTypes.get("Speeltuinen").get("Binnenspeeltuin"));
     }
 
     public void init(String[] header) {
@@ -352,6 +355,7 @@ public class PlayadvisorImporter extends Importer {
             }
             main = StringEscapeUtils.unescapeHtml4(main);
             Integer categoryId = locationTypes.containsKey(main) ? locationTypes.get(main).get(category) : null;
+            
             if (categoryId == null) {
                 throw new IllegalArgumentException("Unknown category given: main:" + main + ", subcategory: " + category+ ". Cannot save types for location with id: " + id);
             }
