@@ -53,6 +53,8 @@ public abstract class Importer {
     protected Map<String, Integer> accessibilityTypes;
     protected Map<String, Integer> agecategoryTypes;
     protected Map<String, Integer> parkingTypes;
+    
+    protected String postfix = "";
 
     public Importer() {
 
@@ -169,7 +171,7 @@ public abstract class Importer {
         if (!exists) {
             sb.append("INSERT ");
             sb.append("INTO ");
-            sb.append(DB.LOCATION_TABLE);
+            sb.append(DB.LOCATION_TABLE).append(postfix);
             sb.append("(title,");
             sb.append("latitude,");
             sb.append("longitude,");
@@ -182,13 +184,13 @@ public abstract class Importer {
             id = savedLocation.getId();
             report.increaseInserted(ImportType.LOCATION);
             List<Map<String, Object>> images = location.getImages();
-            saveImagesAndWords(images, null, savedLocation.getId(), DB.IMAGES_TABLE);
+            saveImagesAndWords(images, null, savedLocation.getId(), DB.IMAGES_TABLE + postfix);
         } else {
             id = getLocationId(location);
 
             sb = new StringBuilder();
             sb.append("update ");
-            sb.append(DB.LOCATION_TABLE);
+            sb.append(DB.LOCATION_TABLE).append(postfix);
             sb.append(" ");
             sb.append("SET title = ?,");
             sb.append("latitude = ?,");
@@ -205,12 +207,12 @@ public abstract class Importer {
     }
 
     protected void saveLocationAgeCategory(Integer location, List<Integer> agecategories) throws NamingException, SQLException {
-        DB.qr().update("DELETE FROM " + DB.LOCATION_AGE_CATEGORY_TABLE + " WHERE location = " + location);
+        DB.qr().update("DELETE FROM " + DB.LOCATION_AGE_CATEGORY_TABLE + postfix + " WHERE location = " + location);
         for (Integer agecategory : agecategories) {
             StringBuilder sb = new StringBuilder();
             sb.append("INSERT ");
             sb.append("INTO ");
-            sb.append(DB.LOCATION_AGE_CATEGORY_TABLE);
+            sb.append(DB.LOCATION_AGE_CATEGORY_TABLE + postfix);
             sb.append("(");
             sb.append("location,");
             sb.append("agecategory)");
@@ -231,7 +233,7 @@ public abstract class Importer {
         StringBuilder sb = new StringBuilder();
         sb.append("select id from ");
 
-        sb.append(DB.LOCATION_TABLE);
+        sb.append(DB.LOCATION_TABLE + postfix);
         if (location.getPm_guid() != null) {
             sb.append(" where pm_guid = '");
             sb.append(location.getPm_guid());
@@ -266,7 +268,7 @@ public abstract class Importer {
             id = getAssetId(asset);
 
             StringBuilder sb = new StringBuilder();
-            sb.append("UPDATE ").append(DB.ASSETS_TABLE);
+            sb.append("UPDATE ").append(DB.ASSETS_TABLE).append(postfix);
             sb.append(" set installeddate = ?,");
             sb.append("location = ?,");
             sb.append("name = ?,");
@@ -304,7 +306,7 @@ public abstract class Importer {
             StringBuilder sb = new StringBuilder();
             sb.append("INSERT ");
             sb.append("INTO ");
-            sb.append(DB.ASSETS_TABLE);
+            sb.append(DB.ASSETS_TABLE).append(postfix);
             sb.append("(");
             sb.append("installeddate,");
             sb.append("location,");
@@ -347,18 +349,18 @@ public abstract class Importer {
 
         Integer locationId = asset.getLocation();
 
-        saveImagesAndWords(asset.getImages(), id, locationId, DB.IMAGES_TABLE);
-        saveImagesAndWords(asset.getDocuments(), id, locationId, DB.ASSETS_DOCUMENTS_TABLE);
+        saveImagesAndWords(asset.getImages(), id, locationId, DB.IMAGES_TABLE + postfix);
+        saveImagesAndWords(asset.getDocuments(), id, locationId, DB.ASSETS_DOCUMENTS_TABLE + postfix);
     }
 
     protected void saveAssetsAgeCategories(Asset asset, Integer location) throws NamingException, SQLException {
         // delete old entries        
-        DB.qr().update("DELETE FROM " + DB.ASSETS_AGECATEGORIES_TABLE + " WHERE location_equipment = " + location);
+        DB.qr().update("DELETE FROM " + DB.ASSETS_AGECATEGORIES_TABLE  + postfix + " WHERE location_equipment = " + location);
         for (Integer agecategory : asset.getAgecategories()) {
             StringBuilder sb = new StringBuilder();
             sb.append("INSERT ");
             sb.append("INTO ");
-            sb.append(DB.ASSETS_AGECATEGORIES_TABLE);
+            sb.append(DB.ASSETS_AGECATEGORIES_TABLE  + postfix);
             sb.append("(");
             sb.append("location_equipment,");
             sb.append("agecategory)");
@@ -386,7 +388,7 @@ public abstract class Importer {
                 Integer equipment = asset.getEquipment();
                 StringBuilder sb = new StringBuilder();
                 sb.append("select * from ");
-                sb.append(DB.ASSETS_TABLE);
+                sb.append(DB.ASSETS_TABLE).append(postfix);
                 sb.append(" where location = ? and equipment = ?");
 
                 o = DB.qr().query(sb.toString(), handler, asset.getLocation(), equipment);
@@ -394,7 +396,7 @@ public abstract class Importer {
             } else {
                 StringBuilder sb = new StringBuilder();
                 sb.append("select * from ");
-                sb.append(DB.ASSETS_TABLE);
+                sb.append(DB.ASSETS_TABLE).append(postfix);
                 sb.append(" where pm_guid = '");
                 sb.append(asset.getPm_guid());
                 sb.append("';");
@@ -439,5 +441,10 @@ public abstract class Importer {
             }
         }
     }
+    
+    public String getPostfix() {
+        return postfix;
+    }
     // </editor-fold>
+
 }

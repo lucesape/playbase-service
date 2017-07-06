@@ -67,6 +67,7 @@ public class TestUtil {
             ds.setUrl("jdbc:hsqldb:file:./target/unittest-hsqldb/" + testname + "_" + randomizer + "/db;shutdown=true");
             datasource = ds;
             initDB("schemaexport.sql");
+            initDB("playadvisor_staging.sql");
             initDB("initdata.sql");
             if(initData){
                 initDB("initdata_locations.sql");

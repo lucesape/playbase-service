@@ -90,6 +90,8 @@ public class PlayadvisorImporter extends Importer {
         
         // Strange english <> dutch mixup
         locationTypes.get("Speeltuinen").put("Indoor speeltuin", locationTypes.get("Speeltuinen").get("Binnenspeeltuin"));
+        
+        postfix = "_playadvisor";
     }
 
     public void init(String[] header) {
@@ -288,7 +290,7 @@ public class PlayadvisorImporter extends Importer {
     // <editor-fold desc="Saving of string-concatenated multivalues" defaultstate="collapsed">
     protected void saveFacilities(Integer locationId, String facilitiesString) throws NamingException, SQLException {
 
-        DB.qr().update("DELETE FROM " + DB.LOCATION_FACILITIES_TABLE + " WHERE location = " + locationId);
+        DB.qr().update("DELETE FROM " + DB.LOCATION_FACILITIES_TABLE + postfix + " WHERE location = " + locationId);
 
         String[] facilities = facilitiesString.split("\\|");
         for (String facility : facilities) {
@@ -299,7 +301,7 @@ public class PlayadvisorImporter extends Importer {
             StringBuilder sb = new StringBuilder();
             sb.append("INSERT ");
             sb.append("INTO ");
-            sb.append(DB.LOCATION_FACILITIES_TABLE);
+            sb.append(DB.LOCATION_FACILITIES_TABLE).append(postfix);
             sb.append("(");
             sb.append("location,");
             sb.append("facility)");
@@ -313,7 +315,7 @@ public class PlayadvisorImporter extends Importer {
 
     protected void saveAccessibility(Integer locationId, String accessiblitiesString) throws NamingException, SQLException {
 
-        DB.qr().update("DELETE FROM " + DB.LOCATION_ACCESSIBILITY_TABLE + " WHERE location = " + locationId);
+        DB.qr().update("DELETE FROM " + DB.LOCATION_ACCESSIBILITY_TABLE + postfix + " WHERE location = " + locationId);
         String[] accessibilities = accessiblitiesString.split("\\|");
 
         for (String accessiblity : accessibilities) {
@@ -326,7 +328,7 @@ public class PlayadvisorImporter extends Importer {
             StringBuilder sb = new StringBuilder();
             sb.append("INSERT ");
             sb.append("INTO ");
-            sb.append(DB.LOCATION_ACCESSIBILITY_TABLE);
+            sb.append(DB.LOCATION_ACCESSIBILITY_TABLE).append(postfix);
             sb.append("(");
             sb.append("location,");
             sb.append("accessibility)");
@@ -339,7 +341,7 @@ public class PlayadvisorImporter extends Importer {
     }
 
     protected void saveLocationType(String typeString, Integer id) throws NamingException, SQLException, UnsupportedEncodingException {
-        DB.qr().update("DELETE FROM " + DB.LOCATION_CATEGORY_TABLE + " WHERE location = " + id);
+        DB.qr().update("DELETE FROM " + DB.LOCATION_CATEGORY_TABLE + postfix + " WHERE location = " + id);
 
         String[] types = typeString.split("\\|");
         for (String type : types) {
@@ -362,7 +364,7 @@ public class PlayadvisorImporter extends Importer {
             StringBuilder sb = new StringBuilder();
             sb.append("INSERT ");
             sb.append("INTO ");
-            sb.append(DB.LOCATION_CATEGORY_TABLE);
+            sb.append(DB.LOCATION_CATEGORY_TABLE).append(postfix);
             sb.append("(");
             sb.append("location,");
             sb.append("category)");
