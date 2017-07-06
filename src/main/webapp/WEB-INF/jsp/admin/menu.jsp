@@ -16,5 +16,8 @@
             <li${menuitem == 'importPlayadvisor' ? ' class="active"' : ''}><stripes:link beanclass="nl.b3p.playbase.stripes.ImportPlayadvisorActionBean">Playadvisor</stripes:link></li>
         </ul>
     </li>
+    <li${menuitem == 'match' ? ' class="active"' : ''}>
+        <stripes:link beanclass="nl.b3p.playbase.stripes.MatchActionBean">Match</stripes:link>
+    </li>
   
 </ul>
