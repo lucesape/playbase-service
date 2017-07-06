@@ -82,7 +82,7 @@ public class ImportPlayadvisorActionBean implements ActionBean {
     // </editor-fold>
     public Resolution importLocations() {
         try {
-            ImportReport report = new ImportReport("locaties");
+            ImportReport report = new ImportReport();
             if(csv != null){
                 processor.importStream(csv.getInputStream(), report);
             }

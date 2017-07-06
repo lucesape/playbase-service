@@ -20,15 +20,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 import javax.naming.NamingException;
+import nl.b3p.playbase.ImportReport.ImportType;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.db.TestUtil;
 import nl.b3p.playbase.entities.Asset;
 import nl.b3p.playbase.entities.Location;
 import org.apache.commons.dbutils.handlers.ArrayListHandler;
 import org.apache.commons.io.IOUtils;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -154,8 +153,10 @@ public class PlaymappingImporterTest extends TestUtil {
         ImportReport report= instance.processAssets(asset);
         
         assertEquals(0, report.getErrors().size());
-        assertEquals(2, report.getNumberInserted());
-        assertEquals(0, report.getNumberUpdated());
+        assertEquals(2, report.getNumberInserted(ImportType.ASSET));
+        assertEquals(0, report.getNumberInserted(ImportType.LOCATION));
+        assertEquals(0, report.getNumberUpdated(ImportType.ASSET));
+        assertEquals(0, report.getNumberUpdated(ImportType.LOCATION));
         
         List<Object[]> assets = DB.qr().query("select id, equipment from " + DB.ASSETS_TABLE, new ArrayListHandler());
         assertEquals(2, assets.size());
@@ -168,8 +169,10 @@ public class PlaymappingImporterTest extends TestUtil {
         ImportReport report= instance.processAssets(assetString);
         
         assertEquals(0, report.getErrors().size());
-        assertEquals(2, report.getNumberInserted());
-        assertEquals(0, report.getNumberUpdated());
+        assertEquals(2, report.getNumberInserted(ImportType.ASSET));
+        assertEquals(0, report.getNumberInserted(ImportType.LOCATION));
+        assertEquals(0, report.getNumberUpdated(ImportType.ASSET));
+        assertEquals(0, report.getNumberUpdated(ImportType.LOCATION));
         
         List<Object[]> assets = DB.qr().query("select id, equipment from " + DB.ASSETS_TABLE, new ArrayListHandler());
         assertEquals(2, assets.size());
@@ -187,13 +190,17 @@ public class PlaymappingImporterTest extends TestUtil {
         ImportReport report= instance.processAssets(asset);
         
         assertEquals(0, report.getErrors().size());
-        assertEquals(2, report.getNumberInserted());
-        assertEquals(0, report.getNumberUpdated());
+        assertEquals(2, report.getNumberInserted(ImportType.ASSET));
+        assertEquals(0, report.getNumberInserted(ImportType.LOCATION));
+        assertEquals(0, report.getNumberUpdated(ImportType.ASSET));
+        assertEquals(0, report.getNumberUpdated(ImportType.LOCATION));
         
         report= instance.processAssets(asset);
         
         assertEquals(0, report.getErrors().size());
-        assertEquals(0, report.getNumberInserted());
-        assertEquals(2, report.getNumberUpdated());
+        assertEquals(0, report.getNumberInserted(ImportType.ASSET));
+        assertEquals(0, report.getNumberInserted(ImportType.LOCATION));
+        assertEquals(2, report.getNumberUpdated(ImportType.ASSET));
+        assertEquals(0, report.getNumberUpdated(ImportType.LOCATION));
     }
 }

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import nl.b3p.commons.csv.CsvFormatException;
 import nl.b3p.commons.csv.CsvInputStream;
+import nl.b3p.playbase.ImportReport.ImportType;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.db.TestUtil;
 import nl.b3p.playbase.entities.Location;
@@ -56,13 +57,14 @@ public class PlayadvisorImporterTest extends TestUtil {
      * Test of importStream method, of class PlayadvisorImporter.
      */
     @Test
-    public void testImportStream() throws Exception {
+    public void testImportStreamSingle() throws Exception {
         InputStream in = PlaymappingImporterTest.class.getResourceAsStream("playadvisor_single_location.csv");
-        ImportReport report = new ImportReport("locaties");
+        ImportReport report = new ImportReport();
         instance.importStream(in, report);
         in.close();
         assertEquals(0, report.getErrors().size());
-        assertEquals(5, report.getNumberInserted());
+        assertEquals(1, report.getNumberInserted(ImportType.LOCATION));
+        assertEquals(4, report.getNumberInserted(ImportType.ASSET));
         List locations = DB.qr().query("Select * from " + DB.LOCATION_TABLE, new ArrayListHandler());
         assertEquals(1, locations.size());
         List images = DB.qr().query("Select * from " + DB.IMAGES_TABLE, new ArrayListHandler());
@@ -79,6 +81,15 @@ public class PlayadvisorImporterTest extends TestUtil {
         assertEquals(8, assetsAgecategories.size());
         List locationAgecategories = DB.qr().query("Select * from " + DB.LOCATION_AGE_CATEGORY_TABLE, new ArrayListHandler());
         assertEquals(2, locationAgecategories.size());
+    }
+    
+    @Test
+    public void testImportStreamMulti() throws Exception {
+        InputStream in = PlaymappingImporterTest.class.getResourceAsStream("speelplekken_playadvisor.csv");
+        ImportReport report = new ImportReport();
+        instance.importStream(in, report);
+        in.close();
+        assertEquals(8939, report.getNumberInserted(ImportType.LOCATION));
     }
 
     /**
@@ -99,19 +110,22 @@ public class PlayadvisorImporterTest extends TestUtil {
     @Test
     public void testUpdateLocation() throws Exception {
         InputStream in = PlaymappingImporterTest.class.getResourceAsStream("playadvisor_single_location.csv");
-        ImportReport report = new ImportReport("locaties");
+        ImportReport report = new ImportReport();
         instance.importStream(in, report);
         in.close();
-        assertEquals(5, report.getNumberInserted());
+        assertEquals(1, report.getNumberInserted(ImportType.LOCATION));
+        assertEquals(4, report.getNumberInserted(ImportType.ASSET));
         List locations = DB.qr().query("Select * from " + DB.LOCATION_TABLE, new ArrayListHandler());
         assertEquals(1, locations.size());
-        report = new ImportReport("locaties");
+        report = new ImportReport();
         in = PlaymappingImporterTest.class.getResourceAsStream("playadvisor_single_location.csv");
         instance.importStream(in, report);
         in.close();
         assertEquals(0, report.getErrors().size());
-        assertEquals(0, report.getNumberInserted());
-        assertEquals(5, report.getNumberUpdated());
+        assertEquals(0, report.getNumberInserted(ImportType.ASSET));
+        assertEquals(0, report.getNumberInserted(ImportType.LOCATION));
+        assertEquals(1, report.getNumberUpdated(ImportType.LOCATION));
+        assertEquals(4, report.getNumberUpdated(ImportType.ASSET));
         locations = DB.qr().query("Select * from " + DB.LOCATION_TABLE, new ArrayListHandler());
         assertEquals(1, locations.size());
         List types = DB.qr().query("Select * from " + DB.LOCATION_CATEGORY_TABLE, new ArrayListHandler());

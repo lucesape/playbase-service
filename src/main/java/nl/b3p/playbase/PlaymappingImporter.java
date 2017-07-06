@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.naming.NamingException;
+import nl.b3p.playbase.ImportReport.ImportType;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.Asset;
 import nl.b3p.playbase.entities.Location;
@@ -87,13 +88,13 @@ public class PlaymappingImporter extends Importer {
     public ImportReport processAssets(String assetsString) throws NamingException, SQLException {
         
         List<Asset> assets = parseAssets(assetsString);
-        ImportReport report = new ImportReport("assets");
+        ImportReport report = new ImportReport();
         for (Asset asset : assets) {
             try {
                 saveAsset(asset, report);
             } catch (NamingException | SQLException | IllegalArgumentException ex) {
                 log.error("Cannot save asset: " + ex.getLocalizedMessage());
-                report.addError(ex.getLocalizedMessage());
+                report.addError(ex.getLocalizedMessage(), ImportType.ASSET);
             }
         }
         return report;
@@ -101,7 +102,7 @@ public class PlaymappingImporter extends Importer {
 
     public ImportReport processLocations(String temp) throws NamingException, SQLException {
         List<Location> childLocations = parseChildLocations(temp);
-        ImportReport report = new ImportReport("locaties");
+        ImportReport report = new ImportReport();
         for (Location childLocation : childLocations) {
             saveLocation(childLocation, report);
         }

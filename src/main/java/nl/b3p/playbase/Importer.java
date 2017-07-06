@@ -25,6 +25,7 @@ import javax.naming.NamingException;
 import nl.b3p.loader.jdbc.GeometryJdbcConverter;
 import nl.b3p.loader.jdbc.GeometryJdbcConverterFactory;
 import nl.b3p.loader.util.DbUtilsGeometryColumnConverter;
+import nl.b3p.playbase.ImportReport.ImportType;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.Asset;
 import nl.b3p.playbase.entities.Location;
@@ -179,7 +180,7 @@ public abstract class Importer {
 
             savedLocation = DB.qr().insert(sb.toString(), handler, location.getTitle(), location.getLatitude(), location.getLongitude(), geom, location.getPa_id(), location.getPm_guid());
             id = savedLocation.getId();
-            report.increaseInserted();
+            report.increaseInserted(ImportType.LOCATION);
             List<Map<String, Object>> images = location.getImages();
             saveImagesAndWords(images, null, savedLocation.getId(), DB.IMAGES_TABLE);
         } else {
@@ -198,7 +199,7 @@ public abstract class Importer {
             sb.append("where id = ?;");
 
             DB.qr().update(sb.toString(), location.getTitle(), location.getLatitude(), location.getLongitude(), geom, location.getPa_id(), location.getPm_guid(), id);
-            report.increaseUpdated();
+            report.increaseUpdated(ImportType.LOCATION);
         }
         return id;
     }
@@ -298,7 +299,7 @@ public abstract class Importer {
                     asset.getLongitude(), asset.getPriceindexation(), asset.getPriceinstallation(), asset.getPricemaintenance(), asset.getPricepurchase(), asset.getPricereinvestment(),
                     asset.getDepth(), asset.getWidth(), asset.getHeight(), asset.getEndoflifeyear(), asset.getFreefallheight(), asset.getSafetyzonelength(), asset.getSafetyzonewidth(),
                     asset.getManufacturer(), asset.getMaterial(), asset.getProduct(), asset.getProductid(), asset.getProductvariantid(), asset.getSerialnumber(), geom, asset.getPm_guid());
-            report.increaseUpdated();
+            report.increaseUpdated(ImportType.ASSET);
         } else {
             StringBuilder sb = new StringBuilder();
             sb.append("INSERT ");
@@ -339,7 +340,7 @@ public abstract class Importer {
                     asset.getDepth(), asset.getWidth(), asset.getHeight(), asset.getEndoflifeyear(), asset.getFreefallheight(), asset.getSafetyzonelength(), asset.getSafetyzonewidth(),
                     asset.getManufacturer(), asset.getMaterial(), asset.getProduct(), asset.getProductid(), asset.getProductvariantid(), asset.getSerialnumber(), geom, asset.getPm_guid());
             id = as.getId();
-            report.increaseInserted();
+            report.increaseInserted(ImportType.ASSET);
         }
 
         saveAssetsAgeCategories(asset, id);
@@ -379,7 +380,10 @@ public abstract class Importer {
             ResultSetHandler<Asset> handler = new BeanHandler(Asset.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
             Asset o;
             if (asset.getPm_guid() == null) {
-                int equipment = asset.getEquipment();
+                if(asset.getLocation() == null || asset.getEquipment() == null){
+                    return null;
+                }
+                Integer equipment = asset.getEquipment();
                 StringBuilder sb = new StringBuilder();
                 sb.append("select * from ");
                 sb.append(DB.ASSETS_TABLE);
@@ -404,6 +408,18 @@ public abstract class Importer {
     }
 
     // </editor-fold>
+    
+    // <editor-fold desc="Helpers" defaultstate="collapsed">
+    protected Integer getAssetType(String type) {
+        Integer id = assetTypes.get(type);
+        return id;
+    }
+
+    protected Integer getEquipmentType(String type) {
+        Integer id = equipmentTypes.get(type);
+        return id;
+    }
+
     protected void saveImagesAndWords(List<Map<String, Object>> images, Integer assetId, Integer locationId, String table) throws NamingException, SQLException {
         DB.qr().update("DELETE FROM " + table + " WHERE equipment = " + assetId);
         if (images != null) {
@@ -423,17 +439,5 @@ public abstract class Importer {
             }
         }
     }
-
-    // <editor-fold desc="Helpers" defaultstate="collapsed">
-    protected Integer getAssetType(String type) {
-        Integer id = assetTypes.get(type);
-        return id;
-    }
-
-    protected Integer getEquipmentType(String type) {
-        Integer id = equipmentTypes.get(type);
-        return id;
-    }
-
     // </editor-fold>
 }

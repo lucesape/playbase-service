@@ -300,6 +300,8 @@ INSERT INTO playservice_accessibility_list VALUES (2, 'Rolstoelvriendelijk');
 INSERT INTO playservice_accessibility_list VALUES (3, 'Invalidentoilet');
 INSERT INTO playservice_accessibility_list VALUES (4, 'samenspeelplek');
 INSERT INTO playservice_accessibility_list VALUES (5, 'Inclusive playground');
+INSERT INTO playservice_accessibility_list VALUES (6, 'NVWA verscherpt toezicht');
+INSERT INTO playservice_accessibility_list VALUES (7, 'NVWA voldoet');
 
 
 --
@@ -351,8 +353,12 @@ INSERT INTO playservice_categories_list VALUES (17, 'Kinderboerderij', 'Amusemen
 INSERT INTO playservice_categories_list VALUES (18, 'Zwembad', 'Amusement');
 INSERT INTO playservice_categories_list VALUES (19, 'Openbare speeltuin', 'Speeltuinen');
 INSERT INTO playservice_categories_list VALUES (20, 'Speeltuinvereniging', 'Speeltuinen');
-INSERT INTO playservice_categories_list VALUES (21, 'Binnenspeeltuin', 'Speeltuinen');
+INSERT INTO playservice_categories_list VALUES (21, 'Indoor speeltuin', 'Speeltuinen');
 INSERT INTO playservice_categories_list VALUES (22, 'Natuurspeeltuin', 'Speeltuinen');
+INSERT INTO playservice_categories_list VALUES (23, 'Speeltuinen', 'Speeltuinen');
+INSERT INTO playservice_categories_list VALUES (24, 'Sport & Fitness', 'Sport & Fitness');
+INSERT INTO playservice_categories_list VALUES (25, 'Amusement', 'Amusement');
+INSERT INTO playservice_categories_list VALUES (26, 'Tennis', 'Sport & Fitness');
 
 
 --
@@ -409,6 +415,7 @@ INSERT INTO playservice_facilities_list VALUES (9, 'Beheerder/toezicht aanwezig'
 INSERT INTO playservice_facilities_list VALUES (10, 'Bankje');
 INSERT INTO playservice_facilities_list VALUES (11, 'Picknicktafel');
 INSERT INTO playservice_facilities_list VALUES (12, 'Afgesloten terrein/hek aanwezig');
+INSERT INTO playservice_facilities_list VALUES (13, 'Rolstoelvriendelijk');
 
 
 --

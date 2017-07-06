@@ -17,11 +17,11 @@
 package nl.b3p.playbase.stripes;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.List;
 import javax.naming.NamingException;
 import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
@@ -35,8 +35,8 @@ import net.sourceforge.stripes.action.UrlBinding;
 import net.sourceforge.stripes.validation.SimpleError;
 import net.sourceforge.stripes.validation.Validate;
 import nl.b3p.playbase.ImportReport;
+import nl.b3p.playbase.ImportReport.ImportType;
 import nl.b3p.playbase.PlaymappingImporter;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
@@ -232,12 +232,20 @@ public class ImportPlaymappingActionBean implements ActionBean {
                 context.getValidationErrors().add("apiurl", new SimpleError("Wrong url selected."));
                 return new ForwardResolution(JSP);
             }
-            context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberInserted() + " " + report.getType() + " weggeschreven."));
-            context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberUpdated() + " " + report.getType() + " geupdatet."));
+            context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberInserted(ImportType.ASSET) + " " + ImportType.ASSET.toString() + " weggeschreven."));
+            context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberInserted(ImportType.LOCATION) + " " + ImportType.LOCATION.toString() + " weggeschreven."));
+            context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberUpdated(ImportType.ASSET) + " " + ImportType.ASSET.toString() + " geupdatet."));
+            context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberUpdated(ImportType.LOCATION) + " " + ImportType.LOCATION.toString() + " geupdatet."));
+            
             if(report.getErrors().size() > 0){
-                context.getMessages().add(new SimpleMessage("Er zijn " + report.getErrors().size()+ " " + report.getType() + " mislukt:"));
-                for (String error : report.getErrors()) {
-                    context.getMessages().add(new SimpleMessage(error));
+                context.getMessages().add(new SimpleMessage("Er zijn " + report.getErrors(ImportType.ASSET).size()+ " " + ImportType.ASSET.toString()  + " mislukt:"));
+                context.getMessages().add(new SimpleMessage("Er zijn " + report.getErrors(ImportType.LOCATION).size()+ " " + ImportType.LOCATION.toString() + " mislukt:"));
+                
+                for (ImportType importType : report.getAllErrors().keySet()) {
+                    List<String> errors = report.getAllErrors().get(importType);
+                    for (String error : errors) {
+                        context.getMessages().add(new SimpleMessage(importType.toString() + ": " + error));
+                    }
                 }
             }
         }

@@ -28,6 +28,7 @@ import java.util.Map;
 import javax.naming.NamingException;
 import nl.b3p.commons.csv.CsvFormatException;
 import nl.b3p.commons.csv.CsvInputStream;
+import nl.b3p.playbase.ImportReport.ImportType;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.Asset;
 import nl.b3p.playbase.entities.Location;
@@ -50,6 +51,7 @@ public class PlayadvisorImporter extends Importer {
     private static final String AGECATEGORIES = "agecategories";
 
     private Map<String, String> parkingMapping;
+
     public PlayadvisorImporter() {
         super();
         playadvisorColumnToPlaybase = new HashMap<>();
@@ -78,7 +80,7 @@ public class PlayadvisorImporter extends Importer {
         playadvisorColumnToPlaybase.put(22, "average_rating");
         playadvisorColumnToPlaybase.put(23, "Lng");
         playadvisorColumnToPlaybase.put(24, "Lat");
-        
+
         parkingMapping = new HashMap<>();
         parkingMapping.put("Betaald", "ja - betaald");
         parkingMapping.put("Gratis", "ja - gratis");
@@ -90,7 +92,11 @@ public class PlayadvisorImporter extends Importer {
     public void importStream(InputStream in, ImportReport report) throws IOException, CsvFormatException {
         CsvInputStream cis = new CsvInputStream(new InputStreamReader(in));
 
-        String[] s = cis.readRecord();
+        String[] s = null;
+        do {
+            s = cis.readRecord();
+        } while (s.length <= 1);
+
         init(s);
         try {
             while ((s = cis.readRecord()) != null) {
@@ -98,15 +104,19 @@ public class PlayadvisorImporter extends Importer {
             }
         } catch (NamingException | SQLException ex) {
             LOG.error("Cannot save location to db: ", ex);
-            report.addError(ex.getLocalizedMessage());
+            report.addError(ex.getLocalizedMessage(), ImportType.LOCATION);
         }
     }
-    
+
     protected Location processRecord(String[] s, ImportReport report) throws NamingException, SQLException {
         Map<String, Object> locationMap = parseRecord(s);
-
-        Location location = parseMap(locationMap);
-
+        Location location = null;
+        try {
+            location = parseMap(locationMap);
+        } catch (IllegalArgumentException e) {
+            report.addError(e.getLocalizedMessage(), ImportType.LOCATION);
+            return null;
+        }
         int id = saveLocation(location, report);
         location.setId(id);
         List<Asset> assets = parseAssets(location, locationMap);
@@ -116,11 +126,19 @@ public class PlayadvisorImporter extends Importer {
         }
 
         saveLocationAgeCategory(id, Arrays.asList(location.getAgecategories()));
-        saveLocationType((String) locationMap.get(LOCATIONSUBTYPE), id);
+        if (((String) locationMap.get(LOCATIONSUBTYPE)).length() > 0) {
+            saveLocationType((String) locationMap.get(LOCATIONSUBTYPE), id);
+        }
 
-        saveFacilities(id, (String) locationMap.get(FACILITIES));
-        saveAccessibility(id, (String) locationMap.get(ACCESSIBLITIY));
+        if (((String) locationMap.get(FACILITIES)).length() > 0) {
+            saveFacilities(id, (String) locationMap.get(FACILITIES));
+        }
+
+        if (((String) locationMap.get(ACCESSIBLITIY)).length() > 0) {
+            saveAccessibility(id, (String) locationMap.get(ACCESSIBLITIY));
+        }
         return location;
+
     }
 
     protected Map<String, Object> parseRecord(String[] record) {
@@ -155,7 +173,7 @@ public class PlayadvisorImporter extends Importer {
                     break;
                 case "Lng":
                 case "Lat":
-                    value = Double.parseDouble(val);
+                    value = val == null || val.isEmpty() ? null : Double.parseDouble(val);
                     break;
                 default:
                     break;
@@ -168,42 +186,47 @@ public class PlayadvisorImporter extends Importer {
         return dbvalues;
     }
 
-    protected Location parseMap(Map<String, Object> lM){
+    protected Location parseMap(Map<String, Object> lM) {
         Location l = new Location();
-        l.setPa_id((String)lM.get("pa_id"));
-        l.setArea((String)lM.get("area"));
-        l.setCountry((String)lM.get("country"));
-        l.setContent((String)lM.get("content"));
-        l.setEmail((String)lM.get("e-mail"));
-        l.setImages((List<Map<String, Object>>)lM.get("images"));
-        l.setDocuments((List<Map<String,Object>>)lM.get("documents"));
-        l.setMunicipality((String)lM.get("municipality"));
-        l.setNumber((String)lM.get("number"));
-        l.setNumberextra((String)lM.get("NumberExtra"));
-        l.setPhone((String)lM.get("Phone"));
-        l.setPostalcode((String)lM.get("Postcode"));
-        l.setStreet((String)lM.get("Street"));
-        l.setSummary((String)lM.get("Excerpt"));
-        l.setTitle((String)lM.get("title"));
-        l.setWebsite((String)lM.get("website"));
-        l.setLatitude((Double)lM.get("Lat"));
-        l.setLongitude((Double)lM.get("Lng"));
-        
-        
-        String parking = (String)lM.get("parking");
+        l.setPa_id((String) lM.get("pa_id"));
+        l.setArea((String) lM.get("area"));
+        l.setCountry((String) lM.get("country"));
+        l.setContent((String) lM.get("content"));
+        l.setEmail((String) lM.get("e-mail"));
+        l.setImages((List<Map<String, Object>>) lM.get("images"));
+        l.setDocuments((List<Map<String, Object>>) lM.get("documents"));
+        l.setMunicipality((String) lM.get("municipality"));
+        l.setNumber((String) lM.get("number"));
+        l.setNumberextra((String) lM.get("NumberExtra"));
+        l.setPhone((String) lM.get("Phone"));
+        l.setPostalcode((String) lM.get("Postcode"));
+        l.setStreet((String) lM.get("Street"));
+        l.setSummary((String) lM.get("Excerpt"));
+        l.setTitle((String) lM.get("title"));
+        l.setWebsite((String) lM.get("website"));
+        l.setLatitude(lM.get("Lat") != null ? (Double) lM.get("Lat") : null);
+        l.setLongitude(lM.get("Lng") != null ? (Double) lM.get("Lng") : null);
+
+        String parking = (String) lM.get("parking");
         l.setParking(parkingTypes.get(parkingMapping.get(parking)));
-        String agecats =(String)lM.get(AGECATEGORIES);
-        String [] agecategories = agecats.split("\\|");
+        String agecats = (String) lM.get(AGECATEGORIES);
+        String[] agecategories = agecats.split("\\|");
         List<Integer> ids = new ArrayList<>();
         for (String agecategory : agecategories) {
-            ids.add(agecategoryTypes.get(agecategory));
+            if (agecategory.length() > 0) {
+                Integer id = agecategoryTypes.get(agecategory.toLowerCase());
+                if (id == null) {
+                    throw new IllegalArgumentException("Agecategory >" + agecategory + "< does not exist. Location with title >" + l.getTitle() + "< not saved.");
+                }
+                ids.add(id);
+            }
         }
         l.setAgecategories(ids.toArray(new Integer[0]));
-        
+
         return l;
     }
-    
-    private List<Asset> parseAssets( Location location, Map<String,Object> locationMap) throws NamingException, SQLException {
+
+    private List<Asset> parseAssets(Location location, Map<String, Object> locationMap) throws NamingException, SQLException {
         List<Asset> assets = new ArrayList<>();
         String assetString = (String) locationMap.get("assets");
         String[] assetArray = assetString.split("\\|");
@@ -212,7 +235,7 @@ public class PlayadvisorImporter extends Importer {
             ass.setName(asset);
             ass.setLocation(location.getId());
             Integer[] cats = location.getAgecategories();
-            
+
             ass.setAgecategories(cats);
             ass.setEquipment(getEquipmentType(asset));
             assets.add(ass);
@@ -248,6 +271,7 @@ public class PlayadvisorImporter extends Importer {
         String[] facilities = facilitiesString.split("\\|");
         for (String facility : facilities) {
             Integer facilityId = facilityTypes.get(facility);
+
             StringBuilder sb = new StringBuilder();
             sb.append("INSERT ");
             sb.append("INTO ");
@@ -263,13 +287,15 @@ public class PlayadvisorImporter extends Importer {
         }
     }
 
-    protected void saveAccessibility(Integer locationId, String  accessiblitiesString) throws NamingException, SQLException {
+    protected void saveAccessibility(Integer locationId, String accessiblitiesString) throws NamingException, SQLException {
 
         DB.qr().update("DELETE FROM " + DB.LOCATION_ACCESSIBILITY_TABLE + " WHERE location = " + locationId);
         String[] accessibilities = accessiblitiesString.split("\\|");
 
         for (String accessiblity : accessibilities) {
-            Integer id = accessibilityTypes.get(accessiblity.toLowerCase());
+            String acc = accessiblity.toLowerCase();
+            acc = acc.contains(">") ? acc.substring(acc.indexOf(">") + 1) : acc;
+            Integer id = accessibilityTypes.get(acc);
             StringBuilder sb = new StringBuilder();
             sb.append("INSERT ");
             sb.append("INTO ");
@@ -285,23 +311,38 @@ public class PlayadvisorImporter extends Importer {
         }
     }
 
-    protected void saveLocationType(String type, Integer id) throws NamingException, SQLException {
-        String main = type.substring(0, type.indexOf(">"));
-        String category = type.substring(type.indexOf(">") + 1);
-        Integer categoryId = locationTypes.get(main).get(category);
+    protected void saveLocationType(String typeString, Integer id) throws NamingException, SQLException {
         DB.qr().update("DELETE FROM " + DB.LOCATION_CATEGORY_TABLE + " WHERE location = " + id);
-        StringBuilder sb = new StringBuilder();
-        sb.append("INSERT ");
-        sb.append("INTO ");
-        sb.append(DB.LOCATION_CATEGORY_TABLE);
-        sb.append("(");
-        sb.append("location,");
-        sb.append("category)");
-        sb.append("VALUES( ");
-        sb.append(id).append(",");
-        sb.append(categoryId);
-        sb.append(");");
-        DB.qr().insert(sb.toString(), new ScalarHandler<>());
+
+        String[] types = typeString.split("\\|");
+        for (String type : types) {
+            int index = type.indexOf(">");
+            String main;
+            String category;
+            if (index == -1) {
+                main = type;
+                category = type;
+            } else {
+                main = type.substring(0, index);
+                category = type.substring(index + 1);
+            }
+            Integer categoryId = locationTypes.get(main).get(category);
+            if (categoryId == null) {
+                throw new IllegalArgumentException("Unknown category given: main:" + main + ", subcategory: " + category+ ". Cannot save types for location with id: " + id);
+            }
+            StringBuilder sb = new StringBuilder();
+            sb.append("INSERT ");
+            sb.append("INTO ");
+            sb.append(DB.LOCATION_CATEGORY_TABLE);
+            sb.append("(");
+            sb.append("location,");
+            sb.append("category)");
+            sb.append("VALUES( ");
+            sb.append(id).append(",");
+            sb.append(categoryId);
+            sb.append(");");
+            DB.qr().insert(sb.toString(), new ScalarHandler<>());
+        }
     }
 
     // </editor-fold>

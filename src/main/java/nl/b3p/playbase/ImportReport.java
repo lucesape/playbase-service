@@ -17,69 +17,88 @@
 package nl.b3p.playbase;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
  * @author Meine Toonen
  */
 public class ImportReport {
-    private int numberInserted;
-    private int numberUpdated;
-    private String type;
-    
-    private List<String> errors;
 
-    public ImportReport(String type) {
-        numberInserted = 0;
-        numberUpdated = 0;
-        errors = new ArrayList<>();
-        this.type = type;
-    }
-    
-    public int getNumberInserted() {
-        return numberInserted;
-    }
-
-    public void setNumberInserted(int numberInserted) {
-        this.numberInserted = numberInserted;
-    }
-
-    public int getNumberUpdated() {
-        return numberUpdated;
-    }
-
-    public void setNumberUpdated(int numberUpdated) {
-        this.numberUpdated = numberUpdated;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
+    public enum ImportType{
+        
+        LOCATION ("Locatie"),
+        ASSET("Asset");
+        
+        private final String type;
+        
+        ImportType(String type){
+            this.type = type;
+        }
+        
+        @Override
+        public String toString(){
+            return type;
+        }
     }
     
-    public void increaseUpdated(){
-        this.numberUpdated++;
+    private Map<ImportType,List<String>> errors = new HashMap<>();
+    private Map<ImportType, Integer> inserted = new HashMap<>();
+    private Map<ImportType, Integer> updated = new HashMap<>();
+
+    public ImportReport() {
+        for (ImportType type : ImportType.values()) {
+            errors.put(type, new ArrayList<String>());
+            inserted.put(type,0);
+            updated.put(type,0);
+        }
     }
     
-    public void increaseInserted(){
-        this.numberInserted++;
-    }
-    
-    public void addError(String message){
-        this.errors.add(message);
+    public int getNumberInserted(ImportType type) {
+        return inserted.get(type);
     }
 
-    public List<String> getErrors() {
+
+    public int getNumberUpdated(ImportType type) {
+        return updated.get(type);
+    }
+    
+    public void increaseUpdated(ImportType type){
+        updated.put(type, updated.get(type) +1);
+    }
+    
+    public void increaseInserted(ImportType type){
+        inserted.put(type, inserted.get(type) +1);
+    }
+    
+    public void addError(String message,ImportType type){
+        this.errors.get(type).add(message);
+    }
+
+    public List<String> getErrors(ImportType type) {
+        return errors.get(type);
+    }
+    
+    public Map<ImportType, List<String>> getAllErrors(){
         return errors;
     }
-
-    public void setErrors(List<String> errors) {
-        this.errors = errors;
+    
+    
+    public List<String> getErrors(){
+        List<String> allErrors = new ArrayList<>();
+        for (ImportType importType : errors.keySet()) {
+            allErrors.addAll(errors.get(importType));
+        }
+        return allErrors;
     }
+    
+    
+
+   /* public void setErrors(List<String> errors) {
+        this.errors = errors;
+    }*/
     
     
 }
