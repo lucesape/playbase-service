@@ -19,6 +19,8 @@ package nl.b3p.playbase;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +35,7 @@ import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.Asset;
 import nl.b3p.playbase.entities.Location;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -101,6 +104,9 @@ public class PlayadvisorImporter extends Importer {
         try {
             while ((s = cis.readRecord()) != null) {
                 Location l = processRecord(s, report);
+                if(l == null){
+                    int a = 0;
+                }
             }
         } catch (NamingException | SQLException ex) {
             LOG.error("Cannot save location to db: ", ex);
@@ -108,7 +114,7 @@ public class PlayadvisorImporter extends Importer {
         }
     }
 
-    protected Location processRecord(String[] s, ImportReport report) throws NamingException, SQLException {
+    protected Location processRecord(String[] s, ImportReport report) throws NamingException, SQLException, UnsupportedEncodingException {
         Map<String, Object> locationMap = parseRecord(s);
         Location location = null;
         try {
@@ -126,16 +132,29 @@ public class PlayadvisorImporter extends Importer {
         }
 
         saveLocationAgeCategory(id, Arrays.asList(location.getAgecategories()));
-        if (((String) locationMap.get(LOCATIONSUBTYPE)).length() > 0) {
-            saveLocationType((String) locationMap.get(LOCATIONSUBTYPE), id);
+   
+        try {
+            if (((String) locationMap.get(LOCATIONSUBTYPE)).length() > 0) {
+                saveLocationType((String) locationMap.get(LOCATIONSUBTYPE), id);
+            }
+        } catch (IllegalArgumentException ex) {
+            report.addError(ex.getLocalizedMessage() + ". Location is saved, but type is not.", ImportType.LOCATION);
         }
-
-        if (((String) locationMap.get(FACILITIES)).length() > 0) {
-            saveFacilities(id, (String) locationMap.get(FACILITIES));
+        
+        try {
+            if (((String) locationMap.get(FACILITIES)).length() > 0) {
+                saveFacilities(id, (String) locationMap.get(FACILITIES));
+            }
+        } catch (IllegalArgumentException ex) {
+            report.addError(ex.getLocalizedMessage() + ". Location is saved, but facilities are not.", ImportType.LOCATION);
         }
-
-        if (((String) locationMap.get(ACCESSIBLITIY)).length() > 0) {
-            saveAccessibility(id, (String) locationMap.get(ACCESSIBLITIY));
+        
+        try {
+            if (((String) locationMap.get(ACCESSIBLITIY)).length() > 0) {
+                saveAccessibility(id, (String) locationMap.get(ACCESSIBLITIY));
+            }
+        } catch (IllegalArgumentException ex) {
+            report.addError(ex.getLocalizedMessage() + ". Location is saved, but accessiblity is not.", ImportType.LOCATION);
         }
         return location;
 
@@ -271,7 +290,9 @@ public class PlayadvisorImporter extends Importer {
         String[] facilities = facilitiesString.split("\\|");
         for (String facility : facilities) {
             Integer facilityId = facilityTypes.get(facility);
-
+            if(facilityId == null){
+                throw new IllegalArgumentException("Unknown facility given: " + facility + ". Cannot save facilities for location with id: " + locationId);
+            }
             StringBuilder sb = new StringBuilder();
             sb.append("INSERT ");
             sb.append("INTO ");
@@ -296,6 +317,9 @@ public class PlayadvisorImporter extends Importer {
             String acc = accessiblity.toLowerCase();
             acc = acc.contains(">") ? acc.substring(acc.indexOf(">") + 1) : acc;
             Integer id = accessibilityTypes.get(acc);
+            if (id == null) {
+                throw new IllegalArgumentException("Unknown accessibilty given: " + acc + ". Cannot save types for location with id: " + locationId);
+            }
             StringBuilder sb = new StringBuilder();
             sb.append("INSERT ");
             sb.append("INTO ");
@@ -311,7 +335,7 @@ public class PlayadvisorImporter extends Importer {
         }
     }
 
-    protected void saveLocationType(String typeString, Integer id) throws NamingException, SQLException {
+    protected void saveLocationType(String typeString, Integer id) throws NamingException, SQLException, UnsupportedEncodingException {
         DB.qr().update("DELETE FROM " + DB.LOCATION_CATEGORY_TABLE + " WHERE location = " + id);
 
         String[] types = typeString.split("\\|");
@@ -326,7 +350,8 @@ public class PlayadvisorImporter extends Importer {
                 main = type.substring(0, index);
                 category = type.substring(index + 1);
             }
-            Integer categoryId = locationTypes.get(main).get(category);
+            main = StringEscapeUtils.unescapeHtml4(main);
+            Integer categoryId = locationTypes.containsKey(main) ? locationTypes.get(main).get(category) : null;
             if (categoryId == null) {
                 throw new IllegalArgumentException("Unknown category given: main:" + main + ", subcategory: " + category+ ". Cannot save types for location with id: " + id);
             }

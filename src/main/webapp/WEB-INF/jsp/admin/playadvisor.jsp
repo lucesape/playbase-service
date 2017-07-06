@@ -24,10 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
         <jsp:include page="/WEB-INF/jsp/common/messages.jsp"/>
         <stripes:form beanclass="nl.b3p.playbase.stripes.ImportPlayadvisorActionBean" class="form-horizontal">
-            <stripes:submit name="importPM" class="btn btn-primary">Importeer</stripes:submit>
+            <stripes:submit name="importLocations" class="btn btn-primary">Importeer</stripes:submit>
             <stripes:submit name="cancel" class="btn btn-default">Annuleren</stripes:submit>
-
-
                 <div class="form-group">
                     <label class="col-sm-2 control-label">Klant GUID</label>
                 <stripes:file name="csv"/>

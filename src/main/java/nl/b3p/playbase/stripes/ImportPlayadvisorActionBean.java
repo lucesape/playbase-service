@@ -18,11 +18,14 @@ package nl.b3p.playbase.stripes;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
+import net.sourceforge.stripes.action.DefaultHandler;
 import net.sourceforge.stripes.action.FileBean;
 import net.sourceforge.stripes.action.ForwardResolution;
 import net.sourceforge.stripes.action.Resolution;
+import net.sourceforge.stripes.action.SimpleMessage;
 import net.sourceforge.stripes.action.StrictBinding;
 import net.sourceforge.stripes.action.UrlBinding;
 import net.sourceforge.stripes.validation.Validate;
@@ -48,7 +51,7 @@ public class ImportPlayadvisorActionBean implements ActionBean {
 
     @Validate
     private FileBean csv;
-    
+
     @Validate
     private String file;
 
@@ -76,14 +79,18 @@ public class ImportPlayadvisorActionBean implements ActionBean {
     public void setFile(String file) {
         this.file = file;
     }
-    
-    
 
     // </editor-fold>
+    
+    @DefaultHandler
+    public Resolution view(){
+        return new ForwardResolution(JSP);
+    }
+    
     public Resolution importLocations() {
         try {
             ImportReport report = new ImportReport();
-            if(csv != null){
+            if (csv != null) {
                 processor.importStream(csv.getInputStream(), report);
             }
             if (file != null) {
@@ -91,10 +98,25 @@ public class ImportPlayadvisorActionBean implements ActionBean {
                     InputStream in = ImportPlayadvisorActionBean.class.getResourceAsStream(file);
                     processor.importStream(in, report);
                     in.close();
-                  
                 } catch (IOException ex) {
                     log.error(ex);
                     return new ForwardResolution(JSP);
+                }
+            }
+            context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberInserted(ImportReport.ImportType.ASSET) + " " + ImportReport.ImportType.ASSET.toString() + " weggeschreven."));
+            context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberInserted(ImportReport.ImportType.LOCATION) + " " + ImportReport.ImportType.LOCATION.toString() + " weggeschreven."));
+            context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberUpdated(ImportReport.ImportType.ASSET) + " " + ImportReport.ImportType.ASSET.toString() + " geupdatet."));
+            context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberUpdated(ImportReport.ImportType.LOCATION) + " " + ImportReport.ImportType.LOCATION.toString() + " geupdatet."));
+
+            if (report.getErrors().size() > 0) {
+                context.getMessages().add(new SimpleMessage("Er zijn " + report.getErrors(ImportReport.ImportType.ASSET).size() + " " + ImportReport.ImportType.ASSET.toString() + " mislukt:"));
+                context.getMessages().add(new SimpleMessage("Er zijn " + report.getErrors(ImportReport.ImportType.LOCATION).size() + " " + ImportReport.ImportType.LOCATION.toString() + " mislukt:"));
+
+                for (ImportReport.ImportType importType : report.getAllErrors().keySet()) {
+                    List<String> errors = report.getAllErrors().get(importType);
+                    for (String error : errors) {
+                        context.getMessages().add(new SimpleMessage(importType.toString() + ": " + error));
+                    }
                 }
             }
         } catch (IOException | CsvFormatException ex) {
