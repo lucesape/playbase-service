@@ -47,20 +47,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     </tfoot>
                 </table>
             </div>
-            <div style="width:40%; height:40%; margin-left: 50px;">
+            <div style="height:40%; margin-left: 50px;">
                 <table id="playmappingtable" class="display" cellspacing="0" width="100%">
                     <thead>
                         <tr>
                             <th>Naam </th>
-                            <th>Afstand (km) </th>
                             <th>Playmapping id</th>
+                            <th>Afstand (km) </th>
+                            <th>Naam gelijkheid (0 t/m 10)</th>
                         </tr>
                     </thead>
                     <tfoot>
                         <tr>
                             <th>Naam </th>
-                            <th>Afstand (km) </th>
                             <th>Playmapping id</th>
+                            <th>Afstand (km) </th>
+                            <th>Naam gelijkheid (0 t/m 10)</th>
                         </tr>
                     </tfoot>
                 </table>

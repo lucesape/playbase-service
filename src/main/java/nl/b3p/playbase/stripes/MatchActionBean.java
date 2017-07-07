@@ -19,10 +19,9 @@ package nl.b3p.playbase.stripes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.vividsolutions.jts.geom.Geometry;
+import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.naming.NamingException;
 import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
@@ -131,6 +130,9 @@ public class MatchActionBean implements ActionBean {
             if (playadvisorLoc != null) {
 
                 CoordinateReferenceSystem crs = CRS.decode("EPSG:4326");
+                
+                NormalizedLevenshtein l = new NormalizedLevenshtein();
+        
                 List<Location> locs = DB.qr().query("select * from " + DB.LOCATION_TABLE + PlaymappingImporter.getPostfix() + " where pa_id is null", listHandler);
                 JSONArray ar = new JSONArray();
                 for (Location loc : locs) {
@@ -145,9 +147,12 @@ public class MatchActionBean implements ActionBean {
                         } else {
                             obj.put("distance", "-");
                         }
+                        
                     } catch (TransformException ex) {
                         LOG.error("Error calculating distance: ", ex);
                     }
+                    double similarity = l.similarity(playadvisorLoc.getTitle(), loc.getTitle()) *10;
+                    obj.put("similarity", Math.round(similarity * 10.0) / 10.0);
                     ar.put(obj);
                 }
                 result.put("data", ar);
