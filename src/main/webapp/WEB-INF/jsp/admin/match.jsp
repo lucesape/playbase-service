@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
         <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css" />
 
-        <script type="text/javascript" src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+        <script type="text/javascript" src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.js"></script>
         <script type="text/javascript" src="${contextPath}/public/js/match.js"></script>
     </stripes:layout-component>
     <stripes:layout-component name="content">
@@ -30,7 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <h1>Match Playadvisor met playmapping</h1>
 
         <jsp:include page="/WEB-INF/jsp/common/messages.jsp"/>
-        <div style="display:flex;"> 
+        <div style="display:flex; height:400px;"> 
             <div style="width:40%;">
                 <table id="playbasetable" class="display" cellspacing="0" width="100%">
                     <thead>
@@ -47,7 +47,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     </tfoot>
                 </table>
             </div>
-            <div style="width:40%; margin-left: 50px;">
+            <div style="width:40%; height:40%; margin-left: 50px;">
                 <table id="playmappingtable" class="display" cellspacing="0" width="100%">
                     <thead>
                         <tr>
@@ -65,6 +65,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     </tfoot>
                 </table>
             </div>
+        </div>
+        <div>
+            sadfasdf
         </div>
     </stripes:layout-component>
 </stripes:layout-render>

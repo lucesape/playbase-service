@@ -97,9 +97,8 @@ public class MatchActionBean implements ActionBean {
 
     public Resolution dataPlayadvisor() {
         JSONObject result = new JSONObject();
-        GeometryJdbcConverter geometryConverter = null;
         try {
-            geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(DB.getConnection());
+            GeometryJdbcConverter geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(DB.getConnection());
             ResultSetHandler<List<Location>> handler = new BeanListHandler(Location.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
             String sql = "select * from " + DB.LOCATION_TABLE + "_playadvisor limit 10";
             List<Location> locs = DB.qr().query(sql, handler);
