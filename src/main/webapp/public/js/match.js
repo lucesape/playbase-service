@@ -23,11 +23,20 @@ $(document).ready(function () {
 
 function PlaymappingMatcher(){
     this.playbasetable = null;
+    this.playmappingtable = null;
     this.init = function(){
          this.playbasetable = $('#playbasetable').DataTable({
         /*"processing": true,
          "serverSide": true,*/
-            "ajax": "data"
+            "ajax": "dataPlayadvisor",
+        "columns": [
+            { "data": "title" },
+            { "data": "pa_id" }/*,
+            { "data": "office" },
+            { "data": "extn" },
+            { "data": "start_date" },
+            { "data": "salary" }*/
+        ]
         });
         var me = this;
         $('#playbasetable tbody').on('click', 'tr', (function () {
@@ -49,6 +58,44 @@ function PlaymappingMatcher(){
     
     this.playadvisorClicked = function(data){
         console.log("playadvisor clicked",data);
+        this.loadPlaymappingTable(data.id);
+    };
+    
+    this.loadPlaymappingTable = function (id) {
+        if(this.playmappingtable){
+            this.playmappingtable.destroy();
+        }
+        this.playmappingtable = $('#playmappingtable').DataTable({
+            /*"processing": true,
+             "serverSide": true,*/
+            "ajax": {
+                url: "dataPlaymapping",
+                data : {
+                    id : id
+                }
+            },
+            "columns": [
+                {"data": "title"},
+                {"data": "distance"},
+                 { "data": "pm_guid" }
+            ],
+            order: [[1, "asc"]]
+        });
+        var me = this;
+        $('#playmappingtable tbody').on('click', 'tr', (function () {
+            if ($(this).hasClass('selected')) {
+                $(this).removeClass('selected');
+            } else {
+                me.playmappingtable.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+                //me.playadvisorClicked(me.playbasetable.row().data());
+            }
+        })).bind(this);
+
+
+        $('#button').click(function () {
+            this.playmappingtable.row('.selected').remove().draw(false);
+        });
     };
     
     this.mappingConfirmed  = function(playadvisorid, playmappingid){

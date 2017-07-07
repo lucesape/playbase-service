@@ -54,7 +54,7 @@ public abstract class Importer {
     protected Map<String, Integer> agecategoryTypes;
     protected Map<String, Integer> parkingTypes;
     
-    protected String postfix = "";
+    public static String postfix = "";
 
     public Importer() {
 
@@ -442,7 +442,7 @@ public abstract class Importer {
         }
     }
     
-    public String getPostfix() {
+    public static String getPostfix() {
         return postfix;
     }
     // </editor-fold>

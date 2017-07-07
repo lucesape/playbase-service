@@ -16,8 +16,14 @@
  */
 package nl.b3p.playbase.stripes;
 
-import java.io.IOException;
-import java.io.InputStream;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.vividsolutions.jts.geom.Geometry;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.naming.NamingException;
 import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
 import net.sourceforge.stripes.action.DefaultHandler;
@@ -26,8 +32,27 @@ import net.sourceforge.stripes.action.Resolution;
 import net.sourceforge.stripes.action.StreamingResolution;
 import net.sourceforge.stripes.action.StrictBinding;
 import net.sourceforge.stripes.action.UrlBinding;
-import org.apache.commons.io.IOUtils;
+import net.sourceforge.stripes.validation.Validate;
+import nl.b3p.loader.jdbc.GeometryJdbcConverter;
+import nl.b3p.loader.jdbc.GeometryJdbcConverterFactory;
+import nl.b3p.loader.util.DbUtilsGeometryColumnConverter;
+import nl.b3p.playbase.PlaymappingImporter;
+import nl.b3p.playbase.db.DB;
+import nl.b3p.playbase.entities.Location;
+import nl.b3p.playbase.util.GeometryGsonSerializer;
+import org.apache.commons.dbutils.BasicRowProcessor;
+import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.geotools.geometry.jts.JTS;
+import org.geotools.referencing.CRS;
+import org.json.JSONArray;
 import org.json.JSONObject;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.TransformException;
 
 /**
  *
@@ -40,6 +65,19 @@ public class MatchActionBean implements ActionBean {
     private ActionBeanContext context;
 
     private static final String JSP = "/WEB-INF/jsp/admin/match.jsp";
+    private static final Log LOG = LogFactory.getLog("MatchActionBean");
+
+    @Validate
+    private Integer id;
+
+    private Gson gson;
+
+    public MatchActionBean() {
+        GsonBuilder builder = new GsonBuilder();
+        builder.serializeSpecialFloatingPointValues();
+        builder.registerTypeAdapter(Geometry.class, new GeometryGsonSerializer());
+        gson = builder.create();
+    }
 
     @Override
     public ActionBeanContext getContext() {
@@ -57,16 +95,86 @@ public class MatchActionBean implements ActionBean {
         return new ForwardResolution(JSP);
     }
 
-    public Resolution data() throws IOException {
-        
-        InputStream in = ImportPlaymappingActionBean.class.getResourceAsStream("data.json");
-        String theString = IOUtils.toString(in, "UTF-8");
-        in.close();
-        JSONObject result = new JSONObject(theString);
+    public Resolution dataPlayadvisor() {
+        JSONObject result = new JSONObject();
+        GeometryJdbcConverter geometryConverter = null;
+        try {
+            geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(DB.getConnection());
+            ResultSetHandler<List<Location>> handler = new BeanListHandler(Location.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
+            String sql = "select * from " + DB.LOCATION_TABLE + "_playadvisor limit 10";
+            List<Location> locs = DB.qr().query(sql, handler);
+            JSONArray ar = new JSONArray();
+            for (Location loc : locs) {
+                ar.put(new JSONObject(gson.toJson(loc, Location.class)));
+            }
+            result.put("data", ar);
+
+        } catch (NamingException | SQLException ex) {
+            LOG.error("Cannot get geometryConverter: ", ex);
+            result.put("message", "Cannot get geometryConverter: " + ex.getLocalizedMessage());
+        }
+
         StreamingResolution res = new StreamingResolution("application/json", result.toString(4));
         res.setFilename("");
         res.setAttachment(true);
         return res;
     }
+
+    public Resolution dataPlaymapping() throws FactoryException {
+        JSONObject result = new JSONObject();
+        GeometryJdbcConverter geometryConverter = null;
+        try {
+            geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(DB.getConnection());
+            ResultSetHandler<List<Location>> listHandler = new BeanListHandler(Location.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
+            ResultSetHandler<Location> handler = new BeanHandler(Location.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
+
+            Location playadvisorLoc = DB.qr().query("select * from " + DB.LOCATION_TABLE + "_playadvisor where id = ?", handler, id);
+            if (playadvisorLoc != null) {
+
+                CoordinateReferenceSystem crs = CRS.decode("EPSG:4326");
+                List<Location> locs = DB.qr().query("select * from " + DB.LOCATION_TABLE + PlaymappingImporter.getPostfix() + " where pa_id is null", listHandler);
+                JSONArray ar = new JSONArray();
+                for (Location loc : locs) {
+                    JSONObject obj = new JSONObject(gson.toJson(loc, Location.class));
+                    Geometry end = loc.getGeom();
+
+                    try {
+
+                        if (end != null && playadvisorLoc.getGeom() != null) {
+                            double distance = JTS.orthodromicDistance(playadvisorLoc.getGeom().getCoordinate(), end.getCoordinate(), crs);
+                            obj.put("distance", distance/1000);
+                        } else {
+                            obj.put("distance", "-");
+                        }
+                    } catch (TransformException ex) {
+                        LOG.error("Error calculating distance: ", ex);
+                    }
+                    ar.put(obj);
+                }
+                result.put("data", ar);
+            } else {
+                result.put("message", "playadvisor location not found.");
+            }
+
+        } catch (NamingException | SQLException ex) {
+            LOG.error("Cannot get geometryConverter: ", ex);
+            result.put("message", "Cannot get geometryConverter: " + ex.getLocalizedMessage());
+        }
+
+        StreamingResolution res = new StreamingResolution("application/json", result.toString(4));
+        res.setFilename("");
+        res.setAttachment(true);
+        return res;
+    }
+
+    //<editor-fold desc="Getters and Setters" defaultstate="collapsed">
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+    // </editor-fold>
 
 }

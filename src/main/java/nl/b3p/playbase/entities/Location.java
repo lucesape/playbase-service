@@ -41,17 +41,16 @@ public class Location {
     private String website;
     private String email;
     private String phone;
-    private Double longitude;
-    private Double latitude;
+    private Double longitude = null;
+    private Double latitude = null;
     private String pm_guid;
     private String pa_id;
     private Integer parking;
     private Geometry geom;
-    private List<Map<String,Object>> images = new ArrayList<>();
-    private List<Map<String,Object>> documents = new ArrayList<>();
+    private List<Map<String, Object>> images = new ArrayList<>();
+    private List<Map<String, Object>> documents = new ArrayList<>();
     private Integer[] agecategories = new Integer[0];
-    
-    
+
     public Integer getId() {
         return id;
     }

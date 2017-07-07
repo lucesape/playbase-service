@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,7 +53,11 @@ public class PlayadvisorImporter extends Importer {
     private static final String AGECATEGORIES = "agecategories";
 
     private Map<String, String> parkingMapping;
-
+    
+    static{
+        postfix = "_playadvisor";
+    }
+    
     public PlayadvisorImporter() {
         super();
         playadvisorColumnToPlaybase = new HashMap<>();
@@ -91,7 +94,6 @@ public class PlayadvisorImporter extends Importer {
         // Strange english <> dutch mixup
         locationTypes.get("Speeltuinen").put("Indoor speeltuin", locationTypes.get("Speeltuinen").get("Binnenspeeltuin"));
         
-        postfix = "_playadvisor";
     }
 
     public void init(String[] header) {

@@ -35,22 +35,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <table id="playbasetable" class="display" cellspacing="0" width="100%">
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Position</th>
-                            <th>Office</th>
-                            <th>Extn.</th>
-                            <th>Start date</th>
-                            <th>Salary</th>
+                            <th>Naam</th>
+                            <th>Playadvisor id</th>
                         </tr>
                     </thead>
                     <tfoot>
                         <tr>
-                            <th>Name</th>
-                            <th>Position</th>
-                            <th>Office</th>
-                            <th>Extn.</th>
-                            <th>Start date</th>
-                            <th>Salary</th>
+                            <th>Naam</th>
+                            <th>playadvisor id</th>
                         </tr>
                     </tfoot>
                 </table>
@@ -59,22 +51,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <table id="playmappingtable" class="display" cellspacing="0" width="100%">
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Position</th>
-                            <th>Office</th>
-                            <th>Extn.</th>
-                            <th>Start date</th>
-                            <th>Salary</th>
+                            <th>Naam </th>
+                            <th>Afstand (km) </th>
+                            <th>Playmapping id</th>
                         </tr>
                     </thead>
                     <tfoot>
                         <tr>
-                            <th>Name</th>
-                            <th>Position</th>
-                            <th>Office</th>
-                            <th>Extn.</th>
-                            <th>Start date</th>
-                            <th>Salary</th>
+                            <th>Naam </th>
+                            <th>Afstand (km) </th>
+                            <th>Playmapping id</th>
                         </tr>
                     </tfoot>
                 </table>
