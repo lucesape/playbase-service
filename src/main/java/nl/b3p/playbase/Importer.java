@@ -17,6 +17,7 @@
 package nl.b3p.playbase;
 
 import com.vividsolutions.jts.io.ParseException;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
@@ -82,8 +83,9 @@ public abstract class Importer {
             log.error("Cannot initialize playmapping assettypes:", ex);
         }
 
-        try {
-            geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(DB.getConnection());
+        
+        try(Connection con = DB.getConnection()) {
+            geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(con);
         } catch (NamingException | SQLException ex) {
             log.error("Cannot get geometryConverter: ", ex);
         }

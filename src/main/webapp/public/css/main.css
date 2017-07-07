@@ -20,3 +20,19 @@
     margin-top: -21px;
     margin-bottom: 10px;
 }
+
+.tablesDiv {
+    display:flex;
+}
+
+.playmappingClass{
+    width:40%; 
+    margin-left: 50px;
+    float: left;
+    height:100px;
+}
+
+.playadvisorClass{
+    width:40%;
+    float: left;
+}

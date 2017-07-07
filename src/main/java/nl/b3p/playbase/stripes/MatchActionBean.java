@@ -20,6 +20,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.vividsolutions.jts.geom.Geometry;
 import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import javax.naming.NamingException;
@@ -67,7 +68,13 @@ public class MatchActionBean implements ActionBean {
     private static final Log LOG = LogFactory.getLog("MatchActionBean");
 
     @Validate
-    private Integer id;
+    private Integer playadvisorId;
+
+    @Validate
+    private Integer playmappingId;
+
+    @Validate
+    private String method;
 
     private Gson gson;
 
@@ -96,8 +103,8 @@ public class MatchActionBean implements ActionBean {
 
     public Resolution dataPlayadvisor() {
         JSONObject result = new JSONObject();
-        try {
-            GeometryJdbcConverter geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(DB.getConnection());
+        try (Connection con = DB.getConnection()) {
+            GeometryJdbcConverter geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(con);
             ResultSetHandler<List<Location>> handler = new BeanListHandler(Location.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
             String sql = "select * from " + DB.LOCATION_TABLE + "_playadvisor limit 10";
             List<Location> locs = DB.qr().query(sql, handler);
@@ -121,18 +128,18 @@ public class MatchActionBean implements ActionBean {
     public Resolution dataPlaymapping() throws FactoryException {
         JSONObject result = new JSONObject();
         GeometryJdbcConverter geometryConverter = null;
-        try {
-            geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(DB.getConnection());
+        try (Connection con = DB.getConnection()) {
+            geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(con);
             ResultSetHandler<List<Location>> listHandler = new BeanListHandler(Location.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
             ResultSetHandler<Location> handler = new BeanHandler(Location.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
 
-            Location playadvisorLoc = DB.qr().query("select * from " + DB.LOCATION_TABLE + "_playadvisor where id = ?", handler, id);
+            Location playadvisorLoc = DB.qr().query("select * from " + DB.LOCATION_TABLE + "_playadvisor where id = ?", handler, playadvisorId);
             if (playadvisorLoc != null) {
 
                 CoordinateReferenceSystem crs = CRS.decode("EPSG:4326");
-                
+
                 NormalizedLevenshtein l = new NormalizedLevenshtein();
-        
+
                 List<Location> locs = DB.qr().query("select * from " + DB.LOCATION_TABLE + PlaymappingImporter.getPostfix() + " where pa_id is null", listHandler);
                 JSONArray ar = new JSONArray();
                 for (Location loc : locs) {
@@ -143,15 +150,15 @@ public class MatchActionBean implements ActionBean {
 
                         if (end != null && playadvisorLoc.getGeom() != null) {
                             double distance = JTS.orthodromicDistance(playadvisorLoc.getGeom().getCoordinate(), end.getCoordinate(), crs);
-                            obj.put("distance", distance/1000);
+                            obj.put("distance", distance / 1000);
                         } else {
                             obj.put("distance", "-");
                         }
-                        
+
                     } catch (TransformException ex) {
                         LOG.error("Error calculating distance: ", ex);
                     }
-                    double similarity = l.similarity(playadvisorLoc.getTitle(), loc.getTitle()) *10;
+                    double similarity = l.similarity(playadvisorLoc.getTitle(), loc.getTitle()) * 10;
                     obj.put("similarity", Math.round(similarity * 10.0) / 10.0);
                     ar.put(obj);
                 }
@@ -171,14 +178,33 @@ public class MatchActionBean implements ActionBean {
         return res;
     }
 
-    //<editor-fold desc="Getters and Setters" defaultstate="collapsed">
-    public Integer getId() {
-        return id;
+    public Resolution save() {
+        return view();
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    //<editor-fold desc="Getters and Setters" defaultstate="collapsed">
+    public Integer getPlayadvisorId() {
+        return playadvisorId;
+    }
+
+    public void setPlayadvisorId(Integer playadvisorId) {
+        this.playadvisorId = playadvisorId;
+    }
+
+    public Integer getPlaymappingId() {
+        return playmappingId;
+    }
+
+    public void setPlaymappingId(Integer playmappingId) {
+        this.playmappingId = playmappingId;
+    }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public void setMethod(String method) {
+        this.method = method;
     }
     // </editor-fold>
-
 }

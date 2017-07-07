@@ -30,8 +30,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <h1>Match Playadvisor met playmapping</h1>
 
         <jsp:include page="/WEB-INF/jsp/common/messages.jsp"/>
-        <div style="display:flex; height:400px;"> 
-            <div style="width:40%;">
+        <div>
+        <div class="tablesDiv"> 
+            <div class="playadvisorClass">
                 <table id="playbasetable" class="display" cellspacing="0" width="100%">
                     <thead>
                         <tr>
@@ -47,12 +48,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     </tfoot>
                 </table>
             </div>
-            <div style="height:40%; margin-left: 50px;">
+            <div class="playmappingClass">
                 <table id="playmappingtable" class="display" cellspacing="0" width="100%">
                     <thead>
                         <tr>
                             <th>Naam </th>
-                            <th>Playmapping id</th>
                             <th>Afstand (km) </th>
                             <th>Naam gelijkheid (0 t/m 10)</th>
                         </tr>
@@ -60,7 +60,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     <tfoot>
                         <tr>
                             <th>Naam </th>
-                            <th>Playmapping id</th>
                             <th>Afstand (km) </th>
                             <th>Naam gelijkheid (0 t/m 10)</th>
                         </tr>
@@ -69,7 +68,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             </div>
         </div>
         <div>
-            sadfasdf
+            <stripes:form beanclass="nl.b3p.playbase.stripes.MatchActionBean"> 
+                <stripes:hidden name="playadvisorId" id="playadvisorId"/>
+                <stripes:hidden name="playmappingId" id="playmappingId" />
+                Playadvisor: <span id="playadvisor"></span> <br/>
+                Playmapping: <span id="playmapping"></span> <br/>
+                <stripes:select name="method">
+                    <stripes:option value="" label=" -- maak een keuze -- "/>
+                    <stripes:option value="merge" label="Samenvoegen"/>
+                    <stripes:option value="add" label="Toevoegen"/>
+                </stripes:select>
+                <stripes:submit name="save">Opslaan</stripes:submit>
+            </stripes:form>
         </div>
+</div>
     </stripes:layout-component>
 </stripes:layout-render>

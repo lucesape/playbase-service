@@ -17,6 +17,7 @@
 package nl.b3p.playbase.stripes;
 
 import java.sql.Array;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -147,7 +148,8 @@ public class DashboardJSONActionBean implements ActionBean {
     private List<Map<String,Object>> getAggregatie(String aggregatie, String geomConverter, String locTable, String locValue) throws NamingException, SQLException {
         final List<String> id = new ArrayList<>();
         id.add(locValue); 
-        Array toSelect = DB.getConnection().createArrayOf("text", id.toArray());
+        Connection con = DB.getConnection();
+        Array toSelect = con.createArrayOf("text", id.toArray());
         
         List<String> locationFields = fieldsLocationTables.get(locTable);
         String checkColumn = locationFields.get(0).split(":")[0];
@@ -216,7 +218,7 @@ public class DashboardJSONActionBean implements ActionBean {
         sb.append("WHERE lg.").append(checkColumn).append(" = ANY(?) ");
 
         List<Map<String,Object>> rows = DB.qr().query(sb.toString(), new MapListHandler(), toSelect);
-        
+        con.close();
         return rows;
     }
     

@@ -22,10 +22,10 @@ $(document).ready(function () {
 });
 
 function PlaymappingMatcher() {
-    this.playbasetable = null;
+    this.playadvisor = null;
     this.playmappingtable = null;
     this.init = function () {
-        this.playbasetable = $('#playbasetable').DataTable({
+        this.playadvisor = $('#playbasetable').DataTable({
             /*"processing": true,
              "serverSide": true,*/
             "ajax": "dataPlayadvisor",
@@ -39,9 +39,9 @@ function PlaymappingMatcher() {
             if ($(this).hasClass('selected')) {
                 $(this).removeClass('selected');
             } else {
-                me.playbasetable.$('tr.selected').removeClass('selected');
+                me.playadvisor.$('tr.selected').removeClass('selected');
                 $(this).addClass('selected');
-                me.playadvisorClicked(me.playbasetable.row(this).data());
+                me.playadvisorClicked(me.playadvisor.row(this).data());
             }
         })).bind(this);
 
@@ -55,6 +55,8 @@ function PlaymappingMatcher() {
     this.playadvisorClicked = function (data) {
         console.log("playadvisor clicked", data);
         this.loadPlaymappingTable(data.id);
+        $("#playadvisor").text(data.title + " (" + data.id + ")");
+        $("#playadvisorId").val(data.id);
     };
 
     this.loadPlaymappingTable = function (id) {
@@ -65,16 +67,16 @@ function PlaymappingMatcher() {
             "ajax": {
                 url: "dataPlaymapping",
                 data: {
-                    id: id
+                    playadvisorId: id
                 }
             },
             "columns": [
                 {"data": "title"},
-                {"data": "pm_guid"},
+               // {"data": "pm_guid"},
                 {"data": "distance"},
                 {"data": "similarity"}
             ],
-            order: [[2, "asc"],[3, "desc"]]
+            order: [[1, "asc"],[2, "desc"]]
         });
         var me = this;
         $('#playmappingtable tbody').on('click', 'tr', (function () {
@@ -83,7 +85,7 @@ function PlaymappingMatcher() {
             } else {
                 me.playmappingtable.$('tr.selected').removeClass('selected');
                 $(this).addClass('selected');
-                //me.playadvisorClicked(me.playbasetable.row().data());
+                me.playmappingClicked(me.playadvisor.row().data());
             }
         })).bind(this);
 
@@ -92,8 +94,10 @@ function PlaymappingMatcher() {
             this.playmappingtable.row('.selected').remove().draw(false);
         });
     };
-
-    this.mappingConfirmed = function (playadvisorid, playmappingid) {
-
+    
+    this.playmappingClicked = function(data){
+      
+        $("#playmapping").text(data.title + " (" + data.id + ")");
+        $("#playmappingid").val(data.id);  
     };
 }
