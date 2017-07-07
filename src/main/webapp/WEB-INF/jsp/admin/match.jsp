@@ -32,7 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <jsp:include page="/WEB-INF/jsp/common/messages.jsp"/>
         <div style="display:flex;"> 
             <div style="width:40%;">
-                <table id="example" class="display" cellspacing="0" width="100%">
+                <table id="playbasetable" class="display" cellspacing="0" width="100%">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -56,7 +56,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 </table>
             </div>
             <div style="width:40%; margin-left: 50px;">
-                <table id="example2" class="display" cellspacing="0" width="100%">
+                <table id="playmappingtable" class="display" cellspacing="0" width="100%">
                     <thead>
                         <tr>
                             <th>Name</th>

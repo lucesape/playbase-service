@@ -15,44 +15,43 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
+var matcher = null;
 $(document).ready(function () {
-    var table = $('#example').DataTable({
-        /*"processing": true,
-         "serverSide": true,*/
-        "ajax": "data"
-    });
-
-    $('#example tbody').on('click', 'tr', function () {
-        if ($(this).hasClass('selected')) {
-            $(this).removeClass('selected');
-        } else {
-            table.$('tr.selected').removeClass('selected');
-            $(this).addClass('selected');
-        }
-    });
-
-    
-    $('#button').click(function () {
-        table.row('.selected').remove().draw(false);
-    });
-    
-    var table2 = $('#example2').DataTable({
-        /*"processing": true,
-         "serverSide": true,*/
-        "ajax": "data"
-    });
-
-    $('#example2 tbody').on('click', 'tr', function () {
-        if ($(this).hasClass('selected')) {
-            $(this).removeClass('selected');
-        } else {
-            table2.$('tr.selected').removeClass('selected');
-            $(this).addClass('selected');
-        }
-    });
-
-    $('#button').click(function () {
-        table2.row('.selected').remove().draw(false);
-    });
+    matcher = new PlaymappingMatcher()
+    matcher.init();
 });
+
+function PlaymappingMatcher(){
+    this.playbasetable = null;
+    this.init = function(){
+         this.playbasetable = $('#playbasetable').DataTable({
+        /*"processing": true,
+         "serverSide": true,*/
+            "ajax": "data"
+        });
+        var me = this;
+        $('#playbasetable tbody').on('click', 'tr', (function () {
+            if ($(this).hasClass('selected')) {
+                $(this).removeClass('selected');
+            } else {
+                me.playbasetable.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+                me.playadvisorClicked(me.playbasetable.row().data());
+            }
+        })).bind(this);
+
+
+        $('#button').click(function () {
+            this.playbasetable.row('.selected').remove().draw(false);
+        });
+
+    };
+    
+    this.playadvisorClicked = function(data){
+        console.log("playadvisor clicked",data);
+    };
+    
+    this.mappingConfirmed  = function(playadvisorid, playmappingid){
+        
+    };
+}
