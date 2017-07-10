@@ -25,7 +25,12 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 import nl.b3p.loader.jdbc.GeometryJdbcConverter;
 import nl.b3p.loader.jdbc.GeometryJdbcConverterFactory;
+import nl.b3p.loader.util.DbUtilsGeometryColumnConverter;
+import nl.b3p.playbase.entities.Location;
+import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hsqldb.jdbc.JDBCDataSource;
@@ -56,6 +61,9 @@ public class TestUtil {
     
     protected QueryRunner run;
     
+    protected GeometryJdbcConverter geometryconverter;
+    protected ResultSetHandler<Location> handler;
+    
     @Rule 
     public TestName testName = new TestName();
     
@@ -77,8 +85,9 @@ public class TestUtil {
                     initDB("initdata_assets.sql");
                 }
             }
-            GeometryJdbcConverter gjc = GeometryJdbcConverterFactory.getGeometryJdbcConverter(datasource.getConnection());
-            run = new QueryRunner(datasource, gjc.isPmdKnownBroken());
+            geometryconverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(datasource.getConnection());
+            handler = new BeanHandler(Location.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryconverter)));
+            run = new QueryRunner(datasource, geometryconverter.isPmdKnownBroken());
 
             PowerMockito.mockStatic(DB.class);
             Mockito.when(DB.qr()).thenReturn(getDS());

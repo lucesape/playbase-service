@@ -23,8 +23,7 @@ import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Map;
 import javax.naming.NamingException;
 import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
@@ -47,6 +46,7 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.geotools.geometry.jts.JTS;
@@ -198,19 +198,28 @@ public class MatchActionBean implements ActionBean {
                 toSave = playadvisorLoc;
                 toSave.setId(null);
             }
+            transferImages(playadvisorLoc, playmappingLoc, importer);
             importer.saveLocation(toSave, new ImportReport());
             
-            DB.qr().update("delete from " + DB.LOCATION_TABLE + "_playadvisor where id = ?", playadvisorId);
+           // DB.qr().update("delete from " + DB.LOCATION_TABLE + "_playadvisor where id = ?", playadvisorId);
         } catch (NamingException | SQLException ex) {
             LOG.error("cannot merge locations",ex);
         }
         return view();
     }
     
-    protected Location mergeLocations(Location playadvisor, Location playmapping){
+    protected Location mergeLocations(Location playadvisor, Location playmapping) throws NamingException, SQLException{
         playadvisor.setPm_guid(playmapping.getPm_guid());
         playadvisor.setId(playmapping.getId());
+        
+        
         return playadvisor;
+    }
+
+    protected void transferImages(Location playadvisor, Location playmapping, PlaymappingImporter importer) throws NamingException, SQLException {
+        List<Map<String,Object>> paImages = DB.qr().query("select * from " + DB.IMAGES_TABLE + "_playadvisor where location = ?", new MapListHandler(), playadvisorId);
+        importer.saveImagesAndWords(paImages, null, playmapping.getId(), DB.IMAGES_TABLE, false);
+        DB.qr().update("delete from " + DB.IMAGES_TABLE + "_playadvisor where location = ?", playadvisorId);
     }
 
     //<editor-fold desc="Getters and Setters" defaultstate="collapsed">

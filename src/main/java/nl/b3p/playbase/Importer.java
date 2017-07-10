@@ -186,7 +186,7 @@ public abstract class Importer {
             id = savedLocation.getId();
             report.increaseInserted(ImportType.LOCATION);
             List<Map<String, Object>> images = location.getImages();
-            saveImagesAndWords(images, null, savedLocation.getId(), DB.IMAGES_TABLE + postfix);
+            saveImagesAndWords(images, null, savedLocation.getId(), DB.IMAGES_TABLE + postfix, true);
         } else {
             id = getLocationId(location);
 
@@ -351,8 +351,8 @@ public abstract class Importer {
 
         Integer locationId = asset.getLocation();
 
-        saveImagesAndWords(asset.getImages(), id, locationId, DB.IMAGES_TABLE + postfix);
-        saveImagesAndWords(asset.getDocuments(), id, locationId, DB.ASSETS_DOCUMENTS_TABLE + postfix);
+        saveImagesAndWords(asset.getImages(), id, locationId, DB.IMAGES_TABLE + postfix, true);
+        saveImagesAndWords(asset.getDocuments(), id, locationId, DB.ASSETS_DOCUMENTS_TABLE + postfix, true);
     }
 
     protected void saveAssetsAgeCategories(Asset asset, Integer location) throws NamingException, SQLException {
@@ -424,8 +424,10 @@ public abstract class Importer {
         return id;
     }
 
-    protected void saveImagesAndWords(List<Map<String, Object>> images, Integer assetId, Integer locationId, String table) throws NamingException, SQLException {
-        DB.qr().update("DELETE FROM " + table + " WHERE equipment = " + assetId);
+    public void saveImagesAndWords(List<Map<String, Object>> images, Integer assetId, Integer locationId, String table, boolean removeBeforeAdding) throws NamingException, SQLException {
+        if(removeBeforeAdding){
+            DB.qr().update("DELETE FROM " + table + " WHERE equipment = " + assetId);
+        }
         if (images != null) {
             for (Map<String, Object> image : images) {
                 StringBuilder sb = new StringBuilder();
