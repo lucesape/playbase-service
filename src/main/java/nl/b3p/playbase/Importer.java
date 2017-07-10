@@ -17,6 +17,7 @@
 package nl.b3p.playbase;
 
 import com.vividsolutions.jts.io.ParseException;
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -35,6 +36,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ArrayListHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -227,6 +229,21 @@ public abstract class Importer {
             sb.append(");");
             DB.qr().insert(sb.toString(), new ScalarHandler<>());
         }
+    }
+    
+    public void saveLocationType(Integer categoryId, Integer locationId) throws NamingException, SQLException, UnsupportedEncodingException {
+        StringBuilder sb = new StringBuilder();
+        sb.append("INSERT ");
+        sb.append("INTO ");
+        sb.append(DB.LOCATION_CATEGORY_TABLE).append(postfix);
+        sb.append("(");
+        sb.append("location,");
+        sb.append("category)");
+        sb.append("VALUES( ");
+        sb.append(locationId).append(",");
+        sb.append(categoryId);
+        sb.append(");");
+        DB.qr().insert(sb.toString(), new ScalarHandler<>());
     }
 
     protected boolean locationExists(Location location) throws NamingException, SQLException {

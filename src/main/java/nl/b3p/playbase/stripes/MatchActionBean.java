@@ -20,12 +20,15 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.vividsolutions.jts.geom.Geometry;
 import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.naming.NamingException;
 import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
@@ -204,12 +207,15 @@ public class MatchActionBean implements ActionBean {
             transferFacilities(playadvisorLoc, playmappingLoc, importer);
             transferAccessibilities(playadvisorLoc, playmappingLoc, importer);
             transferLocationAgecategories(playadvisorLoc, playmappingLoc, importer);
+            transferLocationCategories(playadvisorLoc, playmappingLoc, importer);
             
             importer.saveLocation(toSave, new ImportReport());
             
             DB.qr().update("delete from " + DB.LOCATION_TABLE + "_playadvisor where id = ?", playadvisorId);
         } catch (NamingException | SQLException ex) {
             LOG.error("cannot merge locations",ex);
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(MatchActionBean.class.getName()).log(Level.SEVERE, null, ex);
         }
         return view();
     }
@@ -252,6 +258,14 @@ public class MatchActionBean implements ActionBean {
         }
         importer.saveLocationAgeCategory( playmapping.getId(), ids, false);
         DB.qr().update("delete from " + DB.LOCATION_AGE_CATEGORY_TABLE + "_playadvisor where location = ?", playadvisorId);
+    }
+
+    protected void transferLocationCategories(Location playadvisor, Location playmapping, PlaymappingImporter importer) throws NamingException, SQLException, UnsupportedEncodingException {
+        List<Map<String,Object>> paAccessibilities = DB.qr().query("select location, category from " + DB.LOCATION_CATEGORY_TABLE + "_playadvisor where location = ?", new MapListHandler(), playadvisorId);
+        for (Map<String, Object> paAccessibility : paAccessibilities) {
+            importer.saveLocationType((Integer)paAccessibility.get("category"), playmapping.getId());
+        }
+        DB.qr().update("delete from " + DB.LOCATION_CATEGORY_TABLE + "_playadvisor where location = ?", playadvisorId);
     }
 
     //<editor-fold desc="Getters and Setters" defaultstate="collapsed">

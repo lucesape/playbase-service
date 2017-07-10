@@ -341,18 +341,7 @@ public class PlayadvisorImporter extends Importer {
             if (categoryId == null) {
                 throw new IllegalArgumentException("Unknown category given: main:" + main + ", subcategory: " + category+ ". Cannot save types for location with id: " + id);
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("INSERT ");
-            sb.append("INTO ");
-            sb.append(DB.LOCATION_CATEGORY_TABLE).append(postfix);
-            sb.append("(");
-            sb.append("location,");
-            sb.append("category)");
-            sb.append("VALUES( ");
-            sb.append(id).append(",");
-            sb.append(categoryId);
-            sb.append(");");
-            DB.qr().insert(sb.toString(), new ScalarHandler<>());
+            this.saveLocationType(categoryId, id);
         }
     }
 
