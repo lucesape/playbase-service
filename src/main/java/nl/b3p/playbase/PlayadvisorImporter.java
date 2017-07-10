@@ -297,21 +297,10 @@ public class PlayadvisorImporter extends Importer {
         String[] facilities = facilitiesString.split("\\|");
         for (String facility : facilities) {
             Integer facilityId = facilityTypes.get(facility);
-            if(facilityId == null){
+            if (facilityId == null) {
                 throw new IllegalArgumentException("Unknown facility given: " + facility + ". Cannot save facilities for location with id: " + locationId);
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("INSERT ");
-            sb.append("INTO ");
-            sb.append(DB.LOCATION_FACILITIES_TABLE).append(postfix);
-            sb.append("(");
-            sb.append("location,");
-            sb.append("facility)");
-            sb.append("VALUES( ");
-            sb.append(locationId).append(",");
-            sb.append(facilityId);
-            sb.append(");");
-            DB.qr().insert(sb.toString(), new ScalarHandler<>());
+            this.saveFacilities(locationId, facilityId);
         }
     }
 

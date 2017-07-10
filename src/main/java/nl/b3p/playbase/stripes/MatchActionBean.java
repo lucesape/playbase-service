@@ -199,9 +199,11 @@ public class MatchActionBean implements ActionBean {
                 toSave.setId(null);
             }
             transferImages(playadvisorLoc, playmappingLoc, importer);
+            transferFacilities(playadvisorLoc, playmappingLoc, importer);
+            
             importer.saveLocation(toSave, new ImportReport());
             
-           // DB.qr().update("delete from " + DB.LOCATION_TABLE + "_playadvisor where id = ?", playadvisorId);
+            DB.qr().update("delete from " + DB.LOCATION_TABLE + "_playadvisor where id = ?", playadvisorId);
         } catch (NamingException | SQLException ex) {
             LOG.error("cannot merge locations",ex);
         }
@@ -220,6 +222,14 @@ public class MatchActionBean implements ActionBean {
         List<Map<String,Object>> paImages = DB.qr().query("select * from " + DB.IMAGES_TABLE + "_playadvisor where location = ?", new MapListHandler(), playadvisorId);
         importer.saveImagesAndWords(paImages, null, playmapping.getId(), DB.IMAGES_TABLE, false);
         DB.qr().update("delete from " + DB.IMAGES_TABLE + "_playadvisor where location = ?", playadvisorId);
+    }
+
+    protected void transferFacilities(Location playadvisor, Location playmapping, PlaymappingImporter importer) throws NamingException, SQLException {
+        List<Map<String,Object>> paFacilities = DB.qr().query("select location, facility from " + DB.LOCATION_FACILITIES_TABLE + "_playadvisor where location = ?", new MapListHandler(), playadvisorId);
+        for (Map<String, Object> facility : paFacilities) {
+            importer.saveFacilities(playmapping.getId(), (Integer)facility.get("facility"));
+        }
+        DB.qr().update("delete from " + DB.LOCATION_FACILITIES_TABLE + "_playadvisor where location = ?", playadvisorId);
     }
 
     //<editor-fold desc="Getters and Setters" defaultstate="collapsed">

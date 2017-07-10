@@ -250,7 +250,26 @@ public abstract class Importer {
         return id;
     }
 
+    public void saveFacilities(Integer locationId, Integer facilityId) throws NamingException, SQLException {
+
+       
+            StringBuilder sb = new StringBuilder();
+            sb.append("INSERT ");
+            sb.append("INTO ");
+            sb.append(DB.LOCATION_FACILITIES_TABLE).append(postfix);
+            sb.append("(");
+            sb.append("location,");
+            sb.append("facility)");
+            sb.append("VALUES( ");
+            sb.append(locationId).append(",");
+            sb.append(facilityId);
+            sb.append(");");
+            DB.qr().insert(sb.toString(), new ScalarHandler<>());
+        
+    }
+
     // </editor-fold>
+    
     // <editor-fold desc="Assets" defaultstate="collapsed">
     protected void saveAsset(Asset asset, ImportReport report) throws NamingException, SQLException {
         Integer id = null;
