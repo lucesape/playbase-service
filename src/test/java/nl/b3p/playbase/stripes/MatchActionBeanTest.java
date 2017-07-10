@@ -59,15 +59,14 @@ public class MatchActionBeanTest extends TestUtil{
     @Test
     public void testMerge() throws NamingException, SQLException{
         List origlocations = DB.qr().query("Select * from " + DB.LOCATION_TABLE, new ArrayListHandler());
-        assertEquals(485, origlocations.size());
-        
+        int origSize = origlocations.size();
         List palocations = DB.qr().query("Select * from " + DB.LOCATION_TABLE + "_playadvisor", new ArrayListHandler());
         assertEquals(1, palocations.size());
         
         mergeLocations();
         
         origlocations = DB.qr().query("Select * from " + DB.LOCATION_TABLE, new ArrayListHandler());
-        assertEquals(485, origlocations.size());
+        assertEquals(origSize, origlocations.size());
         
         palocations = DB.qr().query("Select * from " + DB.LOCATION_TABLE + "_playadvisor", new ArrayListHandler());
         assertEquals(0, palocations.size());
