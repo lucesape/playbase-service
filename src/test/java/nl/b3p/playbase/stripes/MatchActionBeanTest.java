@@ -183,6 +183,34 @@ public class MatchActionBeanTest extends TestUtil{
         assertEquals(0, imagesPa.size());
     }
 
+    @Test
+    public void testLocationAgecategoriesAfterMerge()throws NamingException, SQLException {
+        List<Object[]> facilitiesBefore = DB.qr().query("select * from " + DB.LOCATION_AGE_CATEGORY_TABLE + " where location = ?", new ArrayListHandler(), playmappingId);
+        int size = facilitiesBefore.size();
+        mergeLocations();
+        
+        List<Object[]> facilities = DB.qr().query("select * from " + DB.LOCATION_AGE_CATEGORY_TABLE + " where location = ?", new ArrayListHandler(), playmappingId);
+        assertEquals(size + 2, facilities.size());
+        
+        
+        List<Object[]> facPa = DB.qr().query("select * from " + DB.LOCATION_AGE_CATEGORY_TABLE + "_playadvisor where location = ?", new ArrayListHandler(), playadvisorId);
+        assertEquals(0, facPa.size());
+    }
+    
+    @Test
+    public void testLocationAgecategoriesAfterAdd()throws NamingException, SQLException {
+        List<Object[]> imagesBefore = DB.qr().query("select * from " + DB.LOCATION_AGE_CATEGORY_TABLE , new ArrayListHandler());
+        int size = imagesBefore.size();
+        addLocations();
+        
+        List<Object[]> images = DB.qr().query("select * from " + DB.LOCATION_AGE_CATEGORY_TABLE, new ArrayListHandler());
+        assertEquals(size + 2, images.size());
+        
+        
+        List<Object[]> imagesPa = DB.qr().query("select * from " + DB.LOCATION_AGE_CATEGORY_TABLE + "_playadvisor where location = ?", new ArrayListHandler(), playadvisorId);
+        assertEquals(0, imagesPa.size());
+    }
+
     
 
     private void mergeLocations() {

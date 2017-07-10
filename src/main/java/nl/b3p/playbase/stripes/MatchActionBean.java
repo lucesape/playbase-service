@@ -22,6 +22,8 @@ import com.vividsolutions.jts.geom.Geometry;
 import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.naming.NamingException;
@@ -201,6 +203,7 @@ public class MatchActionBean implements ActionBean {
             transferImages(playadvisorLoc, playmappingLoc, importer);
             transferFacilities(playadvisorLoc, playmappingLoc, importer);
             transferAccessibilities(playadvisorLoc, playmappingLoc, importer);
+            transferLocationAgecategories(playadvisorLoc, playmappingLoc, importer);
             
             importer.saveLocation(toSave, new ImportReport());
             
@@ -239,6 +242,16 @@ public class MatchActionBean implements ActionBean {
             importer.saveAccessibility(playmapping.getId(), (Integer)acc.get("accessibility"));
         }
         DB.qr().update("delete from " + DB.LOCATION_ACCESSIBILITY_TABLE + "_playadvisor where location = ?", playadvisorId);
+    }
+
+    protected void transferLocationAgecategories(Location playadvisor, Location playmapping, PlaymappingImporter importer) throws NamingException, SQLException {
+        List<Map<String,Object>> paAccessibilities = DB.qr().query("select location, agecategory from " + DB.LOCATION_AGE_CATEGORY_TABLE + "_playadvisor where location = ?", new MapListHandler(), playadvisorId);
+        List<Integer> ids = new ArrayList<>();
+        for (Map<String, Object> paAccessibility : paAccessibilities) {
+            ids.add((Integer)paAccessibility.get("agecategory"));
+        }
+        importer.saveLocationAgeCategory( playmapping.getId(), ids, false);
+        DB.qr().update("delete from " + DB.LOCATION_AGE_CATEGORY_TABLE + "_playadvisor where location = ?", playadvisorId);
     }
 
     //<editor-fold desc="Getters and Setters" defaultstate="collapsed">

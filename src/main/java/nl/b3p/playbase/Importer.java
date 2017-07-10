@@ -208,13 +208,15 @@ public abstract class Importer {
         return id;
     }
 
-    protected void saveLocationAgeCategory(Integer location, List<Integer> agecategories) throws NamingException, SQLException {
-        DB.qr().update("DELETE FROM " + DB.LOCATION_AGE_CATEGORY_TABLE + postfix + " WHERE location = " + location);
+    public void saveLocationAgeCategory(Integer location, List<Integer> agecategories, boolean removeBeforeAdding) throws NamingException, SQLException {
+        if(removeBeforeAdding){
+            DB.qr().update("DELETE FROM " + DB.LOCATION_AGE_CATEGORY_TABLE + postfix + " WHERE location = " + location);
+        }
         for (Integer agecategory : agecategories) {
             StringBuilder sb = new StringBuilder();
             sb.append("INSERT ");
             sb.append("INTO ");
-            sb.append(DB.LOCATION_AGE_CATEGORY_TABLE + postfix);
+            sb.append(DB.LOCATION_AGE_CATEGORY_TABLE).append(postfix);
             sb.append("(");
             sb.append("location,");
             sb.append("agecategory)");

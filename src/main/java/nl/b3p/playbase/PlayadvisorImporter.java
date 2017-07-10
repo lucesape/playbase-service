@@ -138,7 +138,7 @@ public class PlayadvisorImporter extends Importer {
             saveAsset(asset, report);
         }
 
-        saveLocationAgeCategory(id, Arrays.asList(location.getAgecategories()));
+        saveLocationAgeCategory(id, Arrays.asList(location.getAgecategories()), true);
    
         try {
             if (((String) locationMap.get(LOCATIONSUBTYPE)).length() > 0) {
