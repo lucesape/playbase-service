@@ -268,6 +268,22 @@ public abstract class Importer {
         
     }
 
+    
+    public void saveAccessibility(Integer locationId, Integer id) throws NamingException, SQLException {
+        StringBuilder sb = new StringBuilder();
+        sb.append("INSERT ");
+        sb.append("INTO ");
+        sb.append(DB.LOCATION_ACCESSIBILITY_TABLE).append(postfix);
+        sb.append("(");
+        sb.append("location,");
+        sb.append("accessibility)");
+        sb.append("VALUES( ");
+        sb.append(locationId).append(",");
+        sb.append(id);
+        sb.append(");");
+        DB.qr().insert(sb.toString(), new ScalarHandler<>());
+    }
+
     // </editor-fold>
     
     // <editor-fold desc="Assets" defaultstate="collapsed">

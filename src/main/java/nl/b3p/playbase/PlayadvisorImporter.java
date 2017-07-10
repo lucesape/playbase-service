@@ -316,18 +316,7 @@ public class PlayadvisorImporter extends Importer {
             if (id == null) {
                 throw new IllegalArgumentException("Unknown accessibilty given: " + acc + ". Cannot save types for location with id: " + locationId);
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("INSERT ");
-            sb.append("INTO ");
-            sb.append(DB.LOCATION_ACCESSIBILITY_TABLE).append(postfix);
-            sb.append("(");
-            sb.append("location,");
-            sb.append("accessibility)");
-            sb.append("VALUES( ");
-            sb.append(locationId).append(",");
-            sb.append(id);
-            sb.append(");");
-            DB.qr().insert(sb.toString(), new ScalarHandler<>());
+            this.saveAccessibility(locationId, id);
         }
     }
 

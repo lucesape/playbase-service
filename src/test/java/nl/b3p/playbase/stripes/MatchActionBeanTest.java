@@ -155,6 +155,35 @@ public class MatchActionBeanTest extends TestUtil{
         assertEquals(0, imagesPa.size());
     }
 
+    @Test
+    public void testAccessibilitiesAfterMerge()throws NamingException, SQLException {
+        List<Object[]> facilitiesBefore = DB.qr().query("select * from " + DB.LOCATION_ACCESSIBILITY_TABLE + " where location = ?", new ArrayListHandler(), playmappingId);
+        int size = facilitiesBefore.size();
+        mergeLocations();
+        
+        List<Object[]> facilities = DB.qr().query("select * from " + DB.LOCATION_ACCESSIBILITY_TABLE + " where location = ?", new ArrayListHandler(), playmappingId);
+        assertEquals(size + 1, facilities.size());
+        
+        
+        List<Object[]> facPa = DB.qr().query("select * from " + DB.LOCATION_ACCESSIBILITY_TABLE + "_playadvisor where location = ?", new ArrayListHandler(), playadvisorId);
+        assertEquals(0, facPa.size());
+    }
+    
+    @Test
+    public void testAccessibilitiesAfterAdd()throws NamingException, SQLException {
+        List<Object[]> imagesBefore = DB.qr().query("select * from " + DB.LOCATION_ACCESSIBILITY_TABLE , new ArrayListHandler());
+        int size = imagesBefore.size();
+        addLocations();
+        
+        List<Object[]> images = DB.qr().query("select * from " + DB.LOCATION_ACCESSIBILITY_TABLE, new ArrayListHandler());
+        assertEquals(size + 1, images.size());
+        
+        
+        List<Object[]> imagesPa = DB.qr().query("select * from " + DB.LOCATION_ACCESSIBILITY_TABLE + "_playadvisor where location = ?", new ArrayListHandler(), playadvisorId);
+        assertEquals(0, imagesPa.size());
+    }
+
+    
 
     private void mergeLocations() {
         instance.setPlayadvisorId(playadvisorId);

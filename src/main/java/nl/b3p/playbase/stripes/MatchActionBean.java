@@ -200,6 +200,7 @@ public class MatchActionBean implements ActionBean {
             }
             transferImages(playadvisorLoc, playmappingLoc, importer);
             transferFacilities(playadvisorLoc, playmappingLoc, importer);
+            transferAccessibilities(playadvisorLoc, playmappingLoc, importer);
             
             importer.saveLocation(toSave, new ImportReport());
             
@@ -230,6 +231,14 @@ public class MatchActionBean implements ActionBean {
             importer.saveFacilities(playmapping.getId(), (Integer)facility.get("facility"));
         }
         DB.qr().update("delete from " + DB.LOCATION_FACILITIES_TABLE + "_playadvisor where location = ?", playadvisorId);
+    }
+
+    protected void transferAccessibilities(Location playadvisor, Location playmapping, PlaymappingImporter importer) throws NamingException, SQLException {
+        List<Map<String,Object>> paAccessibilities = DB.qr().query("select location, accessibility from " + DB.LOCATION_ACCESSIBILITY_TABLE + "_playadvisor where location = ?", new MapListHandler(), playadvisorId);
+        for (Map<String, Object> acc : paAccessibilities) {
+            importer.saveAccessibility(playmapping.getId(), (Integer)acc.get("accessibility"));
+        }
+        DB.qr().update("delete from " + DB.LOCATION_ACCESSIBILITY_TABLE + "_playadvisor where location = ?", playadvisorId);
     }
 
     //<editor-fold desc="Getters and Setters" defaultstate="collapsed">
