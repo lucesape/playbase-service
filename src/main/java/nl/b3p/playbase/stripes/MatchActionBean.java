@@ -24,7 +24,6 @@ import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -45,6 +44,7 @@ import nl.b3p.loader.util.DbUtilsGeometryColumnConverter;
 import nl.b3p.playbase.ImportReport;
 import nl.b3p.playbase.PlaymappingImporter;
 import nl.b3p.playbase.db.DB;
+import nl.b3p.playbase.entities.Asset;
 import nl.b3p.playbase.entities.Location;
 import nl.b3p.playbase.util.GeometryGsonSerializer;
 import org.apache.commons.dbutils.BasicRowProcessor;
@@ -191,6 +191,7 @@ public class MatchActionBean implements ActionBean {
             GeometryJdbcConverter geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(con);
 
             ResultSetHandler<Location> handler = new BeanHandler(Location.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
+            ResultSetHandler<List<Asset>> assHandler = new BeanListHandler(Asset.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
             Location playadvisorLoc = DB.qr().query("select * from " + DB.LOCATION_TABLE + "_playadvisor where id = ?", handler, playadvisorId);
             Location playmappingLoc = DB.qr().query("select * from " + DB.LOCATION_TABLE + " where id = ?", handler, playmappingId);
             
@@ -208,6 +209,7 @@ public class MatchActionBean implements ActionBean {
             transferAccessibilities(playadvisorLoc, playmappingLoc, importer);
             transferLocationAgecategories(playadvisorLoc, playmappingLoc, importer);
             transferLocationCategories(playadvisorLoc, playmappingLoc, importer);
+            transferLocationEquipment(playadvisorLoc, playmappingLoc, importer, assHandler);
             
             importer.saveLocation(toSave, new ImportReport());
             
@@ -266,6 +268,29 @@ public class MatchActionBean implements ActionBean {
             importer.saveLocationType((Integer)paAccessibility.get("category"), playmapping.getId());
         }
         DB.qr().update("delete from " + DB.LOCATION_CATEGORY_TABLE + "_playadvisor where location = ?", playadvisorId);
+    }
+
+    protected void transferLocationEquipment(Location playadvisor, Location playmapping, PlaymappingImporter importer,ResultSetHandler<List<Asset>> assHandler) throws NamingException, SQLException, UnsupportedEncodingException {
+        List<Asset> assets = DB.qr().query("select * from " + DB.ASSETS_TABLE + "_playadvisor where location = ?", assHandler, playadvisorId);
+        for (Asset asset : assets) {
+            transferLocationEquipmentAgecategory( asset);
+            asset.setId(null);
+            asset.setLocation(playmapping.getId());
+            importer.saveAsset(asset, new ImportReport());            
+        }
+        DB.qr().update("delete from " + DB.ASSETS_TABLE + "_playadvisor where location = ?", playadvisorId);
+    }
+
+    protected void transferLocationEquipmentAgecategory(Asset asset) throws NamingException, SQLException, UnsupportedEncodingException {
+        List<Map<String,Object>> agecategories = DB.qr().query("select * from " + DB.ASSETS_AGECATEGORIES_TABLE + "_playadvisor where location_equipment = ?",  new MapListHandler(), asset.getId());
+        Integer[] ids = new Integer[agecategories.size()];
+        
+        for (int i = 0; i < agecategories.size(); i++) {
+            Map<String,Object> cat = agecategories.get(i);
+            ids[i] = (Integer)cat.get("agecategory");
+        }
+        asset.setAgecategories(ids);
+        DB.qr().update("delete from " + DB.ASSETS_AGECATEGORIES_TABLE + "_playadvisor where location_equipment = ?", asset.getId());
     }
 
     //<editor-fold desc="Getters and Setters" defaultstate="collapsed">

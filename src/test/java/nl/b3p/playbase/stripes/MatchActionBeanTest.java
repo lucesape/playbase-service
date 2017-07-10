@@ -222,7 +222,6 @@ public class MatchActionBeanTest extends TestUtil{
         List<Object[]> facilities = DB.qr().query("select * from " + DB.LOCATION_CATEGORY_TABLE + " where location = ?", new ArrayListHandler(), playmappingId);
         assertEquals(size + 2, facilities.size());
         
-        
         List<Object[]> facPa = DB.qr().query("select * from " + DB.LOCATION_CATEGORY_TABLE + "_playadvisor where location = ?", new ArrayListHandler(), playadvisorId);
         assertEquals(0, facPa.size());
     }
@@ -236,11 +235,62 @@ public class MatchActionBeanTest extends TestUtil{
         List<Object[]> images = DB.qr().query("select * from " + DB.LOCATION_CATEGORY_TABLE, new ArrayListHandler());
         assertEquals(size + 2, images.size());
         
-        
         List<Object[]> imagesPa = DB.qr().query("select * from " + DB.LOCATION_CATEGORY_TABLE + "_playadvisor where location = ?", new ArrayListHandler(), playadvisorId);
         assertEquals(0, imagesPa.size());
     }
 
+    @Test
+    public void testLocationEquipmentAfterMerge()throws NamingException, SQLException {
+        List<Object[]> facilitiesBefore = DB.qr().query("select * from " + DB.ASSETS_TABLE + " where location = ?", new ArrayListHandler(), playmappingId);
+        int size = facilitiesBefore.size();
+        mergeLocations();
+        
+        List<Object[]> facilities = DB.qr().query("select * from " + DB.ASSETS_TABLE + " where location = ?", new ArrayListHandler(), playmappingId);
+        assertEquals(size + 1, facilities.size());
+        
+        List<Object[]> facPa = DB.qr().query("select * from " + DB.ASSETS_TABLE + "_playadvisor where location = ?", new ArrayListHandler(), playadvisorId);
+        assertEquals(0, facPa.size());
+    }
+    
+    @Test
+    public void testLocationEquipmentAfterAdd()throws NamingException, SQLException {
+        List<Object[]> imagesBefore = DB.qr().query("select * from " + DB.ASSETS_TABLE , new ArrayListHandler());
+        int size = imagesBefore.size();
+        addLocations();
+        
+        List<Object[]> images = DB.qr().query("select * from " + DB.ASSETS_TABLE, new ArrayListHandler());
+        assertEquals(size + 1, images.size());
+        
+        List<Object[]> imagesPa = DB.qr().query("select * from " + DB.ASSETS_TABLE + "_playadvisor where location = ?", new ArrayListHandler(), playadvisorId);
+        assertEquals(0, imagesPa.size());
+    }
+    
+
+    @Test
+    public void testLocationEquipmentAgecategoriesAfterMerge()throws NamingException, SQLException {
+        List<Object[]> facilitiesBefore = DB.qr().query("select * from " + DB.ASSETS_AGECATEGORIES_TABLE , new ArrayListHandler());
+        int size = facilitiesBefore.size();
+        mergeLocations();
+        
+        List<Object[]> facilities = DB.qr().query("select * from " + DB.ASSETS_AGECATEGORIES_TABLE , new ArrayListHandler());
+        assertEquals(size + 1, facilities.size());
+        
+        List<Object[]> facPa = DB.qr().query("select * from " + DB.ASSETS_AGECATEGORIES_TABLE + "_playadvisor", new ArrayListHandler());
+        assertEquals(0, facPa.size());
+    }
+    
+    @Test
+    public void testLocationEquipmentAgecategoriesAfterAdd()throws NamingException, SQLException {
+        List<Object[]> imagesBefore = DB.qr().query("select * from " + DB.ASSETS_AGECATEGORIES_TABLE , new ArrayListHandler());
+        int size = imagesBefore.size();
+        addLocations();
+        
+        List<Object[]> images = DB.qr().query("select * from " + DB.ASSETS_AGECATEGORIES_TABLE, new ArrayListHandler());
+        assertEquals(size + 1, images.size());
+        
+        List<Object[]> imagesPa = DB.qr().query("select * from " + DB.ASSETS_AGECATEGORIES_TABLE + "_playadvisor", new ArrayListHandler());
+        assertEquals(0, imagesPa.size());
+    }
     
 
     private void mergeLocations() {

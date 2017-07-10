@@ -306,7 +306,7 @@ public abstract class Importer {
     // </editor-fold>
     
     // <editor-fold desc="Assets" defaultstate="collapsed">
-    protected void saveAsset(Asset asset, ImportReport report) throws NamingException, SQLException {
+    public void saveAsset(Asset asset, ImportReport report) throws NamingException, SQLException {
         Integer id = null;
         Object geom = null;
 
@@ -409,19 +409,19 @@ public abstract class Importer {
         saveImagesAndWords(asset.getDocuments(), id, locationId, DB.ASSETS_DOCUMENTS_TABLE + postfix, true);
     }
 
-    protected void saveAssetsAgeCategories(Asset asset, Integer location) throws NamingException, SQLException {
+    public void saveAssetsAgeCategories(Asset asset, Integer assetId) throws NamingException, SQLException {
         // delete old entries        
-        DB.qr().update("DELETE FROM " + DB.ASSETS_AGECATEGORIES_TABLE  + postfix + " WHERE location_equipment = " + location);
+        DB.qr().update("DELETE FROM " + DB.ASSETS_AGECATEGORIES_TABLE  + postfix + " WHERE location_equipment = " + assetId);
         for (Integer agecategory : asset.getAgecategories()) {
             StringBuilder sb = new StringBuilder();
             sb.append("INSERT ");
             sb.append("INTO ");
-            sb.append(DB.ASSETS_AGECATEGORIES_TABLE  + postfix);
+            sb.append(DB.ASSETS_AGECATEGORIES_TABLE).append(postfix);
             sb.append("(");
             sb.append("location_equipment,");
             sb.append("agecategory)");
             sb.append("VALUES( ");
-            sb.append(location);
+            sb.append(assetId);
             sb.append(",");
             sb.append(agecategory);
             sb.append(");");
