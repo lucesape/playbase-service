@@ -23,6 +23,8 @@ import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.naming.NamingException;
 import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
@@ -36,6 +38,7 @@ import net.sourceforge.stripes.validation.Validate;
 import nl.b3p.loader.jdbc.GeometryJdbcConverter;
 import nl.b3p.loader.jdbc.GeometryJdbcConverterFactory;
 import nl.b3p.loader.util.DbUtilsGeometryColumnConverter;
+import nl.b3p.playbase.ImportReport;
 import nl.b3p.playbase.PlaymappingImporter;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.Location;
@@ -179,7 +182,35 @@ public class MatchActionBean implements ActionBean {
     }
 
     public Resolution save() {
+        try (Connection con = DB.getConnection()) {
+            GeometryJdbcConverter geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(con);
+
+            ResultSetHandler<Location> handler = new BeanHandler(Location.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
+            Location playadvisorLoc = DB.qr().query("select * from " + DB.LOCATION_TABLE + "_playadvisor where id = ?", handler, playadvisorId);
+            Location playmappingLoc = DB.qr().query("select * from " + DB.LOCATION_TABLE + " where id = ?", handler, playmappingId);
+            
+            PlaymappingImporter importer = new PlaymappingImporter();
+            
+            Location toSave = null;
+            if(method.equals("merge")){
+                toSave = mergeLocations(playadvisorLoc, playmappingLoc);
+            }else if(method.equals("add")){
+                toSave = playadvisorLoc;
+                toSave.setId(null);
+            }
+            importer.saveLocation(toSave, new ImportReport());
+            
+            DB.qr().update("delete from " + DB.LOCATION_TABLE + "_playadvisor where id = ?", playadvisorId);
+        } catch (NamingException | SQLException ex) {
+            LOG.error("cannot merge locations",ex);
+        }
         return view();
+    }
+    
+    protected Location mergeLocations(Location playadvisor, Location playmapping){
+        playadvisor.setPm_guid(playmapping.getPm_guid());
+        playadvisor.setId(playmapping.getId());
+        return playadvisor;
     }
 
     //<editor-fold desc="Getters and Setters" defaultstate="collapsed">

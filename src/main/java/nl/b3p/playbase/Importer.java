@@ -156,7 +156,7 @@ public abstract class Importer {
     }
 
     // <editor-fold desc="Locations" defaultstate="collapsed">
-    protected int saveLocation(Location location, ImportReport report) throws NamingException, SQLException {
+    public int saveLocation(Location location, ImportReport report) throws NamingException, SQLException {
         StringBuilder sb = new StringBuilder();
         boolean exists = locationExists(location);
         Object geom = null;

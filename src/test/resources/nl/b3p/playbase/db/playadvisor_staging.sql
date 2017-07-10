@@ -7,7 +7,7 @@ CREATE TABLE playservice_locations_playadvisor
   content character varying(255),
   summary character varying(255),
   street character varying(255),
-  "number" character varying(255),
+  number character varying(255),
   numberextra character varying(255),
   postalcode character varying(255),
   municipality character varying(255),

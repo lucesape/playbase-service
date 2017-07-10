@@ -74,9 +74,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 Playadvisor: <span id="playadvisor"></span> <br/>
                 Playmapping: <span id="playmapping"></span> <br/>
                 <stripes:select name="method">
-                    <stripes:option value="" label=" -- maak een keuze -- "/>
-                    <stripes:option value="merge" label="Samenvoegen"/>
                     <stripes:option value="add" label="Toevoegen"/>
+                    <stripes:option value="merge" label="Samenvoegen"/>
                 </stripes:select>
                 <stripes:submit name="save">Opslaan</stripes:submit>
             </stripes:form>

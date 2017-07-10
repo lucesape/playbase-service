@@ -52,6 +52,7 @@ public class TestUtil {
     protected DataSource datasource;
     protected boolean useDB = false;
     protected boolean initData = false;
+    protected boolean initAssetsData = false;
     
     protected QueryRunner run;
     
@@ -71,6 +72,10 @@ public class TestUtil {
             initDB("initdata.sql");
             if(initData){
                 initDB("initdata_locations.sql");
+                initDB("initdata_location_playadvisor.sql");
+                if(initAssetsData){
+                    initDB("initdata_assets.sql");
+                }
             }
             GeometryJdbcConverter gjc = GeometryJdbcConverterFactory.getGeometryJdbcConverter(datasource.getConnection());
             run = new QueryRunner(datasource, gjc.isPmdKnownBroken());
