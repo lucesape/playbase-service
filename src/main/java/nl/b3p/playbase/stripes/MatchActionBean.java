@@ -114,7 +114,7 @@ public class MatchActionBean implements ActionBean {
         try (Connection con = DB.getConnection()) {
             GeometryJdbcConverter geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(con);
             ResultSetHandler<List<Location>> handler = new BeanListHandler(Location.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
-            String sql = "select * from " + DB.LOCATION_TABLE + "_playadvisor limit 10";
+            String sql = "select * from " + DB.LOCATION_TABLE + "_playadvisor";
             List<Location> locs = DB.qr().query(sql, handler);
             JSONArray ar = new JSONArray();
             for (Location loc : locs) {
