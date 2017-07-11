@@ -304,7 +304,7 @@ public class MatchActionBeanTest extends TestUtil{
 
     private void addLocations() {
         instance.setPlayadvisorId(playadvisorId);
-        instance.setPlaymappingId(playmappingId);
+        instance.setPlaymappingId(null);
         instance.setMethod("add");
 
         instance.save();

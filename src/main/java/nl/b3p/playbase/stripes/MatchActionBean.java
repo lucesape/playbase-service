@@ -204,14 +204,14 @@ public class MatchActionBean implements ActionBean {
                 toSave = playadvisorLoc;
                 toSave.setId(null);
             }
-            transferImages(playadvisorLoc, playmappingLoc, importer);
-            transferFacilities(playadvisorLoc, playmappingLoc, importer);
-            transferAccessibilities(playadvisorLoc, playmappingLoc, importer);
-            transferLocationAgecategories(playadvisorLoc, playmappingLoc, importer);
-            transferLocationCategories(playadvisorLoc, playmappingLoc, importer);
-            transferLocationEquipment(playadvisorLoc, playmappingLoc, importer, assHandler);
+            Integer locationId = importer.saveLocation(toSave, new ImportReport());
+            transferImages(playadvisorLoc, locationId, importer);
+            transferFacilities(playadvisorLoc, locationId, importer);
+            transferAccessibilities(playadvisorLoc, locationId, importer);
+            transferLocationAgecategories(playadvisorLoc, locationId, importer);
+            transferLocationCategories(playadvisorLoc, locationId, importer);
+            transferLocationEquipment(playadvisorLoc, locationId, importer, assHandler);
             
-            importer.saveLocation(toSave, new ImportReport());
             
             DB.qr().update("delete from " + DB.LOCATION_TABLE + "_playadvisor where id = ?", playadvisorId);
         } catch (NamingException | SQLException ex) {
@@ -230,52 +230,52 @@ public class MatchActionBean implements ActionBean {
         return playadvisor;
     }
 
-    protected void transferImages(Location playadvisor, Location playmapping, PlaymappingImporter importer) throws NamingException, SQLException {
+    protected void transferImages(Location playadvisor, Integer playmapping, PlaymappingImporter importer) throws NamingException, SQLException {
         List<Map<String,Object>> paImages = DB.qr().query("select * from " + DB.IMAGES_TABLE + "_playadvisor where location = ?", new MapListHandler(), playadvisorId);
-        importer.saveImagesAndWords(paImages, null, playmapping.getId(), DB.IMAGES_TABLE, false);
+        importer.saveImagesAndWords(paImages, null, playmapping, DB.IMAGES_TABLE, false);
         DB.qr().update("delete from " + DB.IMAGES_TABLE + "_playadvisor where location = ?", playadvisorId);
     }
 
-    protected void transferFacilities(Location playadvisor, Location playmapping, PlaymappingImporter importer) throws NamingException, SQLException {
+    protected void transferFacilities(Location playadvisor, Integer playmapping, PlaymappingImporter importer) throws NamingException, SQLException {
         List<Map<String,Object>> paFacilities = DB.qr().query("select location, facility from " + DB.LOCATION_FACILITIES_TABLE + "_playadvisor where location = ?", new MapListHandler(), playadvisorId);
         for (Map<String, Object> facility : paFacilities) {
-            importer.saveFacilities(playmapping.getId(), (Integer)facility.get("facility"));
+            importer.saveFacilities(playmapping, (Integer)facility.get("facility"));
         }
         DB.qr().update("delete from " + DB.LOCATION_FACILITIES_TABLE + "_playadvisor where location = ?", playadvisorId);
     }
 
-    protected void transferAccessibilities(Location playadvisor, Location playmapping, PlaymappingImporter importer) throws NamingException, SQLException {
+    protected void transferAccessibilities(Location playadvisor, Integer playmapping, PlaymappingImporter importer) throws NamingException, SQLException {
         List<Map<String,Object>> paAccessibilities = DB.qr().query("select location, accessibility from " + DB.LOCATION_ACCESSIBILITY_TABLE + "_playadvisor where location = ?", new MapListHandler(), playadvisorId);
         for (Map<String, Object> acc : paAccessibilities) {
-            importer.saveAccessibility(playmapping.getId(), (Integer)acc.get("accessibility"));
+            importer.saveAccessibility(playmapping, (Integer)acc.get("accessibility"));
         }
         DB.qr().update("delete from " + DB.LOCATION_ACCESSIBILITY_TABLE + "_playadvisor where location = ?", playadvisorId);
     }
 
-    protected void transferLocationAgecategories(Location playadvisor, Location playmapping, PlaymappingImporter importer) throws NamingException, SQLException {
+    protected void transferLocationAgecategories(Location playadvisor, Integer playmapping, PlaymappingImporter importer) throws NamingException, SQLException {
         List<Map<String,Object>> paAccessibilities = DB.qr().query("select location, agecategory from " + DB.LOCATION_AGE_CATEGORY_TABLE + "_playadvisor where location = ?", new MapListHandler(), playadvisorId);
         List<Integer> ids = new ArrayList<>();
         for (Map<String, Object> paAccessibility : paAccessibilities) {
             ids.add((Integer)paAccessibility.get("agecategory"));
         }
-        importer.saveLocationAgeCategory( playmapping.getId(), ids, false);
+        importer.saveLocationAgeCategory( playmapping, ids, false);
         DB.qr().update("delete from " + DB.LOCATION_AGE_CATEGORY_TABLE + "_playadvisor where location = ?", playadvisorId);
     }
 
-    protected void transferLocationCategories(Location playadvisor, Location playmapping, PlaymappingImporter importer) throws NamingException, SQLException, UnsupportedEncodingException {
+    protected void transferLocationCategories(Location playadvisor, Integer playmapping, PlaymappingImporter importer) throws NamingException, SQLException, UnsupportedEncodingException {
         List<Map<String,Object>> paAccessibilities = DB.qr().query("select location, category from " + DB.LOCATION_CATEGORY_TABLE + "_playadvisor where location = ?", new MapListHandler(), playadvisorId);
         for (Map<String, Object> paAccessibility : paAccessibilities) {
-            importer.saveLocationType((Integer)paAccessibility.get("category"), playmapping.getId());
+            importer.saveLocationType((Integer)paAccessibility.get("category"), playmapping);
         }
         DB.qr().update("delete from " + DB.LOCATION_CATEGORY_TABLE + "_playadvisor where location = ?", playadvisorId);
     }
 
-    protected void transferLocationEquipment(Location playadvisor, Location playmapping, PlaymappingImporter importer,ResultSetHandler<List<Asset>> assHandler) throws NamingException, SQLException, UnsupportedEncodingException {
+    protected void transferLocationEquipment(Location playadvisor, Integer playmapping, PlaymappingImporter importer,ResultSetHandler<List<Asset>> assHandler) throws NamingException, SQLException, UnsupportedEncodingException {
         List<Asset> assets = DB.qr().query("select * from " + DB.ASSETS_TABLE + "_playadvisor where location = ?", assHandler, playadvisorId);
         for (Asset asset : assets) {
             transferLocationEquipmentAgecategory( asset);
             asset.setId(null);
-            asset.setLocation(playmapping.getId());
+            asset.setLocation(playmapping);
             importer.saveAsset(asset, new ImportReport());            
         }
         DB.qr().update("delete from " + DB.ASSETS_TABLE + "_playadvisor where location = ?", playadvisorId);

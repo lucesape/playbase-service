@@ -19,6 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <stripes:layout-render name="/WEB-INF/jsp/templates/admin.jsp" pageTitle="Match playadvisor met playmapping" menuitem="match">
     <stripes:layout-component name="head">
+        <script type="text/javascript">
+            var url = "${contextPath}/action/match/";
+        </script>
 
         <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css" />
 

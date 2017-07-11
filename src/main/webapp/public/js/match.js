@@ -28,7 +28,7 @@ function PlaymappingMatcher() {
         this.playadvisor = $('#playbasetable').DataTable({
             /*"processing": true,
              "serverSide": true,*/
-            "ajax": "dataPlayadvisor",
+            "ajax": url + "dataPlayadvisor",
             "columns": [
                 {"data": "title"},
                 {"data": "pa_id"}
@@ -65,7 +65,7 @@ function PlaymappingMatcher() {
         }
         this.playmappingtable = $('#playmappingtable').DataTable({
             "ajax": {
-                url: "dataPlaymapping",
+                url: url + "dataPlaymapping",
                 data: {
                     playadvisorId: id
                 }
@@ -85,7 +85,7 @@ function PlaymappingMatcher() {
             } else {
                 me.playmappingtable.$('tr.selected').removeClass('selected');
                 $(this).addClass('selected');
-                me.playmappingClicked(me.playadvisor.row().data());
+                me.playmappingClicked(me.playmappingtable.row(this).data());
             }
         })).bind(this);
 
@@ -98,6 +98,6 @@ function PlaymappingMatcher() {
     this.playmappingClicked = function(data){
       
         $("#playmapping").text(data.title + " (" + data.id + ")");
-        $("#playmappingid").val(data.id);  
+        $("#playmappingId").val(data.id);  
     };
 }
