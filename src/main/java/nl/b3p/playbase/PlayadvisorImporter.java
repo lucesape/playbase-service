@@ -199,6 +199,8 @@ public class PlayadvisorImporter extends Importer {
                 case "Lat":
                     value = val == null || val.isEmpty() ? null : Double.parseDouble(val);
                     break;
+                case "average_rating":
+                    value = val == null || val.isEmpty() ? null : Integer.parseInt(val);
                 default:
                     break;
             }
@@ -230,6 +232,7 @@ public class PlayadvisorImporter extends Importer {
         l.setWebsite((String) lM.get("website"));
         l.setLatitude(lM.get("Lat") != null ? (Double) lM.get("Lat") : null);
         l.setLongitude(lM.get("Lng") != null ? (Double) lM.get("Lng") : null);
+        l.setAveragerating(lM.get("average_rating") != null ? (Integer)lM.get("average_rating") : 0);
 
         String parking = (String) lM.get("parking");
         l.setParking(parkingTypes.get(parkingMapping.get(parking)));

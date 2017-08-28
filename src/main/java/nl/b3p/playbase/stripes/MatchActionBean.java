@@ -223,7 +223,7 @@ public class MatchActionBean implements ActionBean {
     
     protected Location mergeLocations(Location playadvisor, Location playmapping) throws NamingException, SQLException{
         playmapping.setPa_id(playadvisor.getPa_id());
-        
+        playmapping.setAveragerating(playadvisor.getAveragerating());
         
         return playmapping;
     }

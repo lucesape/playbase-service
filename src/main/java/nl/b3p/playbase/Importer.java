@@ -180,11 +180,12 @@ public abstract class Importer {
             sb.append("latitude,");
             sb.append("longitude,");
             sb.append("geom,");
+            sb.append("averagerating,");
             sb.append("pa_id,");
             sb.append("pm_guid) ");
-            sb.append("VALUES( ?,?,?,?,?,?);");
+            sb.append("VALUES( ?,?,?,?,?,?,?);");
 
-            savedLocation = DB.qr().insert(sb.toString(), handler, location.getTitle(), location.getLatitude(), location.getLongitude(), geom, location.getPa_id(), location.getPm_guid());
+            savedLocation = DB.qr().insert(sb.toString(), handler, location.getTitle(), location.getLatitude(), location.getLongitude(), geom, location.getAveragerating() != null ? location.getAveragerating() : 0, location.getPa_id(), location.getPm_guid());
             id = savedLocation.getId();
             report.increaseInserted(ImportType.LOCATION);
             List<Map<String, Object>> images = location.getImages();
@@ -200,11 +201,12 @@ public abstract class Importer {
             sb.append("latitude = ?,");
             sb.append("longitude = ?,");
             sb.append("geom = ?,");
+            sb.append("averagerating = ?,");
             sb.append("pa_id = ?,");
             sb.append("pm_guid = ?");
             sb.append("where id = ?;");
 
-            DB.qr().update(sb.toString(), location.getTitle(), location.getLatitude(), location.getLongitude(), geom, location.getPa_id(), location.getPm_guid(), id);
+            DB.qr().update(sb.toString(), location.getTitle(), location.getLatitude(), location.getLongitude(), geom, location.getAveragerating() != null ? location.getAveragerating() : 0, location.getPa_id(), location.getPm_guid(), id);
             report.increaseUpdated(ImportType.LOCATION);
         }
         return id;
