@@ -24,6 +24,7 @@ CREATE TABLE public.playservice_locations_playadvisor
   pm_guid character varying(255),
   pa_id character varying(255),
   parking integer,
+  averagerating integer,
   geom geometry(Point,4326),
   CONSTRAINT playservice_locations_playadvisor_pkey PRIMARY KEY (id),
   CONSTRAINT playservicelocations_playadvisor_fk1 FOREIGN KEY (parking)

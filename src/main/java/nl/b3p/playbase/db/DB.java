@@ -69,6 +69,6 @@ public class DB {
     }
 
     public static final QueryRunner qr() throws NamingException {
-        return new QueryRunner(getDataSource(JNDI_NAME));
+         return new QueryRunner(getDataSource(JNDI_NAME));
     }
 }

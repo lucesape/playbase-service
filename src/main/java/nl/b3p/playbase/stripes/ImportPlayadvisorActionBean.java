@@ -18,7 +18,12 @@ package nl.b3p.playbase.stripes;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.naming.NamingException;
 import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
 import net.sourceforge.stripes.action.DefaultHandler;
@@ -32,6 +37,7 @@ import net.sourceforge.stripes.validation.Validate;
 import nl.b3p.commons.csv.CsvFormatException;
 import nl.b3p.playbase.ImportReport;
 import nl.b3p.playbase.PlayadvisorImporter;
+import nl.b3p.playbase.db.DB;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

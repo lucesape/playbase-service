@@ -28,16 +28,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <stripes:submit name="cancel" class="btn btn-default">Annuleren</stripes:submit>
 
                
-                <div class="form-group">
+                <%--div class="form-group">
                     <label class="col-sm-2 control-label">Klant GUID</label>
                     <div class="col-sm-10"><stripes:text class="form-control" value="pietje" name="locationGuid"/></div>
-                </div>
+                </div--%>
                 <div class="form-group">
                     <label class="col-sm-2 control-label">API URL</label>
                     <div class="col-sm-10">
                         <stripes:select name="apiurl" >
-                            <stripes:option value="https://api.playmapping.com/CustomerAsset/GetAll" label="Assets"/>
                             <stripes:option value="https://api.playmapping.com/CustomerLocation/GetAll" label="Locations"/>
+                            <stripes:option value="https://api.playmapping.com/CustomerAsset/GetAll" label="Assets"/>
                         </stripes:select>
                     </div>
                 </div>
@@ -45,6 +45,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     <label class="col-sm-2 control-label">File</label>
                     <div class="col-sm-10">
                         <stripes:select name="file" >
+                            <stripes:option label="Via API"/>
                             <stripes:option value="assets.json" label="AllAssets"/>
                             <stripes:option value="singleAssetWithLinked.json" label="SingleAsset"/>
                             <stripes:option value="locations.json" label="AllLocations"/>

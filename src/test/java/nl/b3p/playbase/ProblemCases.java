@@ -20,12 +20,15 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Map;
+import javax.naming.NamingException;
 import nl.b3p.commons.csv.CsvFormatException;
 import nl.b3p.commons.csv.CsvInputStream;
+import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.db.TestUtil;
 import nl.b3p.playbase.entities.Location;
-import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
 /**
@@ -37,7 +40,7 @@ public class ProblemCases extends TestUtil{
     
     private PlayadvisorImporter paInstance;
 
-    public ProblemCases(){
+    public ProblemCases() {
         paInstance = new PlayadvisorImporter();
     }
     

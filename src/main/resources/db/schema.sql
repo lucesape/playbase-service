@@ -603,6 +603,7 @@ CREATE TABLE playservice_locations (
     latitude double precision,
     pm_guid character varying(255),
     pa_id character varying(255),
+    averagerating integer,
     parking integer
 );
 

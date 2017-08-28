@@ -37,6 +37,7 @@ import net.sourceforge.stripes.validation.Validate;
 import nl.b3p.playbase.ImportReport;
 import nl.b3p.playbase.ImportReport.ImportType;
 import nl.b3p.playbase.PlaymappingImporter;
+import nl.b3p.playbase.db.DB;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;

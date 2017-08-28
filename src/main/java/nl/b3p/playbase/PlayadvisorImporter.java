@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,12 +55,9 @@ public class PlayadvisorImporter extends Importer {
 
     private Map<String, String> parkingMapping;
     
-    static{
-        postfix = "_playadvisor";
-    }
-    
     public PlayadvisorImporter() {
         super();
+        postfix = "_playadvisor";
         playadvisorColumnToPlaybase = new HashMap<>();
         playadvisorColumnToPlaybase.put(0, "pa_id");
         playadvisorColumnToPlaybase.put(1, "title");

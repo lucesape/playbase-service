@@ -94,3 +94,9 @@ ALTER TABLE public.playservice_documents
 alter table playservice_locations add column geom geometry(Point, 4326)
 
 alter table playservice_location_equipment add column geom geometry(Point, 4326)
+
+
+
+alter table playservice_locations add column averagerating integer;
+
+alter table playservice_locations_playadvisor add column averagerating integer;

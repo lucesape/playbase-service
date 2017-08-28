@@ -85,6 +85,7 @@ public class MatchActionBean implements ActionBean {
     private String method;
 
     private Gson gson;
+    
 
     public MatchActionBean() {
         GsonBuilder builder = new GsonBuilder();
@@ -148,7 +149,7 @@ public class MatchActionBean implements ActionBean {
 
                 NormalizedLevenshtein l = new NormalizedLevenshtein();
 
-                List<Location> locs = DB.qr().query("select * from " + DB.LOCATION_TABLE + PlaymappingImporter.getPostfix() + " where pa_id is null", listHandler);
+                List<Location> locs = DB.qr().query("select * from " + DB.LOCATION_TABLE + " where pa_id is null", listHandler);
                 JSONArray ar = new JSONArray();
                 for (Location loc : locs) {
                     JSONObject obj = new JSONObject(gson.toJson(loc, Location.class));
@@ -200,6 +201,7 @@ public class MatchActionBean implements ActionBean {
             Location toSave = null;
             if(method.equals("merge")){
                 toSave = mergeLocations(playadvisorLoc, playmappingLoc);
+                
             }else if(method.equals("add")){
                 toSave = playadvisorLoc;
                 toSave.setId(null);
@@ -212,22 +214,18 @@ public class MatchActionBean implements ActionBean {
             transferLocationCategories(playadvisorLoc, locationId, importer);
             transferLocationEquipment(playadvisorLoc, locationId, importer, assHandler);
             
-            
             DB.qr().update("delete from " + DB.LOCATION_TABLE + "_playadvisor where id = ?", playadvisorId);
-        } catch (NamingException | SQLException ex) {
+        } catch (NamingException | SQLException | UnsupportedEncodingException ex) {
             LOG.error("cannot merge locations",ex);
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(MatchActionBean.class.getName()).log(Level.SEVERE, null, ex);
         }
         return view();
     }
     
     protected Location mergeLocations(Location playadvisor, Location playmapping) throws NamingException, SQLException{
-        playadvisor.setPm_guid(playmapping.getPm_guid());
-        playadvisor.setId(playmapping.getId());
+        playmapping.setPa_id(playadvisor.getPa_id());
         
         
-        return playadvisor;
+        return playmapping;
     }
 
     protected void transferImages(Location playadvisor, Integer playmapping, PlaymappingImporter importer) throws NamingException, SQLException {

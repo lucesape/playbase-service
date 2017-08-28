@@ -91,11 +91,15 @@ public class TestUtil {
 
             PowerMockito.mockStatic(DB.class);
             Mockito.when(DB.qr()).thenReturn(getDS());
-            Mockito.when(DB.getConnection()).thenReturn(ds.getConnection());
+            Mockito.when(DB.getConnection()).thenReturn(getCon());
         }
     }
     public QueryRunner getDS(){
         return new QueryRunner(datasource);
+    }
+    
+    public Connection getCon() throws SQLException{
+        return datasource.getConnection();
     }
     
     @Test

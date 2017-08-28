@@ -46,6 +46,7 @@ public class Location {
     private String pm_guid;
     private String pa_id;
     private Integer parking;
+    private Integer averagerating;
     private Geometry geom;
     private List<Map<String, Object>> images = new ArrayList<>();
     private List<Map<String, Object>> documents = new ArrayList<>();
@@ -233,5 +234,13 @@ public class Location {
 
     public void setDocuments(List<Map<String, Object>> documents) {
         this.documents = documents;
+    }
+
+    public Integer getAveragerating() {
+        return averagerating;
+    }
+
+    public void setAveragerating(Integer averagerating) {
+        this.averagerating = averagerating;
     }
 }

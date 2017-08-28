@@ -18,6 +18,7 @@ package nl.b3p.playbase;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import javax.naming.NamingException;
