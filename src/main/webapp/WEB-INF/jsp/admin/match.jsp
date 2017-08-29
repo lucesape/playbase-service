@@ -56,6 +56,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     <thead>
                         <tr>
                             <th>Naam </th>
+                            <th>Score (0 - 10) </th>
                             <th>Afstand (km) </th>
                             <th>Naam gelijkheid (0 t/m 10)</th>
                         </tr>
@@ -63,6 +64,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     <tfoot>
                         <tr>
                             <th>Naam </th>
+                            <th>Score (0 - 10) </th>
                             <th>Afstand (km) </th>
                             <th>Naam gelijkheid (0 t/m 10)</th>
                         </tr>

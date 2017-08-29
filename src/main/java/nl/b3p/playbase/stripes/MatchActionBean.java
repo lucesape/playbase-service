@@ -24,10 +24,9 @@ import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.naming.NamingException;
 import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
@@ -151,15 +150,19 @@ public class MatchActionBean implements ActionBean {
 
                 List<Location> locs = DB.qr().query("select * from " + DB.LOCATION_TABLE + " where pa_id is null", listHandler);
                 JSONArray ar = new JSONArray();
+                List<JSONObject> locations = new ArrayList<>();
                 for (Location loc : locs) {
                     JSONObject obj = new JSONObject(gson.toJson(loc, Location.class));
                     Geometry end = loc.getGeom();
-
+                    double distanceScore = 3;
                     try {
-
+                        // not changed when there is no distance. 3 is the penalty for no distance, to prevent skewed results
+                        
                         if (end != null && playadvisorLoc.getGeom() != null) {
-                            double distance = JTS.orthodromicDistance(playadvisorLoc.getGeom().getCoordinate(), end.getCoordinate(), crs);
-                            obj.put("distance", distance / 1000);
+                            double distance = JTS.orthodromicDistance(playadvisorLoc.getGeom().getCoordinate(), end.getCoordinate(), crs) / 1000;
+                            obj.put("distance", String.format("%.2f", distance));
+                            // 
+                            distanceScore = Math.min(distance * 2, 10);
                         } else {
                             obj.put("distance", "-");
                         }
@@ -169,9 +172,23 @@ public class MatchActionBean implements ActionBean {
                     }
                     double similarity = l.similarity(playadvisorLoc.getTitle(), loc.getTitle()) * 10;
                     obj.put("similarity", Math.round(similarity * 10.0) / 10.0);
-                    ar.put(obj);
+                    double score = 10 - ((10 - similarity) / 2 ) - distanceScore;
+                    obj.put("score", String.format("%.2f", score));
+                    //ar.put(obj);
+                    locations.add(obj);
                 }
-                result.put("data", ar);
+                /*locations.sort(new Comparator<JSONObject>() {
+                    @Override
+                    public int compare(JSONObject obj1, JSONObject obj2) {
+                        String distance = obj1.getString("distance");
+                        if(distance.equalsIgnoreCase("-")){
+                            
+                        }
+                        //return obj1.getErrorCode().compareTo(obj2.getErrorCode());
+                        return -1;
+                    }
+                });*/
+                result.put("data", new JSONArray(locations));
             } else {
                 result.put("message", "playadvisor location not found.");
             }

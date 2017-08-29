@@ -73,10 +73,11 @@ function PlaymappingMatcher() {
             "columns": [
                 {"data": "title"},
                // {"data": "pm_guid"},
+                {"data": "score"},
                 {"data": "distance"},
                 {"data": "similarity"}
             ],
-            order: [[1, "asc"],[2, "desc"]]
+            order: [[1, "desc"],[2, "asc"],[2, "asc"]]
         });
         var me = this;
         $('#playmappingtable tbody').on('click', 'tr', (function () {
