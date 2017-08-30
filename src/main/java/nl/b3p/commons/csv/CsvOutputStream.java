@@ -57,7 +57,7 @@ public class CsvOutputStream extends OutputStream{
                 "\\x" + Integer.toHexString(QUOTE) +
                 "\\x" + Integer.toHexString(separator) +
                 "])+.*";
-        pattern = Pattern.compile(regexp);
+     //   pattern = Pattern.compile(regexp);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class CsvOutputStream extends OutputStream{
     private void writeValue(String value) throws IOException {
         if (value == null) {
             value = quoteAlways ? QUOTE + "" + QUOTE : "";
-        } else if (quoteAlways || pattern.matcher(value).matches()) {
+        } else if (quoteAlways/* || pattern.matcher(value).matches()*/) {
             value = QUOTE + value.replaceAll("\\x" + Integer.toHexString(QUOTE), QUOTE + "" + QUOTE) + QUOTE;
         }
         output.write(value);

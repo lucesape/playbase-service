@@ -56,6 +56,7 @@ public class ExportActionBean implements ActionBean {
     private static final Log log = LogFactory.getLog(ExportActionBean.class);
     private static final String JSP = "/WEB-INF/jsp/admin/export/csv.jsp";
 
+    private static final String SEPERATOR_CHAR = ",";
     private ActionBeanContext context;
     
     @Validate
@@ -69,10 +70,12 @@ public class ExportActionBean implements ActionBean {
     public Resolution export() throws IOException {
         final File f = File.createTempFile("locations_export", null);
         FileOutputStream fop = new FileOutputStream(f);
-        final CsvOutputStream out = new CsvOutputStream(new OutputStreamWriter(fop));
+        final CsvOutputStream out = new CsvOutputStream(new OutputStreamWriter(fop),'\t', false);
         //String[] header = {"Titel", "Content", "SamenvattingTitel", "Content", "Samenvatting", "Latitude", "Longitude", "Straat", "Huisnummer", "Huisnummertoevoeging", "Postcode 4 cijfers", "Postcode 2 letters", "Plaats", "Regio", "Land", "Website", "E-mail", "Telefoon (landcode + 9 cijfers)", "Afbeeldingen", "Categorie", "Leeftijd", "Speeltoestellen", "Faciliteiten", "Toegankelijkheid", "ParkerenLatitude", "Longitude", "Straat", "Huisnummer", "Huisnummertoevoeging", "Postcode 4 cijfers", "Postcode 2 letters", "Plaats", "Regio", "Land", "Website", "E-mail", "Telefoon (landcode + 9 cijfers)", "Afbeeldingen", "Categorie", "Leeftijd", "Speeltoestellen", "Faciliteiten", "Toegankelijkheid", "Parkeren"};
-        String[] header = {"id", "Titel", "Content", "Samenvatting", "Latitude", "Longitude", "Straat", "Huisnummer", "Huisnummertoevoeging", "Postcode 4 cijfers",/* "Postcode 2 letters",*/ 
-            "Plaats", "Regio", "Land", "Website", "E-mail", "Telefoon", "Image URL", "Image Caption", "Image Id", "Categorie", "Leeftijdscategorie", "Toegankelijkheid", 
+        String[] header = {"id", "Titel", "Content", "Samenvatting", "Latitude", "Longitude", "Straat", "Huisnummer", "Huisnummertoevoeging",
+            "Postcode 4 cijfers",/* "Postcode 2 letters",*/ 
+            "Plaats", "Regio", "Land", "Website", "E-mail", "Telefoon", "Image URL", "Image Caption", "Image Id", "Categorie", 
+            "Leeftijdscategorie", "Toegankelijkheid", 
             "Faciliteiten", "Parkeren"};
         out.writeRecord(header);
         List<List<String>> records = getRecords();
@@ -175,7 +178,7 @@ Parkeren
         String facilitiesString = "";
         for (Object[] fac : facilities) {
             if (!facilitiesString.isEmpty()) {
-                facilitiesString += "|";
+                facilitiesString += SEPERATOR_CHAR;
             }
             facilitiesString += fac[0];
         }
@@ -188,7 +191,7 @@ Parkeren
         String categories = "";
         for (Object[] cat : cats) {
             if (!categories.isEmpty()) {
-                categories += "|";
+                categories += SEPERATOR_CHAR;
             }
             categories += cat[0];
         }
@@ -201,7 +204,7 @@ Parkeren
         String categories = "";
         for (Object[] cat : cats) {
             if (!categories.isEmpty()) {
-                categories += "|";
+                categories += SEPERATOR_CHAR;
             }
             categories += cat[0];
         }
@@ -214,7 +217,7 @@ Parkeren
         String categories = "";
         for (Object[] cat : cats) {
             if (!categories.isEmpty()) {
-                categories += "|";
+                categories += SEPERATOR_CHAR;
             }
             categories += cat[0] + ">" + cat[1];
         }
@@ -228,12 +231,16 @@ Parkeren
         String captions = "";
         String ids = "";
         for (Object[] image : images) {
-            if (!urls.isEmpty()) {
-                urls += "|";
-                captions += "|";
-                ids += "|";
+            String url = (String)valueOrEmptyString(image[0]);
+            if(url.isEmpty()){
+                continue;
             }
-            urls += valueOrEmptyString(image[0]);
+            if (!urls.isEmpty()) {
+                urls += SEPERATOR_CHAR;
+                captions += SEPERATOR_CHAR;
+                ids += SEPERATOR_CHAR;
+            }
+            urls += url;
             captions += valueOrEmptyString(image[1]);
             ids += valueOrEmptyString(image[2]);
         }
