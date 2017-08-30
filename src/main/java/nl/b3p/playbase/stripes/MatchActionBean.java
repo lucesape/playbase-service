@@ -24,7 +24,6 @@ import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import javax.naming.NamingException;
@@ -44,6 +43,7 @@ import nl.b3p.playbase.ImportReport;
 import nl.b3p.playbase.PlaymappingImporter;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.Asset;
+import nl.b3p.playbase.entities.Comment;
 import nl.b3p.playbase.entities.Location;
 import nl.b3p.playbase.util.GeometryGsonSerializer;
 import org.apache.commons.dbutils.BasicRowProcessor;
@@ -210,6 +210,7 @@ public class MatchActionBean implements ActionBean {
 
             ResultSetHandler<Location> handler = new BeanHandler(Location.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
             ResultSetHandler<List<Asset>> assHandler = new BeanListHandler(Asset.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
+            ResultSetHandler<List<Comment>> commentHandler = new BeanListHandler(Comment.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
             Location playadvisorLoc = DB.qr().query("select * from " + DB.LOCATION_TABLE + "_playadvisor where id = ?", handler, playadvisorId);
             Location playmappingLoc = DB.qr().query("select * from " + DB.LOCATION_TABLE + " where id = ?", handler, playmappingId);
             
@@ -230,6 +231,7 @@ public class MatchActionBean implements ActionBean {
             transferLocationAgecategories(playadvisorLoc, locationId, importer);
             transferLocationCategories(playadvisorLoc, locationId, importer);
             transferLocationEquipment(playadvisorLoc, locationId, importer, assHandler);
+            transferComments(playadvisorLoc, playmappingLoc, importer, commentHandler);
             
             DB.qr().update("delete from " + DB.LOCATION_TABLE + "_playadvisor where id = ?", playadvisorId);
         } catch (NamingException | SQLException | UnsupportedEncodingException ex) {
@@ -245,6 +247,15 @@ public class MatchActionBean implements ActionBean {
         return playmapping;
     }
 
+    
+    protected void transferComments(Location playadvisor, Location playmapping, PlaymappingImporter importer, ResultSetHandler<List<Comment>> commentHandler) throws NamingException, SQLException {
+        List<Comment> comments = DB.qr().query("select * from " + DB.COMMENT_TABLE + "_playadvisor where location = ?", commentHandler, playadvisorId);
+        for (Comment comment : comments) {
+            importer.saveComment(comment, new ImportReport());
+        }
+        DB.qr().update("delete from " + DB.COMMENT_TABLE + "_playadvisor where location = ?", playadvisorId);
+    }
+    
     protected void transferImages(Location playadvisor, Integer playmapping, PlaymappingImporter importer) throws NamingException, SQLException {
         List<Map<String,Object>> paImages = DB.qr().query("select * from " + DB.IMAGES_TABLE + "_playadvisor where location = ?", new MapListHandler(), playadvisorId);
         importer.saveImagesAndWords(paImages, null, playmapping, DB.IMAGES_TABLE, false);
