@@ -487,8 +487,6 @@ public abstract class Importer {
     
     // <editor-fold desc="Comments" defaultstate="collapsed">
     
-    
-    
     public void saveComment(Comment comment, ImportReport report) throws NamingException, SQLException {
         Integer id = null;
 
@@ -541,12 +539,24 @@ public abstract class Importer {
         }
     }
     
-    private boolean commentExists(Comment comment){
-        return false;
+    private boolean commentExists(Comment comment)throws NamingException, SQLException{
+        return getCommentId(comment) != null;
     }
     
-    private Integer getCommentId(Comment comment){
-        return 1;
+    private Integer getCommentId(Comment comment) throws NamingException, SQLException{
+        StringBuilder sb = new StringBuilder();
+        sb.append("select id from ");
+
+        sb.append(DB.COMMENT_TABLE).append(postfix);
+        if (comment.getPlayadvisor_id() != null) {
+            sb.append(" where playadvisor_id = ");
+            sb.append(comment.getPlayadvisor_id());
+        } else {
+            throw new IllegalArgumentException("No id found on location (either pa_id or pm_guid was not set)");
+        }
+        sb.append(";");
+        Integer id = DB.qr().query(sb.toString(), new ScalarHandler<>());
+        return id;
     }
     // </editor-fold>
     
