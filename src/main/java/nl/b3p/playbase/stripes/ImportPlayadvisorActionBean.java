@@ -45,7 +45,7 @@ public class ImportPlayadvisorActionBean implements ActionBean {
 
     private static final Log log = LogFactory.getLog("ImportPlayadvisorActionBean");
     private ActionBeanContext context;
-    private static final String JSP = "/WEB-INF/jsp/admin/playadvisor.jsp";
+    private static final String JSP = "/WEB-INF/jsp/admin/import/playadvisor.jsp";
 
     private PlayadvisorImporter processor = new PlayadvisorImporter();
 

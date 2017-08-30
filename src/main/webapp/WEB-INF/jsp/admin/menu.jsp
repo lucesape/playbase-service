@@ -7,6 +7,7 @@
         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Exporteren <span class="caret"></span></a>
         <ul class="dropdown-menu">
             <li${menuitem == 'json' ? ' class="active"' : ''}><stripes:link beanclass="nl.b3p.playbase.stripes.DashboardJSONActionBean">JSON</stripes:link></li>
+            <li${menuitem == 'exportcsv' ? ' class="active"' : ''}><stripes:link beanclass="nl.b3p.playbase.stripes.ExportActionBean">CSV</stripes:link></li>
         </ul>
     </li>
     <li class="dropdown">

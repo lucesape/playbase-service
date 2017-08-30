@@ -76,7 +76,7 @@ public class ImportPlaymappingActionBean implements ActionBean {
 
     private static final Log log = LogFactory.getLog(ImportPlaymappingActionBean.class);
 
-    private static final String JSP = "/WEB-INF/jsp/admin/playmapping.jsp";
+    private static final String JSP = "/WEB-INF/jsp/admin/import/playmapping.jsp";
 
     @Validate
     private String locationGuid;

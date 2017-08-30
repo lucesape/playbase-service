@@ -30,10 +30,13 @@ import javax.naming.NamingException;
 import javax.servlet.http.HttpServletResponse;
 import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
+import net.sourceforge.stripes.action.DefaultHandler;
+import net.sourceforge.stripes.action.ForwardResolution;
 import net.sourceforge.stripes.action.Resolution;
 import net.sourceforge.stripes.action.StreamingResolution;
 import net.sourceforge.stripes.action.StrictBinding;
 import net.sourceforge.stripes.action.UrlBinding;
+import net.sourceforge.stripes.validation.Validate;
 import nl.b3p.commons.csv.CsvOutputStream;
 import nl.b3p.playbase.db.DB;
 import org.apache.commons.dbutils.handlers.ArrayListHandler;
@@ -51,8 +54,17 @@ import org.apache.commons.logging.LogFactory;
 public class ExportActionBean implements ActionBean {
 
     private static final Log log = LogFactory.getLog(ExportActionBean.class);
+    private static final String JSP = "/WEB-INF/jsp/admin/export/csv.jsp";
 
     private ActionBeanContext context;
+    
+    @Validate
+    private String locationName;
+    
+    @DefaultHandler
+    public Resolution view(){
+        return new ForwardResolution(JSP);
+    }
 
     public Resolution export() throws IOException {
         final File f = File.createTempFile("locations_export", null);
@@ -67,6 +79,7 @@ public class ExportActionBean implements ActionBean {
             ar = record.toArray(ar);
             out.writeRecord(ar);
         }
+        out.flush();
         String filename = "Speeltuinen.csv";
         return new StreamingResolution("text/csv") {
             @Override
@@ -86,9 +99,16 @@ public class ExportActionBean implements ActionBean {
             List<List<String>> records = new ArrayList<>();
             ArrayListHandler rsh = new ArrayListHandler();
             //  id  Titel	Content	Samenvatting	Latitude Longitude Straat Huisnummer Huisnummertoevoeging	Postcode 4 cijfers	Postcode 2 letters  Plaats	Regio	Land	Website	E-mail Telefoon
-            List<Object[]> locations = DB.qr().query(
-                    "SELECT id, title,content,summary,          latitude,longitude,street,number,         numberextra,          postalcode,"
-                    + "municipality,    area,   country,website,email, phone from " + DB.LOCATION_TABLE, rsh);
+            String query = "SELECT id, title,content,summary, latitude,longitude,street,number, numberextra,postalcode,"
+                    + "municipality,    area,   country,website,email, phone from " + DB.LOCATION_TABLE;
+            List<Object[]> locations = null;
+            if(locationName != null){
+                query += " where title like ?";
+                locations =DB.qr().query(query, rsh, "%" + locationName + "%");
+            }else{
+                locations =DB.qr().query(query, rsh);
+            }
+             
             for (Object[] location : locations) {
                 records.add(getRecord(location));
             }
@@ -235,6 +255,13 @@ Parkeren
     public void setContext(ActionBeanContext context) {
         this.context = context;
     }
-    //</editor-fold>
+    
+    public String getLocationName() {
+        return locationName;
+    }
 
+    public void setLocationName(String locationName) {
+        this.locationName = locationName;
+    }
+    //</editor-fold>
 }
