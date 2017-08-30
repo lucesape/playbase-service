@@ -53,6 +53,8 @@ public class DB {
     public static final String ASSETS_DOCUMENTS_TABLE = "playservice_documents";
     
     public static final String IMAGES_TABLE = "playservice_images";
+    
+    public static final String COMMENT_TABLE = "playservice_comment";
 
     public static final DataSource getDataSource(String jndiName) throws NamingException {
         InitialContext cxt = new InitialContext();

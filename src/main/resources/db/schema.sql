@@ -1690,3 +1690,49 @@ ALTER TABLE ONLY playservice_locations
 -- PostgreSQL database dump complete
 --
 
+
+    CREATE TABLE playservice_comment (
+        id integer NOT NULL,
+        playadvisor_id integer,
+        post_id integer,
+        location integer,
+        content text,
+        stars integer,
+        author character varying(255),
+        date character varying(255)
+    );
+
+
+--
+-- TOC entry 222 (class 1259 OID 64369)
+-- Name: playservice_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE playservice_comment_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 3826 (class 0 OID 0)
+-- Dependencies: 222
+-- Name: playservice_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+
+ALTER SEQUENCE playservice_comment_id_seq OWNED BY playservice_comment.id;
+
+--
+
+ALTER TABLE ONLY playservice_comment ALTER COLUMN id SET DEFAULT nextval('playservice_comment_id_seq'::regclass);
+
+ALTER TABLE ONLY playservice_comment
+    ADD CONSTRAINT playservice_comment_pkey PRIMARY KEY (id);
+
+
+
+ALTER TABLE ONLY playservice_comment
+    ADD CONSTRAINT playservice_comment_fk1 FOREIGN KEY (location) REFERENCES playservice_locations(id);

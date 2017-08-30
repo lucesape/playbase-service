@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,8 +32,8 @@ import nl.b3p.commons.csv.CsvInputStream;
 import nl.b3p.playbase.ImportReport.ImportType;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.Asset;
+import nl.b3p.playbase.entities.Comment;
 import nl.b3p.playbase.entities.Location;
-import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -96,7 +95,28 @@ public class PlayadvisorImporter extends Importer {
 
     public void init(String[] header) {
     }
+    
+    public void importComments(InputStream in, ImportReport report) throws IOException, CsvFormatException {
+        CsvInputStream cis = new CsvInputStream(new InputStreamReader(in));
 
+        String[] s = null;
+        do {
+            s = cis.readRecord();
+        } while (s.length <= 1);
+        try {
+            while ((s = cis.readRecord()) != null) {
+                Comment c = processComment(s, report);
+                saveComment(c, report);
+                if (c == null) {
+                    int a = 0;
+                }
+            }
+        } catch (NamingException | SQLException ex) {
+            LOG.error("Cannot save location to db: ", ex);
+            report.addError(ex.getLocalizedMessage(), ImportType.COMMENT);
+        }
+    }
+    
     public void importStream(InputStream in, ImportReport report) throws IOException, CsvFormatException {
         CsvInputStream cis = new CsvInputStream(new InputStreamReader(in));
 
@@ -290,6 +310,20 @@ public class PlayadvisorImporter extends Importer {
         return image;
     }
 
+    
+    private Comment processComment(String [] s, ImportReport report)throws NamingException, SQLException{
+        Comment c = new Comment();
+        c.setPlayadvisor_id(Integer.parseInt(s[0]));
+        c.setContent(s[2]);
+        c.setDate(s[8]);
+        c.setPost_id(Integer.parseInt(s[4]));
+        c.setAuthor(s[5]);
+        Integer stars = s[3].isEmpty() ? null :Integer.parseInt(s[3]);
+        c.setStars(stars);
+        return c;
+    }
+
+    
     // <editor-fold desc="Saving of string-concatenated multivalues" defaultstate="collapsed">
     protected void saveFacilities(Integer locationId, String facilitiesString) throws NamingException, SQLException {
 

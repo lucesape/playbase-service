@@ -18,12 +18,7 @@ package nl.b3p.playbase.stripes;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.naming.NamingException;
+import java.util.Set;
 import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
 import net.sourceforge.stripes.action.DefaultHandler;
@@ -37,7 +32,6 @@ import net.sourceforge.stripes.validation.Validate;
 import nl.b3p.commons.csv.CsvFormatException;
 import nl.b3p.playbase.ImportReport;
 import nl.b3p.playbase.PlayadvisorImporter;
-import nl.b3p.playbase.db.DB;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -57,6 +51,9 @@ public class ImportPlayadvisorActionBean implements ActionBean {
 
     @Validate
     private FileBean csv;
+
+    @Validate
+    private FileBean comments;
 
     @Validate
     private String file;
@@ -86,6 +83,14 @@ public class ImportPlayadvisorActionBean implements ActionBean {
         this.file = file;
     }
 
+    public FileBean getComments() {
+        return comments;
+    }
+
+    public void setComments(FileBean comments) {
+        this.comments = comments;
+    }
+
     // </editor-fold>
     
     @DefaultHandler
@@ -109,17 +114,24 @@ public class ImportPlayadvisorActionBean implements ActionBean {
                     return new ForwardResolution(JSP);
                 }
             }
+            if(comments != null){
+                processor.importComments(comments.getInputStream(), report);
+            }
+            
             context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberInserted(ImportReport.ImportType.ASSET) + " " + ImportReport.ImportType.ASSET.toString() + " weggeschreven."));
             context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberInserted(ImportReport.ImportType.LOCATION) + " " + ImportReport.ImportType.LOCATION.toString() + " weggeschreven."));
+            context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberInserted(ImportReport.ImportType.COMMENT) + " " + ImportReport.ImportType.COMMENT.toString() + " weggeschreven."));
             context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberUpdated(ImportReport.ImportType.ASSET) + " " + ImportReport.ImportType.ASSET.toString() + " geupdatet."));
             context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberUpdated(ImportReport.ImportType.LOCATION) + " " + ImportReport.ImportType.LOCATION.toString() + " geupdatet."));
+            context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberUpdated(ImportReport.ImportType.COMMENT) + " " + ImportReport.ImportType.COMMENT.toString() + " geupdatet."));
 
             if (report.getErrors().size() > 0) {
                 context.getMessages().add(new SimpleMessage("Er zijn " + report.getErrors(ImportReport.ImportType.ASSET).size() + " " + ImportReport.ImportType.ASSET.toString() + " mislukt:"));
                 context.getMessages().add(new SimpleMessage("Er zijn " + report.getErrors(ImportReport.ImportType.LOCATION).size() + " " + ImportReport.ImportType.LOCATION.toString() + " mislukt:"));
+                context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumErrors(ImportReport.ImportType.COMMENT) + " " + ImportReport.ImportType.COMMENT.toString() + " mislukt:"));
 
                 for (ImportReport.ImportType importType : report.getAllErrors().keySet()) {
-                    List<String> errors = report.getAllErrors().get(importType);
+                    Set<String> errors = report.getAllErrors().get(importType);
                     for (String error : errors) {
                         context.getMessages().add(new SimpleMessage(importType.toString() + ": " + error));
                     }

@@ -18,8 +18,10 @@ package nl.b3p.playbase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -30,7 +32,8 @@ public class ImportReport {
     public enum ImportType{
         
         LOCATION ("Locatie"),
-        ASSET("Asset");
+        ASSET("Asset"),
+        COMMENT("Commentaar");
         
         private final String type;
         
@@ -44,15 +47,17 @@ public class ImportReport {
         }
     }
     
-    private Map<ImportType,List<String>> errors = new HashMap<>();
+    private Map<ImportType,Set<String>> errorsMessages = new HashMap<>();
+    private Map<ImportType, Integer> errors = new HashMap<>();
     private Map<ImportType, Integer> inserted = new HashMap<>();
     private Map<ImportType, Integer> updated = new HashMap<>();
 
     public ImportReport() {
         for (ImportType type : ImportType.values()) {
-            errors.put(type, new ArrayList<String>());
+            errorsMessages.put(type, new HashSet<>());
             inserted.put(type,0);
             updated.put(type,0);
+            errors.put(type,0);
         }
     }
     
@@ -74,22 +79,27 @@ public class ImportReport {
     }
     
     public void addError(String message,ImportType type){
-        this.errors.get(type).add(message);
+        errors.put(type, errors.get(type) +1);
+        this.errorsMessages.get(type).add(message);
     }
 
-    public List<String> getErrors(ImportType type) {
-        return errors.get(type);
+    public Set<String> getErrors(ImportType type) {
+        return errorsMessages.get(type);
     }
     
-    public Map<ImportType, List<String>> getAllErrors(){
-        return errors;
+    public Map<ImportType, Set<String>> getAllErrors(){
+        return errorsMessages;
+    }
+    
+    public int getNumErrors(ImportType type){
+        return errors.get(type);
     }
     
     
     public List<String> getErrors(){
         List<String> allErrors = new ArrayList<>();
-        for (ImportType importType : errors.keySet()) {
-            allErrors.addAll(errors.get(importType));
+        for (ImportType importType : errorsMessages.keySet()) {
+            allErrors.addAll(errorsMessages.get(importType));
         }
         return allErrors;
     }

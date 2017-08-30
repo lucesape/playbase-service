@@ -30,13 +30,13 @@ import nl.b3p.loader.util.DbUtilsGeometryColumnConverter;
 import nl.b3p.playbase.ImportReport.ImportType;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.Asset;
+import nl.b3p.playbase.entities.Comment;
 import nl.b3p.playbase.entities.Location;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ArrayListHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -270,6 +270,22 @@ public abstract class Importer {
         Integer id = DB.qr().query(sb.toString(), new ScalarHandler<Integer>());
         return id;
     }
+    
+    protected Integer getLocationId(Comment comment) throws NamingException, SQLException {
+        StringBuilder sb = new StringBuilder();
+        sb.append("select id from ");
+
+        sb.append(DB.LOCATION_TABLE).append(postfix);
+        if (comment.getPost_id()!= null) {
+            sb.append(" where pa_id = '");
+            sb.append(comment.getPost_id());
+        } else {
+            throw new IllegalArgumentException("No id found on location (either pa_id or pm_guid was not set)");
+        }
+        sb.append("';");
+        Integer id = DB.qr().query(sb.toString(), new ScalarHandler<>());
+        return id;
+    }
 
     public void saveFacilities(Integer locationId, Integer facilityId) throws NamingException, SQLException {
 
@@ -467,6 +483,71 @@ public abstract class Importer {
         }
     }
 
+    // </editor-fold>
+    
+    // <editor-fold desc="Comments" defaultstate="collapsed">
+    
+    
+    
+    public void saveComment(Comment comment, ImportReport report) throws NamingException, SQLException {
+        Integer id = null;
+
+        ResultSetHandler<Comment> handler = new BeanHandler(Comment.class);
+        Integer locationid = comment.getLocation_id();
+        if(locationid == null){
+            locationid = getLocationId(comment);
+            comment.setLocation_id(locationid);
+        }
+        if (locationid != null) {
+
+            if (commentExists(comment)) {
+                id = getCommentId(comment);
+
+                StringBuilder sb = new StringBuilder();
+                sb.append("UPDATE ").append(DB.COMMENT_TABLE).append(postfix);
+                sb.append(" set playadvisor_id = ?,");
+                sb.append("post_id = ?,");
+                sb.append("location = ?,");
+                sb.append("content = ?,");
+                sb.append("stars = ?,");
+                sb.append("author = ?,");
+                sb.append("date = ?");
+                sb.append(" WHERE id = ").append(id);
+                DB.qr().update(sb.toString(), comment.getPlayadvisor_id(), comment.getPost_id(), locationid,
+                        comment.getContent(), comment.getStars(), comment.getAuthor(), comment.getDate());
+                report.increaseUpdated(ImportType.COMMENT);
+            } else {
+                StringBuilder sb = new StringBuilder();
+                sb.append("INSERT ");
+                sb.append("INTO ");
+                sb.append(DB.COMMENT_TABLE).append(postfix);
+                sb.append("(");
+                sb.append("playadvisor_id,");
+                sb.append("post_id,");
+                sb.append("location,");
+                sb.append("content,");
+                sb.append("stars,");
+                sb.append("author,");
+                sb.append("date) ");
+                sb.append("VALUES( ?,?,?,?,?,?,?);");
+
+                Comment cm = DB.qr().insert(sb.toString(), handler, comment.getPlayadvisor_id(), comment.getPost_id(), locationid,
+                        comment.getContent(), comment.getStars(), comment.getAuthor(), comment.getDate());
+                id = cm.getId();
+                report.increaseInserted(ImportType.COMMENT);
+            }
+        }else{
+            report.addError("Commentaar van onbekende locatie", ImportType.COMMENT);
+        }
+    }
+    
+    private boolean commentExists(Comment comment){
+        return false;
+    }
+    
+    private Integer getCommentId(Comment comment){
+        return 1;
+    }
     // </editor-fold>
     
     // <editor-fold desc="Helpers" defaultstate="collapsed">

@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <%@include file="/WEB-INF/jsp/taglibs.jsp"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 
-<stripes:layout-render name="/WEB-INF/jsp/templates/admin.jsp" pageTitle="Import JSON" menuitem="importPlayadvisor">
+<stripes:layout-render name="/WEB-INF/jsp/templates/admin.jsp" pageTitle="Import playadvisor" menuitem="importPlayadvisor">
     <stripes:layout-component name="content">
 
         <h1>Import CSV uit Playadvisor</h1>
@@ -26,11 +26,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <stripes:form beanclass="nl.b3p.playbase.stripes.ImportPlayadvisorActionBean" class="form-horizontal">
             <stripes:submit name="importLocations" class="btn btn-primary">Importeer</stripes:submit>
             <stripes:submit name="cancel" class="btn btn-default">Annuleren</stripes:submit>
-                <div class="form-group">
-                    <label class="col-sm-2 control-label">Klant GUID</label>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Export speelplekken playadvisor</label>
                 <stripes:file name="csv"/>
             </div>
             <div class="form-group">
+                <label class="col-sm-2 control-label">Export comments playadvisor</label>
+                <stripes:file name="comments"/>
+            </div>
+            <%--div class="form-group">
                 <label class="col-sm-2 control-label">File</label>
                 <div class="col-sm-10">
                     <stripes:select name="file" >
@@ -39,7 +43,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         <stripes:option value="speelplekken_playadvisor.csv" label="Large"/>
                     </stripes:select>
                 </div>
-            </div>
+            </div--%>
         </stripes:form>
     </stripes:layout-component>
 </stripes:layout-render>

@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <%@include file="/WEB-INF/jsp/taglibs.jsp"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 
-<stripes:layout-render name="/WEB-INF/jsp/templates/admin.jsp" pageTitle="Import JSON" menuitem="importPlaymapping">
+<stripes:layout-render name="/WEB-INF/jsp/templates/admin.jsp" pageTitle="Import Playmapping" menuitem="importPlaymapping">
     <stripes:layout-component name="content">
 
         <h1>Import JSON uit Playmapping API</h1>
@@ -26,12 +26,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <stripes:form beanclass="nl.b3p.playbase.stripes.ImportPlaymappingActionBean" class="form-horizontal">
                 <stripes:submit name="importPM" class="btn btn-primary">Importeer</stripes:submit>
                 <stripes:submit name="cancel" class="btn btn-default">Annuleren</stripes:submit>
-
-               
-                <%--div class="form-group">
-                    <label class="col-sm-2 control-label">Klant GUID</label>
-                    <div class="col-sm-10"><stripes:text class="form-control" value="pietje" name="locationGuid"/></div>
-                </div--%>
                 <div class="form-group">
                     <label class="col-sm-2 control-label">API URL</label>
                     <div class="col-sm-10">
