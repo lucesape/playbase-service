@@ -100,3 +100,8 @@ alter table playservice_location_equipment add column geom geometry(Point, 4326)
 alter table playservice_locations add column averagerating integer;
 
 alter table playservice_locations_playadvisor add column averagerating integer;
+
+--drop view v_locations_pa_rd ;
+alter table playservice_locations_playadvisor alter column content type text;
+drop view v_locations_rd ;
+alter table playservice_locations alter column content type text;

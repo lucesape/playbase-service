@@ -71,7 +71,9 @@ public class ExportActionBean implements ActionBean {
         FileOutputStream fop = new FileOutputStream(f);
         final CsvOutputStream out = new CsvOutputStream(new OutputStreamWriter(fop));
         //String[] header = {"Titel", "Content", "SamenvattingTitel", "Content", "Samenvatting", "Latitude", "Longitude", "Straat", "Huisnummer", "Huisnummertoevoeging", "Postcode 4 cijfers", "Postcode 2 letters", "Plaats", "Regio", "Land", "Website", "E-mail", "Telefoon (landcode + 9 cijfers)", "Afbeeldingen", "Categorie", "Leeftijd", "Speeltoestellen", "Faciliteiten", "Toegankelijkheid", "ParkerenLatitude", "Longitude", "Straat", "Huisnummer", "Huisnummertoevoeging", "Postcode 4 cijfers", "Postcode 2 letters", "Plaats", "Regio", "Land", "Website", "E-mail", "Telefoon (landcode + 9 cijfers)", "Afbeeldingen", "Categorie", "Leeftijd", "Speeltoestellen", "Faciliteiten", "Toegankelijkheid", "Parkeren"};
-        String[] header = {"id", "Titel", "Content", "Samenvatting", "Latitude", "Longitude", "Straat", "Huisnummer", "Huisnummertoevoeging", "Postcode 4 cijfers",/* "Postcode 2 letters",*/ "Plaats", "Regio", "Land", "Website", "E-mail", "Telefoon", "Image URL", "Image Caption", "Image Id", "Categorie", "Leeftijdscategorie", "Toegankelijkheid", "Faciliteiten", "Parkeren"};
+        String[] header = {"id", "Titel", "Content", "Samenvatting", "Latitude", "Longitude", "Straat", "Huisnummer", "Huisnummertoevoeging", "Postcode 4 cijfers",/* "Postcode 2 letters",*/ 
+            "Plaats", "Regio", "Land", "Website", "E-mail", "Telefoon", "Image URL", "Image Caption", "Image Id", "Categorie", "Leeftijdscategorie", "Toegankelijkheid", 
+            "Faciliteiten", "Parkeren"};
         out.writeRecord(header);
         List<List<String>> records = getRecords();
         for (List<String> record : records) {
