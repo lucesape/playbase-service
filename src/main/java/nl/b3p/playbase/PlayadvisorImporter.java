@@ -24,8 +24,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.naming.NamingException;
 import nl.b3p.commons.csv.CsvFormatException;
 import nl.b3p.commons.csv.CsvInputStream;
@@ -292,8 +294,14 @@ public class PlayadvisorImporter extends Importer {
 
     private List<Map<String, Object>> parseImages(String[] imageUrls, String[] imageDescriptions) {
         List<Map<String, Object>> images = new ArrayList<>();
+        Set<String> urls = new HashSet<>();
         for (int i = 0; i < imageUrls.length; i++) {
             String imageUrl = imageUrls[i];
+            if(urls.contains(imageUrl)){
+                continue;
+            }else{
+                urls.add(imageUrl);
+            }
             String description = imageDescriptions.length == imageUrls.length ? imageDescriptions[i] : null;
             Map<String, Object> image = parseImage(imageUrl, description);
             images.add(image);

@@ -70,7 +70,7 @@ public class ExportActionBean implements ActionBean {
     public Resolution export() throws IOException {
         final File f = File.createTempFile("locations_export", null);
         FileOutputStream fop = new FileOutputStream(f);
-        final CsvOutputStream out = new CsvOutputStream(new OutputStreamWriter(fop),'\t', false);
+        final CsvOutputStream out = new CsvOutputStream(new OutputStreamWriter(fop),'|', false);
         //String[] header = {"Titel", "Content", "SamenvattingTitel", "Content", "Samenvatting", "Latitude", "Longitude", "Straat", "Huisnummer", "Huisnummertoevoeging", "Postcode 4 cijfers", "Postcode 2 letters", "Plaats", "Regio", "Land", "Website", "E-mail", "Telefoon (landcode + 9 cijfers)", "Afbeeldingen", "Categorie", "Leeftijd", "Speeltoestellen", "Faciliteiten", "Toegankelijkheid", "ParkerenLatitude", "Longitude", "Straat", "Huisnummer", "Huisnummertoevoeging", "Postcode 4 cijfers", "Postcode 2 letters", "Plaats", "Regio", "Land", "Website", "E-mail", "Telefoon (landcode + 9 cijfers)", "Afbeeldingen", "Categorie", "Leeftijd", "Speeltoestellen", "Faciliteiten", "Toegankelijkheid", "Parkeren"};
         String[] header = {"id", "Titel", "Content", "Samenvatting", "Latitude", "Longitude", "Straat", "Huisnummer", "Huisnummertoevoeging",
             "Postcode 4 cijfers",/* "Postcode 2 letters",*/ 
@@ -127,17 +127,25 @@ public class ExportActionBean implements ActionBean {
     private List<String> getRecord(Object[] location) throws NamingException, SQLException {
         List<String> record = new ArrayList<>();
         Integer id = null;
+        int index = 0;
+        int indexOfContentColumn = 2;
         for (Object col : location) {
             if (id == null) {
                 id = (Integer) col;
             } 
+            Object value = col;
             
-            if (col == null) {
+            if (value == null) {
                 record.add(null);
             } else {
-                record.add(col.toString());
+                String valueString = value.toString();
+                if (index == indexOfContentColumn) {
+                    String s = 
+                    valueString = valueString.replace("\n", "").replace("\r", "");
+                }
+                record.add(valueString);
             }
-            
+            index++;
         }
         retrieveReferencedTables(id, record);
 
@@ -226,6 +234,7 @@ Parkeren
 
     protected void retrieveImages(Integer id, List<String> record) throws NamingException, SQLException {
         ArrayListHandler rsh = new ArrayListHandler();
+        
         List<Object[]> images = DB.qr().query("SELECT url, caption,pm_guid from " + DB.IMAGES_TABLE + " WHERE location = " + id, rsh);
         String urls = "";
         String captions = "";
