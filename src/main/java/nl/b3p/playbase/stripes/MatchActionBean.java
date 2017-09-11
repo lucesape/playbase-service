@@ -32,6 +32,7 @@ import net.sourceforge.stripes.action.ActionBeanContext;
 import net.sourceforge.stripes.action.DefaultHandler;
 import net.sourceforge.stripes.action.ForwardResolution;
 import net.sourceforge.stripes.action.Resolution;
+import net.sourceforge.stripes.action.SimpleMessage;
 import net.sourceforge.stripes.action.StreamingResolution;
 import net.sourceforge.stripes.action.StrictBinding;
 import net.sourceforge.stripes.action.UrlBinding;
@@ -82,9 +83,11 @@ public class MatchActionBean implements ActionBean {
 
     @Validate
     private String method;
-
-    private Gson gson;
     
+    @Validate
+    private double automaticMergeScore =  10.0;
+
+    private final Gson gson;
 
     public MatchActionBean() {
         GsonBuilder builder = new GsonBuilder();
@@ -92,15 +95,55 @@ public class MatchActionBean implements ActionBean {
         builder.registerTypeAdapter(Geometry.class, new GeometryGsonSerializer());
         gson = builder.create();
     }
+    
+    public Resolution autoMerge(){
+        JSONObject result = new JSONObject();
+        // Haal alle playadvisor records op
+        // Per PA record
+            // Haal PM records op
+            // Vind score met >= automaticMergeScore
+                // merge
 
-    @Override
-    public ActionBeanContext getContext() {
-        return context;
-    }
+             
+        try (Connection con = DB.getConnection()) {
+            GeometryJdbcConverter geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(con);
+            ResultSetHandler<List<Location>> handler = new BeanListHandler(Location.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
+            String sql = "select * from " + DB.LOCATION_TABLE + "_playadvisor";
+            List<Location> locs = DB.qr().query(sql, handler);
+            JSONArray ar = new JSONArray();
+            result.put("messages", ar);
+            method = "merge";
+            for (Location loc : locs) {
+                List<JSONObject> pms = getPlaymappingData(loc, geometryConverter);
+                boolean found = false;
+                double maxScore = -100;
+                for (JSONObject pm : pms) {
+                    double score = pm.getDouble("score");
+                    String distanceString = pm.getString("distance");
+                    Double distance = distanceString.equals("-") ? 10 : Double.parseDouble(pm.getString("distance"));
+                    maxScore = Math.max(score, maxScore);
+                    if( score > automaticMergeScore || distance < 0.05 ){
+                        context.getMessages().add(new SimpleMessage("Gelinked: " + loc.getTitle() + " aan " + pm.getString("title")));
+                        playmappingId = pm.getInt("id");
+                        playadvisorId = loc.getId();
+                        save();
+                        found = true;
+                        break;
+                        //save
+                    }
+                }
+                
+                if(!found){
+                    context.getMessages().add(new SimpleMessage("Not found: " + loc.getTitle() + ". Max score: " + maxScore));
+                }
+            }
+            
 
-    @Override
-    public void setContext(ActionBeanContext context) {
-        this.context = context;
+        } catch (FactoryException | NamingException | SQLException ex) {
+            LOG.error("Cannot get geometryConverter: ", ex);
+            result.put("message", "Cannot get geometryConverter: " + ex.getLocalizedMessage());
+        }
+        return view();
     }
 
     @DefaultHandler
@@ -135,59 +178,14 @@ public class MatchActionBean implements ActionBean {
 
     public Resolution dataPlaymapping() throws FactoryException {
         JSONObject result = new JSONObject();
-        GeometryJdbcConverter geometryConverter = null;
         try (Connection con = DB.getConnection()) {
-            geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(con);
-            ResultSetHandler<List<Location>> listHandler = new BeanListHandler(Location.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
+            GeometryJdbcConverter geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(con);
             ResultSetHandler<Location> handler = new BeanHandler(Location.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
 
             Location playadvisorLoc = DB.qr().query("select * from " + DB.LOCATION_TABLE + "_playadvisor where id = ?", handler, playadvisorId);
             if (playadvisorLoc != null) {
 
-                CoordinateReferenceSystem crs = CRS.decode("EPSG:4326");
-
-                NormalizedLevenshtein l = new NormalizedLevenshtein();
-
-                List<Location> locs = DB.qr().query("select * from " + DB.LOCATION_TABLE + " where pa_id is null", listHandler);
-                JSONArray ar = new JSONArray();
-                List<JSONObject> locations = new ArrayList<>();
-                for (Location loc : locs) {
-                    JSONObject obj = new JSONObject(gson.toJson(loc, Location.class));
-                    Geometry end = loc.getGeom();
-                    double distanceScore = 3;
-                    try {
-                        // not changed when there is no distance. 3 is the penalty for no distance, to prevent skewed results
-                        
-                        if (end != null && playadvisorLoc.getGeom() != null) {
-                            double distance = JTS.orthodromicDistance(playadvisorLoc.getGeom().getCoordinate(), end.getCoordinate(), crs) / 1000;
-                            obj.put("distance", String.format("%.2f", distance));
-                            // 
-                            distanceScore = Math.min(distance * 2, 10);
-                        } else {
-                            obj.put("distance", "-");
-                        }
-
-                    } catch (TransformException ex) {
-                        LOG.error("Error calculating distance: ", ex);
-                    }
-                    double similarity = l.similarity(playadvisorLoc.getTitle(), loc.getTitle()) * 10;
-                    obj.put("similarity", Math.round(similarity * 10.0) / 10.0);
-                    double score = 10 - ((10 - similarity) / 2 ) - distanceScore;
-                    obj.put("score", String.format("%.2f", score));
-                    //ar.put(obj);
-                    locations.add(obj);
-                }
-                /*locations.sort(new Comparator<JSONObject>() {
-                    @Override
-                    public int compare(JSONObject obj1, JSONObject obj2) {
-                        String distance = obj1.getString("distance");
-                        if(distance.equalsIgnoreCase("-")){
-                            
-                        }
-                        //return obj1.getErrorCode().compareTo(obj2.getErrorCode());
-                        return -1;
-                    }
-                });*/
+                List<JSONObject> locations = getPlaymappingData(playadvisorLoc, geometryConverter);
                 result.put("data", new JSONArray(locations));
             } else {
                 result.put("message", "playadvisor location not found.");
@@ -202,6 +200,43 @@ public class MatchActionBean implements ActionBean {
         res.setFilename("");
         res.setAttachment(true);
         return res;
+    }
+    
+    private List<JSONObject> getPlaymappingData(Location playadvisorLoc, GeometryJdbcConverter geometryConverter) throws FactoryException, NamingException, SQLException {
+        ResultSetHandler<List<Location>> listHandler = new BeanListHandler(Location.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
+        CoordinateReferenceSystem crs = CRS.decode("EPSG:4326");
+
+        NormalizedLevenshtein l = new NormalizedLevenshtein();
+
+        List<Location> locs = DB.qr().query("select * from " + DB.LOCATION_TABLE + " where pa_id is null", listHandler);
+        JSONArray ar = new JSONArray();
+        List<JSONObject> locations = new ArrayList<>();
+        for (Location loc : locs) {
+            JSONObject obj = new JSONObject(gson.toJson(loc, Location.class));
+            Geometry end = loc.getGeom();
+            double distanceScore = 3;
+            try {
+                // not changed when there is no distance. 3 is the penalty for no distance, to prevent skewed results
+
+                if (end != null && playadvisorLoc.getGeom() != null) {
+                    double distance = JTS.orthodromicDistance(playadvisorLoc.getGeom().getCoordinate(), end.getCoordinate(), crs) / 1000;
+                    obj.put("distance", String.format("%.2f", distance));
+                    // 
+                    distanceScore = Math.min(distance * 2, 10);
+                } else {
+                    obj.put("distance", "-");
+                }
+
+            } catch (TransformException ex) {
+                LOG.error("Error calculating distance: ", ex);
+            }
+            double similarity = l.similarity(playadvisorLoc.getTitle(), loc.getTitle()) * 10;
+            obj.put("similarity", Math.round(similarity * 10.0) / 10.0);
+            double score = 10 - ((10 - similarity) / 2.7) - distanceScore;
+            obj.put("score", String.format("%.2f", score));
+            locations.add(obj);
+        }
+        return locations;
     }
 
     public Resolution save() {
@@ -347,5 +382,24 @@ public class MatchActionBean implements ActionBean {
     public void setMethod(String method) {
         this.method = method;
     }
+    
+    public double getAutomaticMergeScore() {
+        return automaticMergeScore;
+    }
+
+    public void setAutomaticMergeScore(double automaticMergeScore) {
+        this.automaticMergeScore = automaticMergeScore;
+    }
+    
+    @Override
+    public ActionBeanContext getContext() {
+        return context;
+    }
+
+    @Override
+    public void setContext(ActionBeanContext context) {
+        this.context = context;
+    }
     // </editor-fold>
+
 }

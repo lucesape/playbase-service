@@ -34,57 +34,59 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
         <jsp:include page="/WEB-INF/jsp/common/messages.jsp"/>
         <div>
-        <div class="tablesDiv"> 
-            <div class="playadvisorClass">
-                <table id="playbasetable" class="display" cellspacing="0" width="100%">
-                    <thead>
-                        <tr>
-                            <th>Naam</th>
-                            <th>Playadvisor id</th>
-                        </tr>
-                    </thead>
-                    <tfoot>
-                        <tr>
-                            <th>Naam</th>
-                            <th>playadvisor id</th>
-                        </tr>
-                    </tfoot>
-                </table>
+            <div class="tablesDiv"> 
+                <div class="playadvisorClass">
+                    <table id="playbasetable" class="display" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th>Naam</th>
+                                <th>Playadvisor id</th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                <th>Naam</th>
+                                <th>playadvisor id</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="playmappingClass">
+                    <table id="playmappingtable" class="display" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th>Naam </th>
+                                <th>Score (0 - 10) </th>
+                                <th>Afstand (km) </th>
+                                <th>Naam gelijkheid (0 t/m 10)</th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                <th>Naam </th>
+                                <th>Score (0 - 10) </th>
+                                <th>Afstand (km) </th>
+                                <th>Naam gelijkheid (0 t/m 10)</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
             </div>
-            <div class="playmappingClass">
-                <table id="playmappingtable" class="display" cellspacing="0" width="100%">
-                    <thead>
-                        <tr>
-                            <th>Naam </th>
-                            <th>Score (0 - 10) </th>
-                            <th>Afstand (km) </th>
-                            <th>Naam gelijkheid (0 t/m 10)</th>
-                        </tr>
-                    </thead>
-                    <tfoot>
-                        <tr>
-                            <th>Naam </th>
-                            <th>Score (0 - 10) </th>
-                            <th>Afstand (km) </th>
-                            <th>Naam gelijkheid (0 t/m 10)</th>
-                        </tr>
-                    </tfoot>
-                </table>
+            <div>
+                <stripes:form beanclass="nl.b3p.playbase.stripes.MatchActionBean"> 
+                    <stripes:hidden name="playadvisorId" id="playadvisorId"/>
+                    <stripes:hidden name="playmappingId" id="playmappingId" />
+                    Playadvisor: <span id="playadvisor"></span> <br/>
+                    Playmapping: <span id="playmapping"></span> <br/>
+                    <stripes:select name="method">
+                        <stripes:option value="add" label="Toevoegen"/>
+                        <stripes:option value="merge" label="Samenvoegen"/>
+                    </stripes:select>
+                    <stripes:submit name="save">Opslaan</stripes:submit> <br/>
+                    Automatische merge score: <stripes:text name="automaticMergeScore" value="10.0"/> <br/>
+                    <stripes:submit name="autoMerge">Automerge</stripes:submit>
+                </stripes:form>
             </div>
         </div>
-        <div>
-            <stripes:form beanclass="nl.b3p.playbase.stripes.MatchActionBean"> 
-                <stripes:hidden name="playadvisorId" id="playadvisorId"/>
-                <stripes:hidden name="playmappingId" id="playmappingId" />
-                Playadvisor: <span id="playadvisor"></span> <br/>
-                Playmapping: <span id="playmapping"></span> <br/>
-                <stripes:select name="method">
-                    <stripes:option value="add" label="Toevoegen"/>
-                    <stripes:option value="merge" label="Samenvoegen"/>
-                </stripes:select>
-                <stripes:submit name="save">Opslaan</stripes:submit>
-            </stripes:form>
-        </div>
-</div>
     </stripes:layout-component>
 </stripes:layout-render>
