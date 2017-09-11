@@ -84,7 +84,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     </stripes:select>
                     <stripes:submit name="save">Opslaan</stripes:submit> <br/>
                     Automatische merge score: <stripes:text name="automaticMergeScore" value="10.0"/> <br/>
-                    <stripes:submit name="autoMerge">Automerge</stripes:submit>
+                    <stripes:submit name="autoMerge">Automerge</stripes:submit> <br/>
+                    <stripes:submit name="addAll">Alles toevoegen</stripes:submit> <br/>
+                    
                 </stripes:form>
             </div>
         </div>

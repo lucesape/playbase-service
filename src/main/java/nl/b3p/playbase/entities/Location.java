@@ -29,6 +29,7 @@ public class Location {
 
     private Integer id;
     private String title;
+    private String pa_title;
     private String content;
     private String summary;
     private String street;
@@ -243,4 +244,13 @@ public class Location {
     public void setAveragerating(Integer averagerating) {
         this.averagerating = averagerating;
     }
+
+    public String getPa_title() {
+        return pa_title;
+    }
+
+    public void setPa_title(String pa_title) {
+        this.pa_title = pa_title;
+    }
+    
 }

@@ -7,6 +7,7 @@ CREATE TABLE public.playservice_locations_playadvisor
 (
   id serial,
   title character varying(255) NOT NULL,
+  pa_title character varying(255),
   content character varying(255),
   summary character varying(255),
   street character varying(255),

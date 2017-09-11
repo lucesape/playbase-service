@@ -587,6 +587,7 @@ ALTER SEQUENCE playservice_facilities_id_seq OWNED BY playservice_facilities_lis
 CREATE TABLE playservice_locations (
     id integer NOT NULL,
     title character varying(255) NOT NULL,
+    pa_title character varying(255),
     content character varying(255),
     summary character varying(255),
     street character varying(255),

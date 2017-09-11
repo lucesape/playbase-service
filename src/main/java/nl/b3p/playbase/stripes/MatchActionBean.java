@@ -96,6 +96,23 @@ public class MatchActionBean implements ActionBean {
         gson = builder.create();
     }
     
+    public Resolution addAll() {
+        try (Connection con = DB.getConnection()) {
+            GeometryJdbcConverter geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(con);
+            ResultSetHandler<List<Location>> handler = new BeanListHandler(Location.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
+            String sql = "select * from " + DB.LOCATION_TABLE + "_playadvisor";
+            List<Location> locs = DB.qr().query(sql, handler);
+            method = "add";
+            for (Location loc : locs) {
+                playadvisorId = loc.getId();
+                save();
+            }
+        } catch ( NamingException | SQLException ex) {
+            LOG.error("Cannot get geometryConverter: ", ex);
+        }
+        return view();
+    }
+    
     public Resolution autoMerge(){
         JSONObject result = new JSONObject();
         // Haal alle playadvisor records op
@@ -117,11 +134,14 @@ public class MatchActionBean implements ActionBean {
                 List<JSONObject> pms = getPlaymappingData(loc, geometryConverter);
                 boolean found = false;
                 double maxScore = -100;
+                double minDist = 100;
                 for (JSONObject pm : pms) {
                     double score = pm.getDouble("score");
                     String distanceString = pm.getString("distance");
-                    Double distance = distanceString.equals("-") ? 10 : Double.parseDouble(pm.getString("distance"));
+                    Double distance = distanceString.equals("-") ? 100 : Double.parseDouble(pm.getString("distance"));
                     maxScore = Math.max(score, maxScore);
+                    minDist = Math.min(distance, minDist);
+                    
                     if( score > automaticMergeScore || distance < 0.05 ){
                         context.getMessages().add(new SimpleMessage("Gelinked: " + loc.getTitle() + " aan " + pm.getString("title")));
                         playmappingId = pm.getInt("id");
@@ -134,7 +154,7 @@ public class MatchActionBean implements ActionBean {
                 }
                 
                 if(!found){
-                    context.getMessages().add(new SimpleMessage("Not found: " + loc.getTitle() + ". Max score: " + maxScore));
+                    context.getMessages().add(new SimpleMessage("Not found: " + loc.getTitle() + ". Max score: " + maxScore + ". Kleinste afstand: " + minDist));
                 }
             }
             
@@ -281,7 +301,7 @@ public class MatchActionBean implements ActionBean {
         playmapping.setContent(playadvisor.getContent());
         playmapping.setCountry(playadvisor.getCountry());
         playmapping.setMunicipality(playadvisor.getMunicipality());
-        
+        playmapping.setPa_title(playadvisor.getPa_title());
         return playmapping;
     }
 

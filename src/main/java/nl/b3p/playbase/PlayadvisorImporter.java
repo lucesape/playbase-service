@@ -250,7 +250,7 @@ public class PlayadvisorImporter extends Importer {
         l.setPostalcode((String) lM.get("Postcode"));
         l.setStreet((String) lM.get("Street"));
         l.setSummary((String) lM.get("Excerpt"));
-        l.setTitle((String) lM.get("title"));
+        l.setPa_title((String) lM.get("title"));
         l.setWebsite((String) lM.get("website"));
         l.setLatitude(lM.get("Lat") != null ? (Double) lM.get("Lat") : null);
         l.setLongitude(lM.get("Lng") != null ? (Double) lM.get("Lng") : null);
