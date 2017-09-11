@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +60,8 @@ public class ExportActionBean implements ActionBean {
     private static final String SEPERATOR_CHAR = ",";
     private ActionBeanContext context;
     
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    
     @Validate
     private String locationName;
     
@@ -76,7 +79,7 @@ public class ExportActionBean implements ActionBean {
             "Postcode 4 cijfers",/* "Postcode 2 letters",*/ 
             "Plaats", "Regio", "Land", "Website", "E-mail", "Telefoon", "Image URL", "Image Caption", "Image Id", "Categorie", 
             "Leeftijdscategorie", "Toegankelijkheid", 
-            "Faciliteiten", "Parkeren"};
+            "Faciliteiten", "Parkeren", "youngestAssetDate"};
         out.writeRecord(header);
         List<List<String>> records = getRecords();
         for (List<String> record : records) {
@@ -168,6 +171,19 @@ Parkeren
         retrieveAccessibilities(id, record);
         retrieveFacilities(id, record);
         retrieveParking(id, record);
+        retrieveYoungestAssetDate(id, record);
+    }
+    
+    private void retrieveYoungestAssetDate(Integer id, List<String> record) throws NamingException, SQLException {
+        MapHandler rsh = new MapHandler();
+
+        Map m = DB.qr().query("select max(to_timestamp(installeddate, 'yyyy-MM-dd')) as youngestAssetDate from " +DB.ASSETS_TABLE + " where installeddate <> '' and location = " + id, rsh);
+        Object o = m.get("youngestAssetDate");
+        if(o != null){
+            record.add(sdf.format(o));
+        }else{
+            record.add(null);
+        }
     }
 
     protected void retrieveParking(Integer id, List<String> record) throws NamingException, SQLException {
