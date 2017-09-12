@@ -85,6 +85,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     <stripes:submit name="save" class="btn btn-primary">Opslaan</stripes:submit> <br/>
                     Automatische merge score: <stripes:text name="automaticMergeScore" value="10.0"/> <br/>
                     Gebruik afstand: <stripes:checkbox name="useDistance"/> <br/>
+                    Gebruik plaatjes van playadvisor: <stripes:checkbox name="useImagesFromPlayadvisor"/> <br/>
                     <stripes:submit class="btn btn-default" name="autoMerge">Automerge</stripes:submit> <br/>
                     <stripes:submit class="btn btn-default" name="addAll">Alles toevoegen</stripes:submit> <br/>
                     

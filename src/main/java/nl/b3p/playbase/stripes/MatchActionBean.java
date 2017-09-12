@@ -90,6 +90,10 @@ public class MatchActionBean implements ActionBean {
     
     @Validate
     private boolean useDistance = false;
+    
+    
+    @Validate
+    private boolean useImagesFromPlayadvisor = false;
 
     private final Gson gson;
 
@@ -165,7 +169,7 @@ public class MatchActionBean implements ActionBean {
                         maxScore = Math.max(score, maxScore);
                         minDist = Math.min(distance, minDist);
 
-                        if (score > ( automaticMergeScore - curDelta) || (useDistance && distance < 0.05)) {
+                        if (score >= ( automaticMergeScore - curDelta) || (useDistance && distance < 0.05)) {
                             context.getMessages().add(new SimpleMessage("Gelinked: " + playadvisorLoc.getTitle() + " aan " + pm.getString("title")));
                             playmappingId = pm.getInt("id");
                             playadvisorId = playadvisorLoc.getId();
@@ -308,7 +312,9 @@ public class MatchActionBean implements ActionBean {
                 toSave.setId(null);
             }
             Integer locationId = importer.saveLocation(toSave, new ImportReport());
-            transferImages(playadvisorLoc, locationId, importer);
+            if(method.equals("add") || useImagesFromPlayadvisor){
+                transferImages(playadvisorLoc, locationId, importer);
+            }
             transferFacilities(playadvisorLoc, locationId, importer);
             transferAccessibilities(playadvisorLoc, locationId, importer);
             transferLocationAgecategories(playadvisorLoc, locationId, importer);
@@ -470,6 +476,14 @@ public class MatchActionBean implements ActionBean {
 
     public void setUseDistance(boolean useDistance) {
         this.useDistance = useDistance;
+    }
+    
+    public boolean isUseImagesFromPlayadvisor() {
+        return useImagesFromPlayadvisor;
+    }
+
+    public void setUseImagesFromPlayadvisor(boolean useImagesFromPlayadvisor) {
+        this.useImagesFromPlayadvisor = useImagesFromPlayadvisor;
     }
     // </editor-fold>
 
