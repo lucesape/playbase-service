@@ -85,6 +85,9 @@ public class PlayadvisorImporter extends Importer {
         playadvisorColumnToPlaybase.put(22, "average_rating");
         playadvisorColumnToPlaybase.put(23, "Lng");
         playadvisorColumnToPlaybase.put(24, "Lat");
+        playadvisorColumnToPlaybase.put(25, "Phone");
+        playadvisorColumnToPlaybase.put(26, "Street");
+        playadvisorColumnToPlaybase.put(27, "Postcode");
 
         parkingMapping = new HashMap<>();
         parkingMapping.put("Betaald", "ja - betaald");

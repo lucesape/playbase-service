@@ -330,6 +330,21 @@ public class MatchActionBean implements ActionBean {
         playmapping.setCountry(playadvisor.getCountry());
         playmapping.setMunicipality(playadvisor.getMunicipality());
         playmapping.setPa_title(playadvisor.getPa_title());
+        playmapping.setPhone(playadvisor.getPhone());
+        
+        if(playmapping.getStreet() == null){
+            if(playadvisor.getStreet() == null){
+                playmapping.setStreet(playmapping.getTitle());
+            }else{
+                playmapping.setStreet(playadvisor.getStreet());
+            }
+        }
+        
+        if(playmapping.getPostalcode()== null){
+            if(playadvisor.getPostalcode() != null){
+                playmapping.setPostalcode(playadvisor.getPostalcode());
+            }
+        }
         return playmapping;
     }
 
