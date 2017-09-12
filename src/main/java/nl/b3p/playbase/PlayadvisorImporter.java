@@ -61,7 +61,7 @@ public class PlayadvisorImporter extends Importer {
         postfix = "_playadvisor";
         playadvisorColumnToPlaybase = new HashMap<>();
         playadvisorColumnToPlaybase.put(0, "pa_id");
-        playadvisorColumnToPlaybase.put(1, "title");
+        playadvisorColumnToPlaybase.put(1, "pa_title");
         playadvisorColumnToPlaybase.put(2, "content");
         playadvisorColumnToPlaybase.put(3, "summary");
         playadvisorColumnToPlaybase.put(4, "");
@@ -250,7 +250,8 @@ public class PlayadvisorImporter extends Importer {
         l.setPostalcode((String) lM.get("Postcode"));
         l.setStreet((String) lM.get("Street"));
         l.setSummary((String) lM.get("Excerpt"));
-        l.setPa_title((String) lM.get("title"));
+        l.setPa_title((String) lM.get("pa_title"));
+        l.setTitle((String) lM.get("pa_title"));
         l.setWebsite((String) lM.get("website"));
         l.setLatitude(lM.get("Lat") != null ? (Double) lM.get("Lat") : null);
         l.setLongitude(lM.get("Lng") != null ? (Double) lM.get("Lng") : null);
