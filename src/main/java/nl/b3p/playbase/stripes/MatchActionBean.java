@@ -24,6 +24,7 @@ import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.naming.NamingException;
@@ -86,6 +87,9 @@ public class MatchActionBean implements ActionBean {
     
     @Validate
     private double automaticMergeScore =  10.0;
+    
+    @Validate
+    private boolean useDistance = false;
 
     private final Gson gson;
 
@@ -126,39 +130,57 @@ public class MatchActionBean implements ActionBean {
             GeometryJdbcConverter geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(con);
             ResultSetHandler<List<Location>> handler = new BeanListHandler(Location.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
             String sql = "select * from " + DB.LOCATION_TABLE + "_playadvisor";
-            List<Location> locs = DB.qr().query(sql, handler);
+            List<Location> playadvisorLocs = DB.qr().query(sql, handler);
+            
+            String sqlPM = "select * from " + DB.LOCATION_TABLE + " where pa_id is null";
+            List<Location> playmappingLocs = DB.qr().query(sqlPM, handler);
+            
+            CoordinateReferenceSystem crs = CRS.decode("EPSG:4326");
+
+            NormalizedLevenshtein l = new NormalizedLevenshtein();
+
             JSONArray ar = new JSONArray();
             result.put("messages", ar);
             method = "merge";
-            for (Location loc : locs) {
-                List<JSONObject> pms = getPlaymappingData(loc, geometryConverter);
-                boolean found = false;
-                double maxScore = -100;
-                double minDist = 100;
-                for (JSONObject pm : pms) {
-                    double score = pm.getDouble("score");
-                    String distanceString = pm.getString("distance");
-                    Double distance = distanceString.equals("-") ? 100 : Double.parseDouble(pm.getString("distance"));
-                    maxScore = Math.max(score, maxScore);
-                    minDist = Math.min(distance, minDist);
-                    
-                    if( score > automaticMergeScore || distance < 0.05 ){
-                        context.getMessages().add(new SimpleMessage("Gelinked: " + loc.getTitle() + " aan " + pm.getString("title")));
-                        playmappingId = pm.getInt("id");
-                        playadvisorId = loc.getId();
-                        save();
-                        found = true;
-                        break;
-                        //save
+            double delta = 0.1;
+            int steps = 20;
+            for (int i = 0; i <= steps; i++) {
+                double curDelta = i * delta;
+                if(i == steps){
+                    useDistance = true;
+                }
+                for (Iterator<Location> paIterator = playadvisorLocs.iterator(); paIterator.hasNext();) {
+                    Location playadvisorLoc = paIterator.next();
+
+                    boolean found = false;
+                    double maxScore = -100;
+                    double minDist = 100;
+
+                    for (Iterator<Location> iterator = playmappingLocs.iterator(); iterator.hasNext();) {
+                        Location pmLoc = iterator.next();
+                        JSONObject pm = calculateScore(playadvisorLoc, pmLoc, l, crs);
+                        double score = pm.getDouble("score");
+                        String distanceString = pm.getString("distance");
+                        Double distance = distanceString.equals("-") ? 100 : Double.parseDouble(pm.getString("distance"));
+                        maxScore = Math.max(score, maxScore);
+                        minDist = Math.min(distance, minDist);
+
+                        if (score > ( automaticMergeScore - curDelta) || (useDistance && distance < 0.05)) {
+                            context.getMessages().add(new SimpleMessage("Gelinked: " + playadvisorLoc.getTitle() + " aan " + pm.getString("title")));
+                            playmappingId = pm.getInt("id");
+                            playadvisorId = playadvisorLoc.getId();
+                            save();
+                            found = true;
+                            iterator.remove();
+                            paIterator.remove();
+                            break;
+                            //save
+                        }
                     }
                 }
-                
-                if(!found){
-                    context.getMessages().add(new SimpleMessage("Not found: " + loc.getTitle() + ". Max score: " + maxScore + ". Kleinste afstand: " + minDist));
-                }
+
             }
             
-
         } catch (FactoryException | NamingException | SQLException ex) {
             LOG.error("Cannot get geometryConverter: ", ex);
             result.put("message", "Cannot get geometryConverter: " + ex.getLocalizedMessage());
@@ -229,34 +251,39 @@ public class MatchActionBean implements ActionBean {
         NormalizedLevenshtein l = new NormalizedLevenshtein();
 
         List<Location> locs = DB.qr().query("select * from " + DB.LOCATION_TABLE + " where pa_id is null", listHandler);
-        JSONArray ar = new JSONArray();
         List<JSONObject> locations = new ArrayList<>();
         for (Location loc : locs) {
-            JSONObject obj = new JSONObject(gson.toJson(loc, Location.class));
-            Geometry end = loc.getGeom();
-            double distanceScore = 3;
-            try {
-                // not changed when there is no distance. 3 is the penalty for no distance, to prevent skewed results
-
-                if (end != null && playadvisorLoc.getGeom() != null) {
-                    double distance = JTS.orthodromicDistance(playadvisorLoc.getGeom().getCoordinate(), end.getCoordinate(), crs) / 1000;
-                    obj.put("distance", String.format("%.2f", distance));
-                    // 
-                    distanceScore = Math.min(distance * 2, 10);
-                } else {
-                    obj.put("distance", "-");
-                }
-
-            } catch (TransformException ex) {
-                LOG.error("Error calculating distance: ", ex);
-            }
-            double similarity = l.similarity(playadvisorLoc.getTitle(), loc.getTitle()) * 10;
-            obj.put("similarity", Math.round(similarity * 10.0) / 10.0);
-            double score = 10 - ((10 - similarity) / 2.7) - distanceScore;
-            obj.put("score", String.format("%.2f", score));
+            JSONObject obj = calculateScore(playadvisorLoc, loc, l, crs);
             locations.add(obj);
         }
         return locations;
+    }
+    
+    private JSONObject calculateScore(Location playadvisorLoc, Location playmappingLoc,  NormalizedLevenshtein l,CoordinateReferenceSystem crs) {
+        JSONObject obj = new JSONObject(gson.toJson(playmappingLoc, Location.class));
+        Geometry end = playmappingLoc.getGeom();
+        double distanceScore = 3;
+        try {
+            // not changed when there is no distance. 3 is the penalty for no distance, to prevent skewed results
+
+            if (end != null && playadvisorLoc.getGeom() != null) {
+                double distance = JTS.orthodromicDistance(playadvisorLoc.getGeom().getCoordinate(), end.getCoordinate(), crs) / 1000;
+                obj.put("distance", String.format("%.2f", distance));
+                // 
+                distanceScore = Math.min(distance * 2, 10);
+            } else {
+                obj.put("distance", "-");
+            }
+
+        } catch (TransformException ex) {
+            LOG.error("Error calculating distance: ", ex);
+        }
+        double similarity = l.similarity(playadvisorLoc.getTitle(), playmappingLoc.getTitle()) * 10;
+        obj.put("similarity", Math.round(similarity * 10.0) / 10.0);
+        double score = 10 - ((10 - similarity) / 2.7) - distanceScore;
+        obj.put("score", String.format("%.2f", score));
+
+        return obj;
     }
 
     public Resolution save() {
@@ -277,6 +304,7 @@ public class MatchActionBean implements ActionBean {
                 
             }else if(method.equals("add")){
                 toSave = playadvisorLoc;
+                toSave.setTitle(toSave.getPa_title());
                 toSave.setId(null);
             }
             Integer locationId = importer.saveLocation(toSave, new ImportReport());
@@ -419,6 +447,14 @@ public class MatchActionBean implements ActionBean {
     @Override
     public void setContext(ActionBeanContext context) {
         this.context = context;
+    }
+    
+    public boolean isUseDistance() {
+        return useDistance;
+    }
+
+    public void setUseDistance(boolean useDistance) {
+        this.useDistance = useDistance;
     }
     // </editor-fold>
 

@@ -82,10 +82,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         <stripes:option value="add" label="Toevoegen"/>
                         <stripes:option value="merge" label="Samenvoegen"/>
                     </stripes:select>
-                    <stripes:submit name="save">Opslaan</stripes:submit> <br/>
+                    <stripes:submit name="save" class="btn btn-primary">Opslaan</stripes:submit> <br/>
                     Automatische merge score: <stripes:text name="automaticMergeScore" value="10.0"/> <br/>
-                    <stripes:submit name="autoMerge">Automerge</stripes:submit> <br/>
-                    <stripes:submit name="addAll">Alles toevoegen</stripes:submit> <br/>
+                    Gebruik afstand: <stripes:checkbox name="useDistance"/> <br/>
+                    <stripes:submit class="btn btn-default" name="autoMerge">Automerge</stripes:submit> <br/>
+                    <stripes:submit class="btn btn-default" name="addAll">Alles toevoegen</stripes:submit> <br/>
                     
                 </stripes:form>
             </div>

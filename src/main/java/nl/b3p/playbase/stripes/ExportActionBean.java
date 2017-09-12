@@ -77,7 +77,7 @@ public class ExportActionBean implements ActionBean {
         //String[] header = {"Titel", "Content", "SamenvattingTitel", "Content", "Samenvatting", "Latitude", "Longitude", "Straat", "Huisnummer", "Huisnummertoevoeging", "Postcode 4 cijfers", "Postcode 2 letters", "Plaats", "Regio", "Land", "Website", "E-mail", "Telefoon (landcode + 9 cijfers)", "Afbeeldingen", "Categorie", "Leeftijd", "Speeltoestellen", "Faciliteiten", "Toegankelijkheid", "ParkerenLatitude", "Longitude", "Straat", "Huisnummer", "Huisnummertoevoeging", "Postcode 4 cijfers", "Postcode 2 letters", "Plaats", "Regio", "Land", "Website", "E-mail", "Telefoon (landcode + 9 cijfers)", "Afbeeldingen", "Categorie", "Leeftijd", "Speeltoestellen", "Faciliteiten", "Toegankelijkheid", "Parkeren"};
         String[] header = {"id", "Titel", "Content", "Samenvatting", "Latitude", "Longitude", "Straat", "Huisnummer", "Huisnummertoevoeging",
             "Postcode 4 cijfers",/* "Postcode 2 letters",*/ 
-            "Plaats", "Regio", "Land", "Website", "E-mail", "Telefoon", "Image URL", "Image Caption", "Image Id", "Categorie", 
+            "Plaats", "Regio", "Land", "Website", "E-mail", "Telefoon", "Playadvisor id", "Image URL", "Image Caption", "Image Id", "Categorie", 
             "Leeftijdscategorie", "Toegankelijkheid", 
             "Faciliteiten", "Parkeren", "youngestAssetDate"};
         out.writeRecord(header);
@@ -107,12 +107,13 @@ public class ExportActionBean implements ActionBean {
             List<List<String>> records = new ArrayList<>();
             ArrayListHandler rsh = new ArrayListHandler();
             //  id  Titel	Content	Samenvatting	Latitude Longitude Straat Huisnummer Huisnummertoevoeging	Postcode 4 cijfers	Postcode 2 letters  Plaats	Regio	Land	Website	E-mail Telefoon
-            String query = "SELECT id, title,content,summary, latitude,longitude,street,number, numberextra,postalcode,"
-                    + "municipality,    area,   country,website,email, phone from " + DB.LOCATION_TABLE;
+            String query = "SELECT id, pa_title,content,summary, latitude,longitude,street,number, numberextra,postalcode,"
+                    + "municipality,    area,   country,website,email, phone, pa_id from " + DB.LOCATION_TABLE;
             List<Object[]> locations = null;
             if(locationName != null){
-                query += " where title like ?";
-                locations =DB.qr().query(query, rsh, "%" + locationName + "%");
+                query += " where pa_title like ? or title like ?";
+                String wildcard = "%" + locationName + "%";
+                locations =DB.qr().query(query, rsh, wildcard, wildcard);
             }else{
                 locations =DB.qr().query(query, rsh);
             }
@@ -243,7 +244,7 @@ Parkeren
             if (!categories.isEmpty()) {
                 categories += SEPERATOR_CHAR;
             }
-            categories += cat[0] + ">" + cat[1];
+            categories += /*cat[0] + ">" +*/ cat[1];
         }
         record.add(categories);
     }
