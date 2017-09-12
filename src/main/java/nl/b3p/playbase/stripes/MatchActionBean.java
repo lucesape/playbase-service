@@ -314,6 +314,8 @@ public class MatchActionBean implements ActionBean {
             Integer locationId = importer.saveLocation(toSave, new ImportReport());
             if(method.equals("add") || useImagesFromPlayadvisor){
                 transferImages(playadvisorLoc, locationId, importer);
+            }else{
+                DB.qr().update("delete from " + DB.IMAGES_TABLE + "_playadvisor where location = ?", playadvisorId);
             }
             transferFacilities(playadvisorLoc, locationId, importer);
             transferAccessibilities(playadvisorLoc, locationId, importer);
