@@ -331,29 +331,31 @@ public class MatchActionBean implements ActionBean {
         return view();
     }
     
-    protected Location mergeLocations(Location playadvisor, Location playmapping) throws NamingException, SQLException{
-        playmapping.setPa_id(playadvisor.getPa_id());
-        playmapping.setAveragerating(playadvisor.getAveragerating());
-        playmapping.setContent(playadvisor.getContent());
-        playmapping.setCountry(playadvisor.getCountry());
-        playmapping.setMunicipality(playadvisor.getMunicipality());
-        playmapping.setPa_title(playadvisor.getPa_title());
-        playmapping.setPhone(playadvisor.getPhone());
+    protected Location mergeLocations(Location pa, Location pm) throws NamingException, SQLException{
+        pm.setPa_id(pa.getPa_id());
+        pm.setAveragerating(pa.getAveragerating());
+        pm.setContent(pa.getContent());
+        pm.setCountry(pa.getCountry());
+        pm.setMunicipality(pa.getMunicipality());
+        pm.setPa_title(pa.getPa_title());
+        pm.setPhone(pa.getPhone());
+        pm.setParking(pa.getParking());
+        pm.setWebsite(pa.getWebsite());
         
-        if(playmapping.getStreet() == null){
-            if(playadvisor.getStreet() == null){
-                playmapping.setStreet(playmapping.getTitle());
+        if(pm.getStreet() == null){
+            if(pa.getStreet() == null){
+                pm.setStreet(pm.getTitle());
             }else{
-                playmapping.setStreet(playadvisor.getStreet());
+                pm.setStreet(pa.getStreet());
             }
         }
         
-        if(playmapping.getPostalcode()== null){
-            if(playadvisor.getPostalcode() != null){
-                playmapping.setPostalcode(playadvisor.getPostalcode());
+        if(pm.getPostalcode()== null){
+            if(pa.getPostalcode() != null){
+                pm.setPostalcode(pa.getPostalcode());
             }
         }
-        return playmapping;
+        return pm;
     }
 
     
