@@ -1,0 +1,12 @@
+language: java
+
+script:
+  - mvn test -B
+
+
+jdk:
+  - oraclejdk8
+  - openjdk8
+  
+os:
+  - linux
