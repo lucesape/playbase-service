@@ -4,13 +4,13 @@ script:
   - mvn test -B
 
     - if [ "$TRAVIS_JDK_VERSION" == oraclejdk8 ]; then
-      mvn cobertura:cobertura
+          mvn cobertura:cobertura;
     fi
 
 
 after_success:
     - if [ "$TRAVIS_JDK_VERSION" == oraclejdk8 ]; then
-      bash <(curl -s https://codecov.io/bash)
+          bash <(curl -s https://codecov.io/bash);
     fi
 
 jdk:
