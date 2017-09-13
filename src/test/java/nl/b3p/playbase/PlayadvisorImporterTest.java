@@ -30,11 +30,15 @@ import java.util.logging.Logger;
 import javax.naming.NamingException;
 import nl.b3p.commons.csv.CsvFormatException;
 import nl.b3p.commons.csv.CsvInputStream;
+import nl.b3p.loader.util.DbUtilsGeometryColumnConverter;
 import nl.b3p.playbase.ImportReport.ImportType;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.db.TestUtil;
 import nl.b3p.playbase.entities.Location;
+import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.handlers.ArrayListHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.MapListHandler;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -73,7 +77,7 @@ public class PlayadvisorImporterTest extends TestUtil {
         List locations = DB.qr().query("Select * from " + DB.LOCATION_TABLE + instance.getPostfix(), new ArrayListHandler());
         assertEquals(1, locations.size());
         List images = DB.qr().query("Select * from " + DB.IMAGES_TABLE + instance.getPostfix(), new ArrayListHandler());
-        assertEquals(2, images.size());
+        assertEquals(1, images.size());
         List types = DB.qr().query("Select * from " + DB.LOCATION_CATEGORY_TABLE + instance.getPostfix(), new ArrayListHandler());
         assertEquals(1, types.size());
         List facilities = DB.qr().query("Select * from " + DB.LOCATION_FACILITIES_TABLE + instance.getPostfix(), new ArrayListHandler());
@@ -170,7 +174,7 @@ public class PlayadvisorImporterTest extends TestUtil {
 
     @Test
     public void testParseMap() throws IOException, CsvFormatException {
-        String i = "30324,Speeltuinvereniging De Oranjetuin,\"<span class=C-6>De Oranjespeeltuin is de mooiste, gezelligste en groenste speeltuin in héél Barendrecht!<br>De speeltuin is sinds 1958 gevestigd in de Oranjewijk in Barendrecht. In de speeltuin zijn diverse glijbanen, klimtoestellen, schommels, een waterbak en een zandbak te vinden die het tot een waar speelparadijs voor de kinderen maken. De Oranjetuin is op een parkachtige wijze aangelegd en biedt een groene speelomgeving. In de speeltuin zijn eenvoudige consumpties in de vorm van koffie, thee, limonade en ijsjes te verkrijgen.<br></span>\",,2016-04-20,speelplek,http://playadvisor.b3p.nl/speelplek/openbare-speeltuin/speeltuinvereniging-%c2%93de-oranjetuin%c2%94/,http://playadvisor.b3p.nl/wp-content/uploads/2016/04/001-1.jpg|http://playadvisor.b3p.nl/wp-content/uploads/2016/04/001-1.jpg,001.jpg|001.jpg,|,|,|,,Speeltuinen>Openbare speeltuin,Nederland,Barendrecht,Duikelrek|Glijbaan|Klimtoestel|Wip,Bankje|Toilet|Verschoontafel,0 - 5 jaar|6 - 11 jaar,Gratis,Inclusive playground|Samenspeelplek,,5,4.5561209321022,51.8490438089326,\"a:1:{i:0;a:2:{s:13:\"\"attachment_id\"\";i:30309;s:3:\"\"url\"\";s:87:\"\"https://playadvisor.co/wp-content/uploads/2016/04/speeltuinverenigingdeoranjetuin-0.jpg\"\";}}\",,,,,,publish,1,speeltuinvereniging-%c2%93de-oranjetuin%c2%94,,,0,0,0,open,open,,";
+        String i = "30324,Speeltuinvereniging De Oranjetuin,\"<span class=C-6>De Oranjespeeltuin is de mooiste, gezelligste en groenste speeltuin in héél Barendrecht!<br>De speeltuin is sinds 1958 gevestigd in de Oranjewijk in Barendrecht. In de speeltuin zijn diverse glijbanen, klimtoestellen, schommels, een waterbak en een zandbak te vinden die het tot een waar speelparadijs voor de kinderen maken. De Oranjetuin is op een parkachtige wijze aangelegd en biedt een groene speelomgeving. In de speeltuin zijn eenvoudige consumpties in de vorm van koffie, thee, limonade en ijsjes te verkrijgen.<br></span>\",,2016-04-20,speelplek,http://playadvisor.b3p.nl/speelplek/openbare-speeltuin/speeltuinvereniging-%c2%93de-oranjetuin%c2%94/,http://playadvisor.b3p.nl/wp-content/uploads/2016/04/001-1.jpg|http://playadvisor.b3p.nl/wp-content/uploads/2016/04/001-1.jpg,001.jpg|001.jpg,|,|,|,,Speeltuinen>Openbare speeltuin,Nederland,Barendrecht,Duikelrek|Glijbaan|Klimtoestel|Wip,Bankje|Toilet|Verschoontafel,0 - 5 jaar|6 - 11 jaar,Gratis,Inclusive playground|Samenspeelplek,,5,4.5561209321022,51.8490438089326,123,raam,2801,\"a:1:{i:0;a:2:{s:13:\"\"attachment_id\"\";i:30309;s:3:\"\"url\"\";s:87:\"\"https://playadvisor.co/wp-content/uploads/2016/04/speeltuinverenigingdeoranjetuin-0.jpg\"\";}}\",,,,,,publish,1,speeltuinvereniging-%c2%93de-oranjetuin%c2%94,,,0,0,0,open,open,,";
         CsvInputStream cis = new CsvInputStream(new InputStreamReader(new ByteArrayInputStream(i.getBytes(StandardCharsets.UTF_8))));
 
         String[] s = cis.readRecord();
@@ -186,7 +190,7 @@ public class PlayadvisorImporterTest extends TestUtil {
         assertEquals("Nederland", l.getCountry());
         assertNull(l.getDocuments());
         assertNull(l.getEmail());
-        assertEquals(2, l.getImages().size());
+        assertEquals(1, l.getImages().size());
         assertNull(l.getId());
         assertEquals(51.8490438089326, l.getLatitude(), 0.01);
         assertEquals(4.5561209321022, l.getLongitude(), 0.01);
@@ -194,10 +198,10 @@ public class PlayadvisorImporterTest extends TestUtil {
         assertNull( l.getNumber());
         assertNull( l.getNumberextra());
         assertEquals(1, (int) l.getParking());
-        assertNull( l.getPhone());
+        assertEquals("123", l.getPhone());
         assertNull( l.getPm_guid());
-        assertNull( l.getPostalcode());
-        assertNull( l.getStreet());
+        assertEquals("2801", l.getPostalcode());
+        assertEquals("raam", l.getStreet());
         assertNull( l.getSummary());
         assertEquals(5,(int) l.getAveragerating());
         assertEquals("http://playadvisor.b3p.nl/speelplek/openbare-speeltuin/speeltuinvereniging-%c2%93de-oranjetuin%c2%94/", l.getWebsite());
@@ -218,21 +222,24 @@ public class PlayadvisorImporterTest extends TestUtil {
         assertEquals("<span class=C-6>De Oranjespeeltuin is de mooiste, gezelligste en groenste speeltuin in héél Barendrecht!<br>De speeltuin is sinds 1958 gevestigd in de Oranjewijk in Barendrecht. In de speeltuin zijn diverse glijbanen, klimtoestellen, schommels, een waterbak en een zandbak te vinden die het tot een waar speelparadijs voor de kinderen maken. De Oranjetuin is op een parkachtige wijze aangelegd en biedt een groene speelomgeving. In de speeltuin zijn eenvoudige consumpties in de vorm van koffie, thee, limonade en ijsjes te verkrijgen.<br></span>", l.getContent());
         assertEquals("Nederland", l.getCountry());
         assertNull(l.getEmail());
-        assertNull(l.getId());
+        assertEquals(new Integer(1),l.getId());
         assertEquals(51.8490438089326, l.getLatitude(), 0.01);
         assertEquals(4.5561209321022, l.getLongitude(), 0.01);
         assertEquals("Barendrecht", l.getMunicipality());
         assertNull( l.getNumber());
         assertNull( l.getNumberextra());
-        assertNull( l.getPhone());
+        assertEquals("123", l.getPhone());
         assertNull( l.getPm_guid());
-        assertNull( l.getPostalcode());
-        assertNull( l.getStreet());
+        assertEquals("2801", l.getPostalcode());
+        assertEquals("raam", l.getStreet());
         assertNull( l.getSummary());
         assertEquals(5,(int) l.getAveragerating());
         assertEquals("http://playadvisor.b3p.nl/speelplek/openbare-speeltuin/speeltuinvereniging-%c2%93de-oranjetuin%c2%94/", l.getWebsite());
-        assertEquals(2, l.getAgecategories().length);
-        assertEquals(2, l.getImages().size());
+        
+        List li = DB.qr().query("select * from " + DB.LOCATION_AGE_CATEGORY_TABLE + "_playadvisor where location = ?", new ArrayListHandler(), l.getId());
+        assertEquals(2, li.size());
+        List ims = DB.qr().query("select * from " + DB.IMAGES_TABLE + "_playadvisor where location = ?", new MapListHandler(), l.getId());
+        assertEquals(1, ims.size());
         assertEquals(1, (int) l.getParking());
 
     }

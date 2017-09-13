@@ -186,15 +186,17 @@ public abstract class Importer {
             sb.append("country,");
             sb.append("street,");
             sb.append("postalcode,");
+            sb.append("parking,");
             sb.append("phone,");
+            sb.append("website,");
             sb.append("pa_id,");
             sb.append("pa_title,");
             sb.append("pm_guid) ");
-            sb.append("VALUES( ?,?,?,?,?,?,?,?,?,?,?,?,?,?);");
+            sb.append("VALUES( ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);");
 
             savedLocation = DB.qr().insert(sb.toString(), handler, location.getTitle(), location.getLatitude(), location.getLongitude(), geom, 
                     location.getAveragerating() != null ? location.getAveragerating() : 0, location.getContent(), location.getMunicipality(), location.getCountry(),
-                   location.getStreet(), location.getPostalcode(), location.getPhone(), location.getPa_id(), location.getPa_title(), location.getPm_guid());
+                   location.getStreet(), location.getPostalcode(), location.getParking(), location.getPhone(), location.getWebsite(), location.getPa_id(), location.getPa_title(), location.getPm_guid());
             id = savedLocation.getId();
             report.increaseInserted(ImportType.LOCATION);
             List<Map<String, Object>> images = location.getImages();
@@ -216,7 +218,9 @@ public abstract class Importer {
             sb.append("country = ?,");
             sb.append("street = ?,");
             sb.append("postalcode= ?,");
+            sb.append("parking= ?,");
             sb.append("phone = ?,");
+            sb.append("website = ?,");
             sb.append("pa_id = ?,");
             sb.append("pa_title = ?,");
             sb.append("pm_guid = ?");
@@ -224,7 +228,7 @@ public abstract class Importer {
 
             DB.qr().update(sb.toString(), location.getTitle(), location.getLatitude(), location.getLongitude(), geom, 
                     location.getAveragerating() != null ? location.getAveragerating() : 0, location.getContent(), location.getMunicipality(), location.getCountry(),
-                    location.getStreet(), location.getPostalcode(), location.getPhone(), location.getPa_id(), location.getPa_title(), location.getPm_guid(), id);
+                    location.getStreet(), location.getPostalcode(), location.getParking(), location.getWebsite(), location.getPhone(), location.getPa_id(), location.getPa_title(), location.getPm_guid(), id);
             report.increaseUpdated(ImportType.LOCATION);
         }
         return id;

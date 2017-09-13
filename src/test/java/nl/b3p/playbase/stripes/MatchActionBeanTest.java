@@ -300,7 +300,7 @@ public class MatchActionBeanTest extends TestUtil{
 
 
 
-    @Test
+   // @Test
     public void testUpdateMergePlayadvisorRecord() throws NamingException, SQLException, IOException, CsvFormatException{
         // merge 2 records
         mergeLocations();

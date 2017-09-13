@@ -89,6 +89,8 @@ public class PlaymappingImporterTest extends TestUtil {
         //assertEquals(0, ((JSONArray) real.get("ChildLocations")).length());
         assertEquals(0, ((List) real.getDocuments()).size());
         assertEquals(2, ((List) real.getImages()).size());
+        assertEquals("http://www.playmapping.com/GetImage.ashx?g=33ec50eb-eec8-452a-bf7c-1b54ca7543f8", real.getImages().get(0).get("URI"));
+        assertEquals("http://www.playmapping.com/GetImage.ashx?g=8af2bd67-5178-405f-9a97-444133bf370d", real.getImages().get(1).get("URI"));
     }
 
     @Test

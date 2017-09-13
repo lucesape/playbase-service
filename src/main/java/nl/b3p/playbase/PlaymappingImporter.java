@@ -241,7 +241,9 @@ public class PlaymappingImporter extends Importer {
         map.put("$id", image.optString("$id"));
         map.put("ID", image.optString("ID"));
         map.put("LastUpdated", image.optString("LastUpdated"));
-        map.put("URI", image.optString("URI"));
+        String url = image.optString("URI");
+        url = url.replaceAll("&w=350&h=350", "");
+        map.put("URI", url);
         map.put("Description", image.optString("Description"));
         return map;
     }
