@@ -2,20 +2,20 @@ language: java
 
 script:
   - mvn test -B
-
-    - if [ "$TRAVIS_JDK_VERSION" == oraclejdk8 ]; then
-          mvn cobertura:cobertura;
+  - if [ "$TRAVIS_JDK_VERSION" == oraclejdk8 ]; then
+         mvn cobertura:cobertura;
     fi
-
 
 after_success:
-    - if [ "$TRAVIS_JDK_VERSION" == oraclejdk8 ]; then
-          bash <(curl -s https://codecov.io/bash);
+  - if [ "$TRAVIS_JDK_VERSION" == oraclejdk8 ]; then
+         bash <(curl -s https://codecov.io/bash);
     fi
-
+  
 jdk:
   - oraclejdk8
   - openjdk8
-  
+
 os:
   - linux
+
+
