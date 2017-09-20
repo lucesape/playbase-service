@@ -228,7 +228,7 @@ public abstract class Importer {
 
             DB.qr().update(sb.toString(), location.getTitle(), location.getLatitude(), location.getLongitude(), geom, 
                     location.getAveragerating() != null ? location.getAveragerating() : 0, location.getContent(), location.getMunicipality(), location.getCountry(),
-                    location.getStreet(), location.getPostalcode(), location.getParking(), location.getWebsite(), location.getPhone(), location.getPa_id(), location.getPa_title(), location.getPm_guid(), id);
+                    location.getStreet(), location.getPostalcode(), location.getParking(), location.getPhone(), location.getWebsite(), location.getPa_id(), location.getPa_title(), location.getPm_guid(), id);
             report.increaseUpdated(ImportType.LOCATION);
         }
         return id;
