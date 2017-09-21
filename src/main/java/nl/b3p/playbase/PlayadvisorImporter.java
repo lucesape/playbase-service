@@ -36,6 +36,8 @@ import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.Asset;
 import nl.b3p.playbase.entities.Comment;
 import nl.b3p.playbase.entities.Location;
+import nl.b3p.playbase.stripes.MatchActionBean;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -153,6 +155,16 @@ public class PlayadvisorImporter extends Importer {
             report.addError(e.getLocalizedMessage(), ImportType.LOCATION);
             return null;
         }
+        Location existingLocation = getMergedLocation(location);
+        String prevPostfix = postfix;
+        if(existingLocation != null){
+            MatchActionBean.mergeLocations(location, existingLocation);
+            location = existingLocation;
+            postfix = "";
+            
+            // remove assets from playadvisor 
+            DB.qr().update("delete from " + DB.ASSETS_TABLE + " where location = ? and pa_guid = ?", location.getId(), location.getPa_id());
+        }
         int id = saveLocation(location, report);
         location.setId(id);
         List<Asset> assets = parseAssets(location, locationMap);
@@ -162,7 +174,7 @@ public class PlayadvisorImporter extends Importer {
         }
 
         saveLocationAgeCategory(id, Arrays.asList(location.getAgecategories()), true);
-   
+
         try {
             if (((String) locationMap.get(LOCATIONSUBTYPE)).length() > 0) {
                 saveLocationType((String) locationMap.get(LOCATIONSUBTYPE), id);
@@ -170,7 +182,7 @@ public class PlayadvisorImporter extends Importer {
         } catch (IllegalArgumentException ex) {
             report.addError(ex.getLocalizedMessage() + ". Location is saved, but type is not.", ImportType.LOCATION);
         }
-        
+
         try {
             if (((String) locationMap.get(FACILITIES)).length() > 0) {
                 saveFacilities(id, (String) locationMap.get(FACILITIES));
@@ -178,7 +190,7 @@ public class PlayadvisorImporter extends Importer {
         } catch (IllegalArgumentException ex) {
             report.addError(ex.getLocalizedMessage() + ". Location is saved, but facilities are not.", ImportType.LOCATION);
         }
-        
+
         try {
             if (((String) locationMap.get(ACCESSIBLITIY)).length() > 0) {
                 saveAccessibility(id, (String) locationMap.get(ACCESSIBLITIY));
@@ -186,10 +198,25 @@ public class PlayadvisorImporter extends Importer {
         } catch (IllegalArgumentException ex) {
             report.addError(ex.getLocalizedMessage() + ". Location is saved, but accessiblity is not.", ImportType.LOCATION);
         }
+
+        postfix = prevPostfix;
         return location;
 
     }
+    
+    public Location getMergedLocation(Location newLocation) throws NamingException, SQLException{
+        StringBuilder sb = new StringBuilder();
+        sb.append("select * from ");
 
+        sb.append(DB.LOCATION_TABLE);
+        sb.append(" where pa_id = '");
+        sb.append(newLocation.getPa_id());
+
+        sb.append("';");
+        Location loc = DB.qr().query(sb.toString(), locationHandler);
+        return loc;
+    }
+    
     protected Map<String, Object> parseRecord(String[] record) {
         Map<String, Object> dbvalues = new HashMap<>();
         String[] imageUrls = null;
@@ -286,6 +313,7 @@ public class PlayadvisorImporter extends Importer {
         for (String asset : assetArray) {
             Asset ass = new Asset();
             ass.setName(asset);
+            ass.setPa_guid(location.getPa_id());
             ass.setLocation(location.getId());
             Integer[] cats = location.getAgecategories();
 

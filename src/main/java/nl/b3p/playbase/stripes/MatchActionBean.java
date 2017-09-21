@@ -331,7 +331,7 @@ public class MatchActionBean implements ActionBean {
         return view();
     }
     
-    protected Location mergeLocations(Location pa, Location pm) throws NamingException, SQLException{
+    public static Location mergeLocations(Location pa, Location pm) throws NamingException, SQLException{
         pm.setPa_id(pa.getPa_id());
         pm.setAveragerating(pa.getAveragerating());
         pm.setContent(pa.getContent());

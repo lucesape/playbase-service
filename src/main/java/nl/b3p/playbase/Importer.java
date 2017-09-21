@@ -48,6 +48,8 @@ public abstract class Importer {
 
     private static final Log log = LogFactory.getLog("Importer");
     private GeometryJdbcConverter geometryConverter;
+    protected ResultSetHandler<Location> locationHandler;
+    private ResultSetHandler<Asset> assHandler;
 
     private Map<String, Integer> assetTypes;
     private Map<String, Integer> equipmentTypes;
@@ -88,6 +90,8 @@ public abstract class Importer {
         
         try(Connection con = DB.getConnection()) {
             geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(con);
+            locationHandler = new BeanHandler(Location.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
+            assHandler = new BeanHandler(Asset.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
         } catch (NamingException | SQLException ex) {
             log.error("Cannot get geometryConverter: ", ex);
         }
@@ -169,9 +173,8 @@ public abstract class Importer {
         } catch (NullPointerException ex) {
             log.info("no geom for asset");
         }
-        ResultSetHandler<Location> handler = new BeanHandler(Location.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
-        Location savedLocation = null;
-        Integer id = null;
+        Location savedLocation;
+        Integer id;
         if (!exists) {
             sb.append("INSERT ");
             sb.append("INTO ");
@@ -194,7 +197,7 @@ public abstract class Importer {
             sb.append("pm_guid) ");
             sb.append("VALUES( ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);");
 
-            savedLocation = DB.qr().insert(sb.toString(), handler, location.getTitle(), location.getLatitude(), location.getLongitude(), geom, 
+            savedLocation = DB.qr().insert(sb.toString(), locationHandler, location.getTitle(), location.getLatitude(), location.getLongitude(), geom, 
                     location.getAveragerating() != null ? location.getAveragerating() : 0, location.getContent(), location.getMunicipality(), location.getCountry(),
                    location.getStreet(), location.getPostalcode(), location.getParking(), location.getPhone(), location.getWebsite(), location.getPa_id(), location.getPa_title(), location.getPm_guid());
             id = savedLocation.getId();
@@ -278,7 +281,7 @@ public abstract class Importer {
         StringBuilder sb = new StringBuilder();
         sb.append("select id from ");
 
-        sb.append(DB.LOCATION_TABLE + postfix);
+        sb.append(DB.LOCATION_TABLE).append(postfix);
         if (location.getPm_guid() != null) {
             sb.append(" where pm_guid = '");
             sb.append(location.getPm_guid());
@@ -310,21 +313,18 @@ public abstract class Importer {
     }
 
     public void saveFacilities(Integer locationId, Integer facilityId) throws NamingException, SQLException {
-
-       
-            StringBuilder sb = new StringBuilder();
-            sb.append("INSERT ");
-            sb.append("INTO ");
-            sb.append(DB.LOCATION_FACILITIES_TABLE).append(postfix);
-            sb.append("(");
-            sb.append("location,");
-            sb.append("facility)");
-            sb.append("VALUES( ");
-            sb.append(locationId).append(",");
-            sb.append(facilityId);
-            sb.append(");");
-            DB.qr().insert(sb.toString(), new ScalarHandler<>());
-        
+        StringBuilder sb = new StringBuilder();
+        sb.append("INSERT ");
+        sb.append("INTO ");
+        sb.append(DB.LOCATION_FACILITIES_TABLE).append(postfix);
+        sb.append("(");
+        sb.append("location,");
+        sb.append("facility)");
+        sb.append("VALUES( ");
+        sb.append(locationId).append(",");
+        sb.append(facilityId);
+        sb.append(");");
+        DB.qr().insert(sb.toString(), new ScalarHandler<>());
     }
 
     
@@ -349,8 +349,6 @@ public abstract class Importer {
     public void saveAsset(Asset asset, ImportReport report) throws NamingException, SQLException {
         Integer id = null;
         Object geom = null;
-
-        ResultSetHandler<Asset> handler = new BeanHandler(Asset.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
 
         try {
             geom = geometryConverter.createNativePoint(asset.getLatitude(), asset.getLongitude(), 4326);
@@ -391,12 +389,13 @@ public abstract class Importer {
             sb.append("productvariantid = ?,");
             sb.append("serialnumber = ?,");
             sb.append("geom = ?,");
-            sb.append("pm_guid = ?");
+            sb.append("pa_guid = ?,");
+            sb.append("pm_guid = ?,");
             sb.append(" WHERE id = ").append(id);
             DB.qr().update(sb.toString(), asset.getInstalleddate(), asset.getLocation(), asset.getName(), asset.getType_(), asset.getEquipment(), asset.getLatitude(),
                     asset.getLongitude(), asset.getPriceindexation(), asset.getPriceinstallation(), asset.getPricemaintenance(), asset.getPricepurchase(), asset.getPricereinvestment(),
                     asset.getDepth(), asset.getWidth(), asset.getHeight(), asset.getEndoflifeyear(), asset.getFreefallheight(), asset.getSafetyzonelength(), asset.getSafetyzonewidth(),
-                    asset.getManufacturer(), asset.getMaterial(), asset.getProduct(), asset.getProductid(), asset.getProductvariantid(), asset.getSerialnumber(), geom, asset.getPm_guid());
+                    asset.getManufacturer(), asset.getMaterial(), asset.getProduct(), asset.getProductid(), asset.getProductvariantid(), asset.getSerialnumber(), geom, asset.getPa_guid(), asset.getPm_guid());
             report.increaseUpdated(ImportType.ASSET);
         } else {
             StringBuilder sb = new StringBuilder();
@@ -430,13 +429,14 @@ public abstract class Importer {
             sb.append("productvariantid,");
             sb.append("serialnumber,");
             sb.append("geom,");
+            sb.append("pa_guid,");
             sb.append("pm_guid) ");
-            sb.append("VALUES(  ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);");
+            sb.append("VALUES(  ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);");
 
-            Asset as = DB.qr().insert(sb.toString(), handler, asset.getInstalleddate(), asset.getLocation(), asset.getName(), asset.getType_(), asset.getEquipment(), asset.getLatitude(),
+            Asset as = DB.qr().insert(sb.toString(), assHandler, asset.getInstalleddate(), asset.getLocation(), asset.getName(), asset.getType_(), asset.getEquipment(), asset.getLatitude(),
                     asset.getLongitude(), asset.getPriceindexation(), asset.getPriceinstallation(), asset.getPricemaintenance(), asset.getPricepurchase(), asset.getPricereinvestment(),
                     asset.getDepth(), asset.getWidth(), asset.getHeight(), asset.getEndoflifeyear(), asset.getFreefallheight(), asset.getSafetyzonelength(), asset.getSafetyzonewidth(),
-                    asset.getManufacturer(), asset.getMaterial(), asset.getProduct(), asset.getProductid(), asset.getProductvariantid(), asset.getSerialnumber(), geom, asset.getPm_guid());
+                    asset.getManufacturer(), asset.getMaterial(), asset.getProduct(), asset.getProductid(), asset.getProductvariantid(), asset.getSerialnumber(), geom, asset.getPa_guid(), asset.getPm_guid());
             id = as.getId();
             report.increaseInserted(ImportType.ASSET);
         }
@@ -475,7 +475,6 @@ public abstract class Importer {
 
     protected Integer getAssetId(Asset asset) {
         try {
-            ResultSetHandler<Asset> handler = new BeanHandler(Asset.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
             Asset o;
             if (asset.getPm_guid() == null) {
                 if(asset.getLocation() == null || asset.getEquipment() == null){
@@ -487,7 +486,7 @@ public abstract class Importer {
                 sb.append(DB.ASSETS_TABLE).append(postfix);
                 sb.append(" where location = ? and equipment = ?");
 
-                o = DB.qr().query(sb.toString(), handler, asset.getLocation(), equipment);
+                o = DB.qr().query(sb.toString(), assHandler, asset.getLocation(), equipment);
 
             } else {
                 StringBuilder sb = new StringBuilder();
@@ -496,7 +495,7 @@ public abstract class Importer {
                 sb.append(" where pm_guid = '");
                 sb.append(asset.getPm_guid());
                 sb.append("';");
-                o = DB.qr().query(sb.toString(), handler);
+                o = DB.qr().query(sb.toString(), assHandler);
             }
             return o != null ? o.getId() : null;
         } catch (NamingException | SQLException ex) {
