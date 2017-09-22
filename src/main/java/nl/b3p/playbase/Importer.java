@@ -390,7 +390,7 @@ public abstract class Importer {
             sb.append("serialnumber = ?,");
             sb.append("geom = ?,");
             sb.append("pa_guid = ?,");
-            sb.append("pm_guid = ?,");
+            sb.append("pm_guid = ?");
             sb.append(" WHERE id = ").append(id);
             DB.qr().update(sb.toString(), asset.getInstalleddate(), asset.getLocation(), asset.getName(), asset.getType_(), asset.getEquipment(), asset.getLatitude(),
                     asset.getLongitude(), asset.getPriceindexation(), asset.getPriceinstallation(), asset.getPricemaintenance(), asset.getPricepurchase(), asset.getPricereinvestment(),
