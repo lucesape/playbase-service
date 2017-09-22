@@ -78,6 +78,7 @@ CREATE TABLE playservice_location_agecategories_playadvisor (
 
 CREATE TABLE playservice_location_categories_playadvisor (
     location integer NOT NULL,
+    pa_id character varying(255),
     category integer NOT NULL
 );
 

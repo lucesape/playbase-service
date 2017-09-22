@@ -261,16 +261,18 @@ public abstract class Importer {
         }
     }
     
-    public void saveLocationType(Integer categoryId, Integer locationId) throws NamingException, SQLException, UnsupportedEncodingException {
+    public void saveLocationType(Integer categoryId, Location location) throws NamingException, SQLException, UnsupportedEncodingException {
         StringBuilder sb = new StringBuilder();
         sb.append("INSERT ");
         sb.append("INTO ");
         sb.append(DB.LOCATION_CATEGORY_TABLE).append(postfix);
         sb.append("(");
         sb.append("location,");
+        sb.append("pa_id,");
         sb.append("category)");
         sb.append("VALUES( ");
-        sb.append(locationId).append(",");
+        sb.append(location.getId()).append(",");
+        sb.append(location.getPa_id()).append(",");
         sb.append(categoryId);
         sb.append(");");
         DB.qr().insert(sb.toString(), new ScalarHandler<>());

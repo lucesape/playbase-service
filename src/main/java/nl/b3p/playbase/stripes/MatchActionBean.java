@@ -320,7 +320,7 @@ public class MatchActionBean implements ActionBean {
             transferFacilities(playadvisorLoc, locationId, importer);
             transferAccessibilities(playadvisorLoc, locationId, importer);
             transferLocationAgecategories(playadvisorLoc, playmappingLoc, importer);
-            transferLocationCategories(playadvisorLoc, locationId, importer);
+            transferLocationCategories(playadvisorLoc, playmappingLoc, importer);
             transferLocationEquipment(playadvisorLoc, locationId, importer, assHandler);
             transferComments(playadvisorLoc, playmappingLoc, importer, commentHandler);
             
@@ -400,7 +400,7 @@ public class MatchActionBean implements ActionBean {
         DB.qr().update("delete from " + DB.LOCATION_AGE_CATEGORY_TABLE + "_playadvisor where location = ?", playadvisorId);
     }
 
-    protected void transferLocationCategories(Location playadvisor, Integer playmapping, PlaymappingImporter importer) throws NamingException, SQLException, UnsupportedEncodingException {
+    protected void transferLocationCategories(Location playadvisor, Location playmapping, PlaymappingImporter importer) throws NamingException, SQLException, UnsupportedEncodingException {
         List<Map<String,Object>> paAccessibilities = DB.qr().query("select location, category from " + DB.LOCATION_CATEGORY_TABLE + "_playadvisor where location = ?", new MapListHandler(), playadvisorId);
         for (Map<String, Object> paAccessibility : paAccessibilities) {
             importer.saveLocationType((Integer)paAccessibility.get("category"), playmapping);

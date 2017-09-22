@@ -163,12 +163,7 @@ public class PlayadvisorImporter extends Importer {
             location = existingLocation;
             postfix = "";
             
-            //o = DB.qr().query(sb.toString(), assHandler, asset.getLocation(), equipment);
-            ArrayListHandler rsh = new ArrayListHandler();
-            List<Object[]> assets = DB.qr().query("select id from " + DB.ASSETS_TABLE + " where location = ? and pa_guid = ?",rsh, location.getId(), location.getPa_id());
-            for (Object[] assetId : assets) {
-                DB.qr().update("DELETE FROM " + DB.LOCATION_AGE_CATEGORY_TABLE + postfix + " WHERE location_equipment = ?", assetId[0]);
-            }
+            DB.qr().update("DELETE FROM " + DB.LOCATION_AGE_CATEGORY_TABLE + " WHERE pa_id = ?", location.getPa_id());
             // remove assets from playadvisor 
             DB.qr().update("delete from " + DB.ASSETS_TABLE + " where location = ? and pa_guid = ?", location.getId(), location.getPa_id());
         }
@@ -184,7 +179,7 @@ public class PlayadvisorImporter extends Importer {
 
         try {
             if (((String) locationMap.get(LOCATIONSUBTYPE)).length() > 0) {
-                saveLocationType((String) locationMap.get(LOCATIONSUBTYPE), id);
+                saveLocationType((String) locationMap.get(LOCATIONSUBTYPE), location, !locationAlreadyMerged);
             }
         } catch (IllegalArgumentException ex) {
             report.addError(ex.getLocalizedMessage() + ". Location is saved, but type is not.", ImportType.LOCATION);
@@ -402,8 +397,10 @@ public class PlayadvisorImporter extends Importer {
         }
     }
 
-    protected void saveLocationType(String typeString, Integer id) throws NamingException, SQLException, UnsupportedEncodingException {
-        DB.qr().update("DELETE FROM " + DB.LOCATION_CATEGORY_TABLE + postfix + " WHERE location = " + id);
+    protected void saveLocationType(String typeString, Location location, boolean deleteFirst) throws NamingException, SQLException, UnsupportedEncodingException {
+        if(deleteFirst){
+            DB.qr().update("DELETE FROM " + DB.LOCATION_CATEGORY_TABLE + postfix + " WHERE location = " + location.getId());
+        }
 
         String[] types = typeString.split("\\|");
         for (String type : types) {
@@ -421,9 +418,9 @@ public class PlayadvisorImporter extends Importer {
             Integer categoryId = locationTypes.containsKey(main) ? locationTypes.get(main).get(category) : null;
             
             if (categoryId == null) {
-                throw new IllegalArgumentException("Unknown category given: main:" + main + ", subcategory: " + category+ ". Cannot save types for location with id: " + id);
+                throw new IllegalArgumentException("Unknown category given: main:" + main + ", subcategory: " + category+ ". Cannot save types for location with id: " + location.getId());
             }
-            this.saveLocationType(categoryId, id);
+            this.saveLocationType(categoryId, location);
         }
     }
 

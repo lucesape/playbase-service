@@ -242,6 +242,7 @@ ALTER TABLE public.playservice_location_agecategories_playadvisor
 CREATE TABLE public.playservice_location_categories_playadvisor
 (
   location integer NOT NULL,
+    pa_id character varying(255),
   category integer NOT NULL,
   CONSTRAINT playservice_location_categories_playadvisor_pkey PRIMARY KEY (location, category),
   CONSTRAINT playservicelocationcategories_playadvisor_fk1 FOREIGN KEY (location)
