@@ -179,6 +179,7 @@ CREATE TABLE playservice_location_accessibility (
 
 CREATE TABLE playservice_location_agecategories (
     location   integer not null,
+    pa_id character varying(255),
     agecategory   integer not null
 );
 

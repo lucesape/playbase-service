@@ -319,7 +319,7 @@ public class MatchActionBean implements ActionBean {
             }
             transferFacilities(playadvisorLoc, locationId, importer);
             transferAccessibilities(playadvisorLoc, locationId, importer);
-            transferLocationAgecategories(playadvisorLoc, locationId, importer);
+            transferLocationAgecategories(playadvisorLoc, playmappingLoc, importer);
             transferLocationCategories(playadvisorLoc, locationId, importer);
             transferLocationEquipment(playadvisorLoc, locationId, importer, assHandler);
             transferComments(playadvisorLoc, playmappingLoc, importer, commentHandler);
@@ -390,7 +390,7 @@ public class MatchActionBean implements ActionBean {
         DB.qr().update("delete from " + DB.LOCATION_ACCESSIBILITY_TABLE + "_playadvisor where location = ?", playadvisorId);
     }
 
-    protected void transferLocationAgecategories(Location playadvisor, Integer playmapping, PlaymappingImporter importer) throws NamingException, SQLException {
+    protected void transferLocationAgecategories(Location playadvisor, Location playmapping, PlaymappingImporter importer) throws NamingException, SQLException {
         List<Map<String,Object>> paAccessibilities = DB.qr().query("select location, agecategory from " + DB.LOCATION_AGE_CATEGORY_TABLE + "_playadvisor where location = ?", new MapListHandler(), playadvisorId);
         List<Integer> ids = new ArrayList<>();
         for (Map<String, Object> paAccessibility : paAccessibilities) {

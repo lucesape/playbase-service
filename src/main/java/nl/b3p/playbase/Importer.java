@@ -49,7 +49,7 @@ public abstract class Importer {
     private static final Log log = LogFactory.getLog("Importer");
     private GeometryJdbcConverter geometryConverter;
     protected ResultSetHandler<Location> locationHandler;
-    private ResultSetHandler<Asset> assHandler;
+    protected ResultSetHandler<Asset> assHandler;
 
     private Map<String, Integer> assetTypes;
     private Map<String, Integer> equipmentTypes;
@@ -237,9 +237,9 @@ public abstract class Importer {
         return id;
     }
 
-    public void saveLocationAgeCategory(Integer location, List<Integer> agecategories, boolean removeBeforeAdding) throws NamingException, SQLException {
+    public void saveLocationAgeCategory(Location location, List<Integer> agecategories, boolean removeBeforeAdding) throws NamingException, SQLException {
         if(removeBeforeAdding){
-            DB.qr().update("DELETE FROM " + DB.LOCATION_AGE_CATEGORY_TABLE + postfix + " WHERE location = " + location);
+            DB.qr().update("DELETE FROM " + DB.LOCATION_AGE_CATEGORY_TABLE + postfix + " WHERE location = " + location.getId());
         }
         for (Integer agecategory : agecategories) {
             StringBuilder sb = new StringBuilder();
@@ -248,9 +248,12 @@ public abstract class Importer {
             sb.append(DB.LOCATION_AGE_CATEGORY_TABLE).append(postfix);
             sb.append("(");
             sb.append("location,");
+            sb.append("pa_id,");
             sb.append("agecategory)");
             sb.append("VALUES( ");
-            sb.append(location);
+            sb.append(location.getId());
+            sb.append(",");
+            sb.append(location.getPa_id());
             sb.append(",");
             sb.append(agecategory);
             sb.append(");");

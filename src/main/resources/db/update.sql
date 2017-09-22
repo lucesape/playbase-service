@@ -105,3 +105,11 @@ alter table playservice_locations_playadvisor add column averagerating integer;
 alter table playservice_locations_playadvisor alter column content type text;
 drop view v_locations_rd ;
 alter table playservice_locations alter column content type text;
+
+
+ALTER TABLE public.playservice_location_agecategories
+  ADD COLUMN pa_id character varying(255);
+
+  ALTER TABLE public.playservice_location_agecategories_playadvisor
+  ADD COLUMN pa_id character varying(255);
+

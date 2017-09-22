@@ -37,7 +37,7 @@ import nl.b3p.playbase.entities.Asset;
 import nl.b3p.playbase.entities.Comment;
 import nl.b3p.playbase.entities.Location;
 import nl.b3p.playbase.stripes.MatchActionBean;
-import org.apache.commons.dbutils.handlers.ScalarHandler;
+import org.apache.commons.dbutils.handlers.ArrayListHandler;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -157,11 +157,18 @@ public class PlayadvisorImporter extends Importer {
         }
         Location existingLocation = getMergedLocation(location);
         String prevPostfix = postfix;
-        if(existingLocation != null){
+        boolean locationAlreadyMerged = existingLocation != null;
+        if(locationAlreadyMerged){
             MatchActionBean.mergeLocations(location, existingLocation);
             location = existingLocation;
             postfix = "";
             
+            //o = DB.qr().query(sb.toString(), assHandler, asset.getLocation(), equipment);
+            ArrayListHandler rsh = new ArrayListHandler();
+            List<Object[]> assets = DB.qr().query("select id from " + DB.ASSETS_TABLE + " where location = ? and pa_guid = ?",rsh, location.getId(), location.getPa_id());
+            for (Object[] assetId : assets) {
+                DB.qr().update("DELETE FROM " + DB.LOCATION_AGE_CATEGORY_TABLE + postfix + " WHERE location_equipment = ?", assetId[0]);
+            }
             // remove assets from playadvisor 
             DB.qr().update("delete from " + DB.ASSETS_TABLE + " where location = ? and pa_guid = ?", location.getId(), location.getPa_id());
         }
@@ -173,7 +180,7 @@ public class PlayadvisorImporter extends Importer {
             saveAsset(asset, report);
         }
 
-        saveLocationAgeCategory(id, Arrays.asList(location.getAgecategories()), true);
+        saveLocationAgeCategory(location, Arrays.asList(location.getAgecategories()), !locationAlreadyMerged);
 
         try {
             if (((String) locationMap.get(LOCATIONSUBTYPE)).length() > 0) {
