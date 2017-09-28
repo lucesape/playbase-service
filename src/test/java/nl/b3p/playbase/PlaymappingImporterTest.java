@@ -165,7 +165,7 @@ public class PlaymappingImporterTest extends TestUtil {
         assertEquals(2, assets.size());
     }
     
-    //@Test
+    @Test
     public void testSaveAssetType() throws IOException, NamingException, SQLException {
         InputStream in = PlaymappingImporterTest.class.getResourceAsStream("singleAssetWithLinked.json");
         String assetString = IOUtils.toString(in);
@@ -184,7 +184,7 @@ public class PlaymappingImporterTest extends TestUtil {
         }
     }
 
-    @Test
+    //@Test
     public void testUpdateAssets() throws IOException, NamingException, SQLException {
         InputStream in = PlaymappingImporterTest.class.getResourceAsStream("singleAssetWithLinked.json");
         String asset = IOUtils.toString(in);

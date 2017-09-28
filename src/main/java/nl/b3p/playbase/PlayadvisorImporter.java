@@ -23,10 +23,12 @@ import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import javax.naming.NamingException;
 import nl.b3p.commons.csv.CsvFormatException;
@@ -37,7 +39,6 @@ import nl.b3p.playbase.entities.Asset;
 import nl.b3p.playbase.entities.Comment;
 import nl.b3p.playbase.entities.Location;
 import nl.b3p.playbase.stripes.MatchActionBean;
-import org.apache.commons.dbutils.handlers.ArrayListHandler;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -165,12 +166,11 @@ public class PlayadvisorImporter extends Importer {
             
             DB.qr().update("DELETE FROM " + DB.LOCATION_AGE_CATEGORY_TABLE + " WHERE pa_id = ?", location.getPa_id());
             DB.qr().update("DELETE FROM " + DB.LOCATION_CATEGORY_TABLE + " WHERE pa_id = ?", location.getPa_id());
-            // remove assets from playadvisor 
-            DB.qr().update("delete from " + DB.ASSETS_TABLE + " where location = ? and pa_guid = ?", location.getId(), location.getPa_id());
+            // remove assets from playadvisor which are not in playmapping
+            DB.qr().update("delete from " + DB.ASSETS_TABLE + " where location = ? and pa_guid = ? and pm_guid is null", location.getId(), location.getPa_id());
         }
         int id = saveLocation(location, report);
-        location.setId(id);
-        List<Asset> assets = parseAssets(location, locationMap);
+        List<Asset> assets = parseAssets(location, locationMap, locationAlreadyMerged);
 
         for (Asset asset : assets) {
             saveAsset(asset, report);
@@ -309,19 +309,50 @@ public class PlayadvisorImporter extends Importer {
         return l;
     }
 
-    private List<Asset> parseAssets(Location location, Map<String, Object> locationMap) throws NamingException, SQLException {
+    private List<Asset> parseAssets(Location location, Map<String, Object> locationMap, boolean merged) throws NamingException, SQLException {
+        
         List<Asset> assets = new ArrayList<>();
         String assetString = (String) locationMap.get("assets");
         String[] assetArray = assetString.split("\\|");
-        for (String asset : assetArray) {
+        List<String> paAssets = Arrays.asList(assetArray);
+        if(merged){
+            // Get possible previously saved assets
+            List<String> nieuwList = new ArrayList<>();
+            List<Asset> prevAssets = DB.qr().query("SELECT * FROM " + DB.ASSETS_TABLE +" WHERE location = ?",assListHandler, location.getId());
+            for (String paAsset : assetArray) {
+                boolean found = false;
+                Integer paEquipmentType = equipmentTypes.get(paAsset);
+                for (Asset prevAsset : prevAssets) {
+                    Integer pmEquipmentType = equipmenttypePMtoPA.get(prevAsset.getType_());
+                    if(Objects.equals(paEquipmentType, pmEquipmentType)){
+                        found = true;
+                        prevAsset.setPa_guid(location.getPa_id());
+                        assets.add(prevAsset);
+                        break;
+                    }
+                }
+                if(!found){
+                    nieuwList.add(paAsset);
+                }
+            }
+            // Filter list of assets from this instance based on previous assets
+            paAssets = nieuwList;
+        }
+        // Save new assets
+        for (String asset : paAssets) {
             Asset ass = new Asset();
             ass.setName(asset);
             ass.setPa_guid(location.getPa_id());
             ass.setLocation(location.getId());
+            ass.setLatitude(location.getLatitude());
+            ass.setLongitude(location.getLongitude());
+            
             Integer[] cats = location.getAgecategories();
 
             ass.setAgecategories(cats);
-            ass.setEquipment(getEquipmentType(asset));
+            Integer equipmentType = getEquipmentType(asset);
+            ass.setEquipment(equipmentType);
+            ass.setType_(equipmenttypePAtoPM.get(equipmentType));
             assets.add(ass);
         }
         return assets;

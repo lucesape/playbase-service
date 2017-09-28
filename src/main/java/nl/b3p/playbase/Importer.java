@@ -36,6 +36,7 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ArrayListHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -50,9 +51,12 @@ public abstract class Importer {
     private GeometryJdbcConverter geometryConverter;
     protected ResultSetHandler<Location> locationHandler;
     protected ResultSetHandler<Asset> assHandler;
+    protected ResultSetHandler<List<Asset>> assListHandler;
 
     private Map<String, Integer> assetTypes;
-    private Map<String, Integer> equipmentTypes;
+    protected Map<String, Integer> equipmentTypes;
+    protected Map<Integer, Integer> equipmenttypePMtoPA;
+    protected Map<Integer, Integer> equipmenttypePAtoPM;
     protected Map<String, Map<String, Integer>> locationTypes;
     protected Map<String, Integer> facilityTypes;
     protected Map<String, Integer> accessibilityTypes;
@@ -66,11 +70,16 @@ public abstract class Importer {
         ArrayListHandler rsh = new ArrayListHandler();
         try {
             assetTypes = new HashMap<>();
-            List<Object[]> o = DB.qr().query("SELECT id, catasset from " + DB.ASSETS_TYPE_GROUP_LIST_TABLE, rsh);
+            equipmenttypePMtoPA = new HashMap<>();
+            equipmenttypePAtoPM = new HashMap<>();
+            List<Object[]> o = DB.qr().query("SELECT id, catasset, equipment_type from " + DB.ASSETS_TYPE_GROUP_LIST_TABLE, rsh);
             for (Object[] type : o) {
                 Integer id = (Integer) type[0];
                 String cat = (String) type[1];
+                Integer equipmentType = (Integer) type[2];
                 assetTypes.put(cat, id);
+                equipmenttypePMtoPA.put(id, equipmentType);
+                equipmenttypePAtoPM.put(equipmentType,id);
             }
         } catch (NamingException | SQLException ex) {
             log.error("Cannot initialize playmapping assettypes:", ex);
@@ -92,6 +101,7 @@ public abstract class Importer {
             geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(con);
             locationHandler = new BeanHandler(Location.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
             assHandler = new BeanHandler(Asset.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
+            assListHandler = new BeanListHandler(Asset.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
         } catch (NamingException | SQLException ex) {
             log.error("Cannot get geometryConverter: ", ex);
         }
@@ -234,6 +244,7 @@ public abstract class Importer {
                     location.getStreet(), location.getPostalcode(), location.getParking(), location.getPhone(), location.getWebsite(), location.getPa_id(), location.getPa_title(), location.getPm_guid(), id);
             report.increaseUpdated(ImportType.LOCATION);
         }
+        location.setId(id);
         return id;
     }
 
