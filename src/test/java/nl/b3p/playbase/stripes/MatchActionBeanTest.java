@@ -58,7 +58,7 @@ public class MatchActionBeanTest extends TestUtil{
         instance = new MatchActionBean();
     }
     
-    //@Test
+    @Test
     public void testMerge() throws NamingException, SQLException{
         List origlocations = DB.qr().query("Select * from " + DB.LOCATION_TABLE, new ArrayListHandler());
         int origSize = origlocations.size();
@@ -74,7 +74,7 @@ public class MatchActionBeanTest extends TestUtil{
         assertEquals(0, palocations.size());
     }
     
-    //@Test
+    @Test
     public void testAdd() throws NamingException, SQLException{
         
         List origlocations = DB.qr().query("Select * from " + DB.LOCATION_TABLE, new ArrayListHandler());
@@ -92,18 +92,19 @@ public class MatchActionBeanTest extends TestUtil{
         assertEquals(0, palocations.size());
     }
 
-    //@Test
+    @Test
     public void testFieldsAfterMerge() throws NamingException, SQLException {
         mergeLocations();
         Location pl = DB.qr().query("select * from " + DB.LOCATION_TABLE + " where id = ?", handler, playmappingId);
 
-        assertEquals("Speeltuin Assendorp", pl.getTitle());
+        assertEquals("Speeltuin Assendorp", pl.getPa_title());
     }
     
-    //@Test
+    @Test
     public void testImagesAfterMerge()throws NamingException, SQLException {
         List<Object[]> imagesBefore = DB.qr().query("select * from " + DB.IMAGES_TABLE + " where location = ?", new ArrayListHandler(), playmappingId);
         int size = imagesBefore.size();
+        instance.setUseImagesFromPlayadvisor(true);
         mergeLocations();
         
         List<Object[]> images = DB.qr().query("select * from " + DB.IMAGES_TABLE + " where location = ?", new ArrayListHandler(), playmappingId);
@@ -114,7 +115,7 @@ public class MatchActionBeanTest extends TestUtil{
         assertEquals(0, imagesPa.size());
     }
     
-    //@Test
+    @Test
     public void testImagesAfterAdd()throws NamingException, SQLException {
         List<Object[]> imagesBefore = DB.qr().query("select * from " + DB.IMAGES_TABLE , new ArrayListHandler());
         int size = imagesBefore.size();
@@ -128,7 +129,7 @@ public class MatchActionBeanTest extends TestUtil{
         assertEquals(0, imagesPa.size());
     }
     
-    //@Test
+    @Test
     public void testFacilitiesAfterMerge()throws NamingException, SQLException {
         List<Object[]> facilitiesBefore = DB.qr().query("select * from " + DB.LOCATION_FACILITIES_TABLE + " where location = ?", new ArrayListHandler(), playmappingId);
         int size = facilitiesBefore.size();
@@ -142,7 +143,7 @@ public class MatchActionBeanTest extends TestUtil{
         assertEquals(0, facPa.size());
     }
     
-    //@Test
+    @Test
     public void testFacilitiesAfterAdd()throws NamingException, SQLException {
         List<Object[]> imagesBefore = DB.qr().query("select * from " + DB.LOCATION_FACILITIES_TABLE , new ArrayListHandler());
         int size = imagesBefore.size();
@@ -170,7 +171,7 @@ public class MatchActionBeanTest extends TestUtil{
         assertEquals(0, facPa.size());
     }
     
-    //@Test
+    @Test
     public void testAccessibilitiesAfterAdd()throws NamingException, SQLException {
         List<Object[]> imagesBefore = DB.qr().query("select * from " + DB.LOCATION_ACCESSIBILITY_TABLE , new ArrayListHandler());
         int size = imagesBefore.size();
@@ -184,7 +185,7 @@ public class MatchActionBeanTest extends TestUtil{
         assertEquals(0, imagesPa.size());
     }
 
-    //@Test
+    @Test
     public void testLocationAgecategoriesAfterMerge()throws NamingException, SQLException {
         List<Object[]> facilitiesBefore = DB.qr().query("select * from " + DB.LOCATION_AGE_CATEGORY_TABLE + " where location = ?", new ArrayListHandler(), playmappingId);
         int size = facilitiesBefore.size();
@@ -198,7 +199,7 @@ public class MatchActionBeanTest extends TestUtil{
         assertEquals(0, facPa.size());
     }
     
-    //@Test
+    @Test
     public void testLocationAgecategoriesAfterAdd()throws NamingException, SQLException {
         List<Object[]> imagesBefore = DB.qr().query("select * from " + DB.LOCATION_AGE_CATEGORY_TABLE , new ArrayListHandler());
         int size = imagesBefore.size();
@@ -214,7 +215,7 @@ public class MatchActionBeanTest extends TestUtil{
 
     
 
-    //@Test
+    @Test
     public void testLocationCategoriesAfterMerge()throws NamingException, SQLException {
         List<Object[]> facilitiesBefore = DB.qr().query("select * from " + DB.LOCATION_CATEGORY_TABLE + " where location = ?", new ArrayListHandler(), playmappingId);
         int size = facilitiesBefore.size();
@@ -227,7 +228,7 @@ public class MatchActionBeanTest extends TestUtil{
         assertEquals(0, facPa.size());
     }
     
-    //@Test
+    @Test
     public void testLocationCategoriesAfterAdd()throws NamingException, SQLException {
         List<Object[]> imagesBefore = DB.qr().query("select * from " + DB.LOCATION_CATEGORY_TABLE , new ArrayListHandler());
         int size = imagesBefore.size();
@@ -240,7 +241,7 @@ public class MatchActionBeanTest extends TestUtil{
         assertEquals(0, imagesPa.size());
     }
 
-    //@Test
+    @Test
     public void testLocationEquipmentAfterMerge()throws NamingException, SQLException {
         List<Object[]> facilitiesBefore = DB.qr().query("select * from " + DB.ASSETS_TABLE + " where location = ?", new ArrayListHandler(), playmappingId);
         int size = facilitiesBefore.size();
@@ -253,7 +254,7 @@ public class MatchActionBeanTest extends TestUtil{
         assertEquals(0, facPa.size());
     }
     
-    //@Test
+    @Test
     public void testLocationEquipmentAfterAdd()throws NamingException, SQLException {
         List<Object[]> imagesBefore = DB.qr().query("select * from " + DB.ASSETS_TABLE , new ArrayListHandler());
         int size = imagesBefore.size();
@@ -267,7 +268,7 @@ public class MatchActionBeanTest extends TestUtil{
     }
     
 
-    //@Test
+    @Test
     public void testLocationEquipmentAgecategoriesAfterMerge()throws NamingException, SQLException {
         List<Object[]> facilitiesBefore = DB.qr().query("select * from " + DB.ASSETS_AGECATEGORIES_TABLE , new ArrayListHandler());
         int size = facilitiesBefore.size();
@@ -300,7 +301,7 @@ public class MatchActionBeanTest extends TestUtil{
 
 
 
-   // //@Test
+   // @Test
     public void testUpdateMergePlayadvisorRecord() throws NamingException, SQLException, IOException, CsvFormatException{
         // merge 2 records
         mergeLocations();
