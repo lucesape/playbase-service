@@ -289,13 +289,6 @@ ALTER table playmapping_type_group
     ADD CONSTRAINT playmapping_type_group_pkey PRIMARY KEY (id);
 
 
-
-
-ALTER table playmapping_type_group
-  add CONSTRAINT playmapping_equipment_pkey FOREIGN KEY (equipment_type)
-      REFERENCES public.playservice_equipment_list (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION
-
 --
 -- TOC entry 3575 (class 2606 OID 64653)
 -- Name: playservice_accessibility_list playservice_accessibility_pkey; Type: CONSTRAINT; Schema: public; Owner: playbase
@@ -591,3 +584,9 @@ ALTER table playservice_locations
 -- PostgreSQL database dump complete
 --
 
+
+
+ALTER table playmapping_type_group
+  add CONSTRAINT playmapping_equipment_pkey FOREIGN KEY (equipment_type)
+      REFERENCES public.playservice_equipment_list (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
