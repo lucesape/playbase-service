@@ -140,6 +140,7 @@ CREATE TABLE playservice_location_equipment_playadvisor
 
 CREATE TABLE playservice_location_facilities_playadvisor (
     location integer NOT NULL,
+    pa_id character varying(255),
     facility integer NOT NULL
 );
 

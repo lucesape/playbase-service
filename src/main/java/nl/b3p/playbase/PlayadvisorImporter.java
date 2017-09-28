@@ -164,6 +164,7 @@ public class PlayadvisorImporter extends Importer {
             postfix = "";
             
             DB.qr().update("DELETE FROM " + DB.LOCATION_AGE_CATEGORY_TABLE + " WHERE pa_id = ?", location.getPa_id());
+            DB.qr().update("DELETE FROM " + DB.LOCATION_CATEGORY_TABLE + " WHERE pa_id = ?", location.getPa_id());
             // remove assets from playadvisor 
             DB.qr().update("delete from " + DB.ASSETS_TABLE + " where location = ? and pa_guid = ?", location.getId(), location.getPa_id());
         }
@@ -187,7 +188,7 @@ public class PlayadvisorImporter extends Importer {
 
         try {
             if (((String) locationMap.get(FACILITIES)).length() > 0) {
-                saveFacilities(id, (String) locationMap.get(FACILITIES));
+                saveFacilities(location, (String) locationMap.get(FACILITIES), !locationAlreadyMerged);
             }
         } catch (IllegalArgumentException ex) {
             report.addError(ex.getLocalizedMessage() + ". Location is saved, but facilities are not.", ImportType.LOCATION);
@@ -367,17 +368,18 @@ public class PlayadvisorImporter extends Importer {
 
     
     // <editor-fold desc="Saving of string-concatenated multivalues" defaultstate="collapsed">
-    protected void saveFacilities(Integer locationId, String facilitiesString) throws NamingException, SQLException {
-
-        DB.qr().update("DELETE FROM " + DB.LOCATION_FACILITIES_TABLE + postfix + " WHERE location = " + locationId);
+    protected void saveFacilities(Location location, String facilitiesString, boolean deleteFirst) throws NamingException, SQLException {
+        if(deleteFirst){
+            DB.qr().update("DELETE FROM " + DB.LOCATION_FACILITIES_TABLE + postfix + " WHERE location = " + location.getId());
+        }
 
         String[] facilities = facilitiesString.split("\\|");
         for (String facility : facilities) {
             Integer facilityId = facilityTypes.get(facility);
             if (facilityId == null) {
-                throw new IllegalArgumentException("Unknown facility given: " + facility + ". Cannot save facilities for location with id: " + locationId);
+                throw new IllegalArgumentException("Unknown facility given: " + facility + ". Cannot save facilities for location with id: " + location.getId());
             }
-            this.saveFacilities(locationId, facilityId);
+            this.saveFacilities(location, facilityId);
         }
     }
 

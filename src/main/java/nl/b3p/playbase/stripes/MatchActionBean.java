@@ -310,6 +310,7 @@ public class MatchActionBean implements ActionBean {
                 toSave = playadvisorLoc;
                 toSave.setTitle(toSave.getPa_title());
                 toSave.setId(null);
+                playmappingLoc = playadvisorLoc;
             }
             Integer locationId = importer.saveLocation(toSave, new ImportReport());
             if(method.equals("add") || useImagesFromPlayadvisor){
@@ -317,7 +318,7 @@ public class MatchActionBean implements ActionBean {
             }else{
                 DB.qr().update("delete from " + DB.IMAGES_TABLE + "_playadvisor where location = ?", playadvisorId);
             }
-            transferFacilities(playadvisorLoc, locationId, importer);
+            transferFacilities(playadvisorLoc, playmappingLoc, importer);
             transferAccessibilities(playadvisorLoc, locationId, importer);
             transferLocationAgecategories(playadvisorLoc, playmappingLoc, importer);
             transferLocationCategories(playadvisorLoc, playmappingLoc, importer);
@@ -374,7 +375,7 @@ public class MatchActionBean implements ActionBean {
         DB.qr().update("delete from " + DB.IMAGES_TABLE + "_playadvisor where location = ?", playadvisorId);
     }
 
-    protected void transferFacilities(Location playadvisor, Integer playmapping, PlaymappingImporter importer) throws NamingException, SQLException {
+    protected void transferFacilities(Location playadvisor, Location playmapping, PlaymappingImporter importer) throws NamingException, SQLException {
         List<Map<String,Object>> paFacilities = DB.qr().query("select location, facility from " + DB.LOCATION_FACILITIES_TABLE + "_playadvisor where location = ?", new MapListHandler(), playadvisorId);
         for (Map<String, Object> facility : paFacilities) {
             importer.saveFacilities(playmapping, (Integer)facility.get("facility"));

@@ -317,16 +317,18 @@ public abstract class Importer {
         return id;
     }
 
-    public void saveFacilities(Integer locationId, Integer facilityId) throws NamingException, SQLException {
+    public void saveFacilities(Location location, Integer facilityId) throws NamingException, SQLException {
         StringBuilder sb = new StringBuilder();
         sb.append("INSERT ");
         sb.append("INTO ");
         sb.append(DB.LOCATION_FACILITIES_TABLE).append(postfix);
         sb.append("(");
         sb.append("location,");
+        sb.append("pa_id,");
         sb.append("facility)");
         sb.append("VALUES( ");
-        sb.append(locationId).append(",");
+        sb.append(location.getId()).append(",");
+        sb.append(location.getPa_id()).append(",");
         sb.append(facilityId);
         sb.append(");");
         DB.qr().insert(sb.toString(), new ScalarHandler<>());

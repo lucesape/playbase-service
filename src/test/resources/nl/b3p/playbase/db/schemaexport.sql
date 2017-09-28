@@ -250,6 +250,7 @@ CREATE TABLE playservice_location_equipment_agecategories (
 
 CREATE TABLE playservice_location_facilities (
     location  integer not null,
+    pa_id character varying(255),
     facility  integer not null
 );
 
