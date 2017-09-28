@@ -13,6 +13,12 @@ ALTER TABLE public.playservice_location_equipment
   ADD CONSTRAINT playservicelocationequipmenttype_fk FOREIGN KEY (type_) REFERENCES public.playmapping_type_group (id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 
+ALTER table playmapping_type_group  add column equipment_type integer;
+
+ALTER TABLE public.playmapping_type_group
+  ADD CONSTRAINT playmapping_equipment_fkey FOREIGN KEY (equipment_type) REFERENCES public.playservice_equipment_list (id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+
 alter table playservice_location_equipment 
 add column priceindexation integer,
 add column priceinstallation integer,
