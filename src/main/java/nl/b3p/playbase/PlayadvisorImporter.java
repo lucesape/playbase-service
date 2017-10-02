@@ -436,6 +436,7 @@ public class PlayadvisorImporter extends Importer {
         }
 
         String[] types = typeString.split("\\|");
+        Set<Integer>  typeSet = new HashSet<>();
         for (String type : types) {
             int index = type.indexOf(">");
             String main;
@@ -453,8 +454,9 @@ public class PlayadvisorImporter extends Importer {
             if (categoryId == null) {
                 throw new IllegalArgumentException("Unknown category given: main:" + main + ", subcategory: " + category+ ". Cannot save types for location with id: " + location.getId());
             }
-            this.saveLocationType(categoryId, location);
+            typeSet.add(categoryId);
         }
+        this.saveLocationTypes(typeSet, location.getId());
     }
 
     // </editor-fold>

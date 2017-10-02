@@ -133,3 +133,8 @@ ALTER TABLE public.playservice_location_facilities
 
   ALTER TABLE public.playservice_location_facilities_playadvisor
   ADD COLUMN pa_id character varying(255);
+
+  ALTER TABLE public.playservice_location_categories
+  ADD COLUMN pm_guid character varying(255);
+ALTER TABLE public.playmapping_type_group
+  ADD CONSTRAINT fk_location_equipment_type FOREIGN KEY (locationcategory) REFERENCES public.playservice_categories_list (id) ON UPDATE NO ACTION ON DELETE NO ACTION;

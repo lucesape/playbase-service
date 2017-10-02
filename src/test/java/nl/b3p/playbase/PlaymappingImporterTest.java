@@ -18,9 +18,11 @@ package nl.b3p.playbase;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.naming.NamingException;
 import nl.b3p.playbase.ImportReport.ImportType;
 import nl.b3p.playbase.db.DB;
@@ -96,8 +98,9 @@ public class PlaymappingImporterTest extends TestUtil {
     @Test
     public void testParseAssets() throws IOException, NamingException, SQLException {
         InputStream in = PlaymappingImporterTest.class.getResourceAsStream("haarlemAssets.json");
+        Map<Integer,Set<Integer>> assetType = new HashMap<>();
         String location = IOUtils.toString(in);
-        List<Asset> returnValue = instance.parseAssets(location);
+        List<Asset> returnValue = instance.parseAssets(location, assetType);
         assertEquals(3479, returnValue.size());
     }
 
@@ -105,7 +108,8 @@ public class PlaymappingImporterTest extends TestUtil {
     public void testParseAsset() {
         String assetString = "{\"$id\": \"1\",\"ID\": \"dc5d0399-ccc4-4c22-9ab0-2a7b9ff80a19\",\"LocationID\": \"0d415c38-ca18-4d67-a716-00df56df8736\",\"LocationName\": \"Centrum\\\\C136/1005 Vroonhof 1\",\"LastUpdated\": \"2013-01-29T11:24:59.25\",\"Name\": \"Motorfiets\",\"AssetType\": \"Wiptoestellen/Type 2A - Enkelpunts - 1 richting\",\"Manufacturer\": \"KOMPAN A/S\",\"Product\": \"MOMENTS\\\\M130P\",\"SerialNumber\": \"04\",\"Material\": \"\",\"InstalledDate\": \"1988-01-01\",\"EndOfLifeYear\": -1,\"ProductID\": \"eeb6cc3b-0f77-40ac-8926-09588625244d\",\"ProductVariantID\": \"0ff2d747-6634-4ac5-861d-697ab4d80762\",\"Height\": 820,\"Depth\": 900,\"Width\": 360,\"FreefallHeight\": 560,\"SafetyZoneLength\": 3500,\"SafetyZoneWidth\": 2360,\"AgeGroupToddlers\": true,\"AgeGroupJuniors\": false,\"AgeGroupSeniors\": false,\"PricePurchase\": 700.0,\"PriceInstallation\": -1.0,\"PriceReInvestment\": -1.0,\"PriceMaintenance\": -1.0,\"PriceIndexation\": -1.0,\"Lat\": \"52,38138\",\"Lng\": \"4,641622\",\"Images\": [{\"$id\": \"3\",\"ID\": \"7f8ac724-1821-4bee-8f34-f8894deb5cac\",\"LastUpdated\": \"2010-07-06T18:15:08.453\",\"URI\": \"http://www.playmapping.com/GetImage.ashx?g=7f8ac724-1821-4bee-8f34-f8894deb5cac&w=350&h=350\",\"Description\": \"\"}],\"Documents\": [],\"Hyperlinks\": [],\"LinkedAssets\": []}";
         JSONObject assetJSON = new JSONObject(assetString);
-        Asset map = instance.parseAsset(assetJSON, 3882);
+        Map<Integer,Set<Integer>> assetType = new HashMap<>();
+        Asset map = instance.parseAsset(assetJSON, 3882, assetType);
         assertEquals("dc5d0399-ccc4-4c22-9ab0-2a7b9ff80a19", map.getPm_guid());
         //assertEquals("0d415c38-ca18-4d67-a716-00df56df8736", map.get("LocationPMID"));
         //assertEquals("Centrum\\C136/1005 Vroonhof 1", map.get("LocationName"));
@@ -144,7 +148,8 @@ public class PlaymappingImporterTest extends TestUtil {
     public void testParseAssetWithLinkedAsset() throws IOException, NamingException, SQLException {
         InputStream in = PlaymappingImporterTest.class.getResourceAsStream("singleAssetWithLinked.json");
         String asset = IOUtils.toString(in);
-        List<Asset> returnValue = instance.parseAssets(asset);
+        Map<Integer,Set<Integer>> assetType = new HashMap<>();
+        List<Asset> returnValue = instance.parseAssets(asset, assetType);
         assertEquals(2, returnValue.size());
 
     }

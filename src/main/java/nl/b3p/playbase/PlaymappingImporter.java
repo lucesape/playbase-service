@@ -16,13 +16,14 @@
  */
 package nl.b3p.playbase;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.naming.NamingException;
 import nl.b3p.playbase.ImportReport.ImportType;
 import nl.b3p.playbase.db.DB;
@@ -48,9 +49,9 @@ public class PlaymappingImporter extends Importer {
         try {
             agecategories = new HashMap<>();
 
-            agecategories.put(AGECATEGORY_TODDLER_KEY, new ArrayList<Integer>());
-            agecategories.put(AGECATEGORY_JUNIOR_KEY, new ArrayList<Integer>());
-            agecategories.put(AGECATEGORY_SENIOR_KEY, new ArrayList<Integer>());
+            agecategories.put(AGECATEGORY_TODDLER_KEY, new ArrayList<>());
+            agecategories.put(AGECATEGORY_JUNIOR_KEY, new ArrayList<>());
+            agecategories.put(AGECATEGORY_SENIOR_KEY, new ArrayList<>());
 
             List<Object[]> o = DB.qr().query("SELECT * from " + DB.LIST_AGECATEGORIES_TABLE, rsh);
             for (Object[] cat : o) {
@@ -87,8 +88,8 @@ public class PlaymappingImporter extends Importer {
     }
 
     public ImportReport processAssets(String assetsString) throws NamingException, SQLException {
-        
-        List<Asset> assets = parseAssets(assetsString);
+        Map<Integer,Set<Integer>> assetTypes = new HashMap<>();
+        List<Asset> assets = parseAssets(assetsString, assetTypes);
         ImportReport report = new ImportReport();
         for (Asset asset : assets) {
             try {
@@ -97,6 +98,13 @@ public class PlaymappingImporter extends Importer {
                 log.error("Cannot save asset: " + ex.getLocalizedMessage());
                 report.addError(ex.getLocalizedMessage(), ImportType.ASSET);
             }
+        }
+        for (Integer location : assetTypes.keySet()) {
+            if(location == null){
+                continue;
+            }
+            Set<Integer> types = assetTypes.get(location);
+            saveLocationTypes(types, location);
         }
         return report;
     }
@@ -111,21 +119,21 @@ public class PlaymappingImporter extends Importer {
     }
 
     // <editor-fold desc="Assets" defaultstate="collapsed">
-    protected List<Asset> parseAssets(String assetsString) throws NamingException, SQLException {
+    protected List<Asset> parseAssets(String assetsString, Map<Integer,Set<Integer>> assetTypes) throws NamingException, SQLException {
         List<Asset> assets = new ArrayList<>();
         JSONArray assetsArray = new JSONArray(assetsString);
 
         for (int i = 0; i < assetsArray.length(); i++) {
             JSONObject asset = assetsArray.getJSONObject(i);
             Integer locationId = getLocationId(asset.getString("LocationID"));
-            assets.add(parseAsset(asset, locationId));
+            assets.add(parseAsset(asset, locationId, assetTypes));
             String linkedAssets = asset.getJSONArray("LinkedAssets").toString();
-            assets.addAll(parseAssets(linkedAssets));
+            assets.addAll(parseAssets(linkedAssets,assetTypes));
         }
         return assets;
     }
 
-    protected Asset parseAsset(JSONObject assetJSON, Integer locationId) {
+    protected Asset parseAsset(JSONObject assetJSON, Integer locationId, Map<Integer,Set<Integer>> locationTypes) {
         Asset asset = new Asset();
         asset.setPm_guid(assetJSON.optString("ID"));
         asset.setLocation(locationId);
@@ -156,6 +164,12 @@ public class PlaymappingImporter extends Importer {
         asset.setImages(parseImagesAndWords(assetJSON.optJSONArray("Images")));
         asset.setAgecategories(parseAgecategories(assetJSON));
         
+        if (!locationTypes.containsKey(locationId)) {
+            locationTypes.put(locationId, new HashSet<>());
+        }
+        if (asset.getType_() != null){
+            locationTypes.get(locationId).add(assetTypeToLocationCategory.get(asset.getType_()));
+        }
         // ToDo hyperlinks: asset.put("Hyperlinks", assetJSON.optJSONArray("Hyperlinks"));
         
         return asset;

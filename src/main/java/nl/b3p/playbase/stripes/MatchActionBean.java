@@ -24,9 +24,11 @@ import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.naming.NamingException;
 import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
@@ -403,9 +405,11 @@ public class MatchActionBean implements ActionBean {
 
     protected void transferLocationCategories(Location playadvisor, Location playmapping, PlaymappingImporter importer) throws NamingException, SQLException, UnsupportedEncodingException {
         List<Map<String,Object>> paAccessibilities = DB.qr().query("select location, category from " + DB.LOCATION_CATEGORY_TABLE + "_playadvisor where location = ?", new MapListHandler(), playadvisorId);
+        Set<Integer> types = new HashSet<>();
         for (Map<String, Object> paAccessibility : paAccessibilities) {
-            importer.saveLocationType((Integer)paAccessibility.get("category"), playmapping);
+            types.add((Integer)paAccessibility.get("category"));
         }
+        importer.saveLocationTypes(types, playmapping.getId());
         DB.qr().update("delete from " + DB.LOCATION_CATEGORY_TABLE + "_playadvisor where location = ?", playadvisorId);
     }
 

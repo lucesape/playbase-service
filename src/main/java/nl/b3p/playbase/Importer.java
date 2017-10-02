@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.naming.NamingException;
 import nl.b3p.loader.jdbc.GeometryJdbcConverter;
 import nl.b3p.loader.jdbc.GeometryJdbcConverterFactory;
@@ -57,6 +58,7 @@ public abstract class Importer {
     protected Map<String, Integer> equipmentTypes;
     protected Map<Integer, Integer> equipmenttypePMtoPA;
     protected Map<Integer, Integer> equipmenttypePAtoPM;
+    protected Map<Integer, Integer> assetTypeToLocationCategory;
     protected Map<String, Map<String, Integer>> locationTypes;
     protected Map<String, Integer> facilityTypes;
     protected Map<String, Integer> accessibilityTypes;
@@ -72,14 +74,17 @@ public abstract class Importer {
             assetTypes = new HashMap<>();
             equipmenttypePMtoPA = new HashMap<>();
             equipmenttypePAtoPM = new HashMap<>();
-            List<Object[]> o = DB.qr().query("SELECT id, catasset, equipment_type from " + DB.ASSETS_TYPE_GROUP_LIST_TABLE, rsh);
+            assetTypeToLocationCategory = new HashMap<>();
+            List<Object[]> o = DB.qr().query("SELECT id, catasset, equipment_type,locationcategory from " + DB.ASSETS_TYPE_GROUP_LIST_TABLE, rsh);
             for (Object[] type : o) {
                 Integer id = (Integer) type[0];
                 String cat = (String) type[1];
                 Integer equipmentType = (Integer) type[2];
+                Integer locationCategory = (Integer) type[3];
                 assetTypes.put(cat, id);
                 equipmenttypePMtoPA.put(id, equipmentType);
                 equipmenttypePAtoPM.put(equipmentType,id);
+                assetTypeToLocationCategory.put(id, locationCategory);
             }
         } catch (NamingException | SQLException ex) {
             log.error("Cannot initialize playmapping assettypes:", ex);
@@ -272,7 +277,28 @@ public abstract class Importer {
         }
     }
     
-    public void saveLocationType(Integer categoryId, Location location) throws NamingException, SQLException, UnsupportedEncodingException {
+    public void saveLocationTypes(Set<Integer> types, Integer locationId) throws NamingException, SQLException{
+        
+        ArrayListHandler rsh = new ArrayListHandler();
+        List<Object[]> o = DB.qr().query("SELECT category from " + DB.LOCATION_CATEGORY_TABLE + " WHERE location = ?", rsh, locationId);
+        
+        for (Object[] objects : o) {
+            Integer cat = (Integer)objects[0];
+            types.remove(cat);
+        }
+        for (Integer type : types) {
+            if(type !=null){
+                saveLocationType(type, locationId, null);
+            }
+        }
+        
+    }
+    
+    private void saveLocationType(Integer categoryId, Location location) throws NamingException, SQLException, UnsupportedEncodingException {
+       saveLocationType(categoryId, location.getId(), location.getPa_id());
+    }
+   
+    private void saveLocationType(Integer categoryId, Integer locationId, String pa_id) throws NamingException, SQLException {
         StringBuilder sb = new StringBuilder();
         sb.append("INSERT ");
         sb.append("INTO ");
@@ -282,8 +308,8 @@ public abstract class Importer {
         sb.append("pa_id,");
         sb.append("category)");
         sb.append("VALUES( ");
-        sb.append(location.getId()).append(",");
-        sb.append(location.getPa_id()).append(",");
+        sb.append(locationId).append(",");
+        sb.append(pa_id).append(",");
         sb.append(categoryId);
         sb.append(");");
         DB.qr().insert(sb.toString(), new ScalarHandler<>());

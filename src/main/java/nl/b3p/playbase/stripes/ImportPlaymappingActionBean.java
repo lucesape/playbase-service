@@ -17,6 +17,7 @@
 package nl.b3p.playbase.stripes;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.SQLException;
@@ -37,6 +38,7 @@ import net.sourceforge.stripes.validation.Validate;
 import nl.b3p.playbase.ImportReport;
 import nl.b3p.playbase.ImportReport.ImportType;
 import nl.b3p.playbase.PlaymappingImporter;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
@@ -99,21 +101,25 @@ public class ImportPlaymappingActionBean implements ActionBean {
     }
 
     public Resolution importPM() throws NamingException, SQLException {
+        if(file.equalsIgnoreCase("Via API")){
             return collectJSON();
-        /*try {
-            InputStream in = ImportPlaymappingActionBean.class.getResourceAsStream(file);
-            String theString = IOUtils.toString(in, "UTF-8");
-            in.close();
-            Resolution res = importString(theString);
-            if(res != null){
-                return res;
-            }else{
-            return new ForwardResolution(JSP);
+        }else{
+
+            try {
+                InputStream in = ImportPlaymappingActionBean.class.getResourceAsStream(file);
+                String theString = IOUtils.toString(in, "UTF-8");
+                in.close();
+                Resolution res = importString(theString);
+                if (res != null) {
+                    return res;
+                } else {
+                    return new ForwardResolution(JSP);
+                }
+            } catch (IOException ex) {
+                log.error(ex);
+                return new ForwardResolution(JSP);
             }
-        } catch (IOException ex) {
-            log.error(ex);
-            return new ForwardResolution(JSP);
-        }*/
+        }
     }
 
     private Resolution collectJSON() throws SQLException, NamingException {
