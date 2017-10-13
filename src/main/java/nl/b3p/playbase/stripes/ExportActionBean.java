@@ -46,6 +46,7 @@ import nl.b3p.commons.csv.CsvOutputStream;
 import nl.b3p.loader.jdbc.GeometryJdbcConverter;
 import nl.b3p.loader.jdbc.GeometryJdbcConverterFactory;
 import nl.b3p.loader.util.DbUtilsGeometryColumnConverter;
+import nl.b3p.playbase.ImageDownloader;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.Asset;
 import org.apache.commons.dbutils.BasicRowProcessor;
@@ -76,6 +77,8 @@ public class ExportActionBean implements ActionBean {
     private Map<Integer, String> equipmentTypes;
     private Map<Integer, Integer> assetTypes;
     
+    private ImageDownloader downloader;
+    
     @Validate
     private String locationName;
     
@@ -85,6 +88,8 @@ public class ExportActionBean implements ActionBean {
     }
 
     public Resolution export() throws IOException {
+        downloader = new ImageDownloader("/home/meine/test/");
+        downloader.run();
         final File f = File.createTempFile("locations_export", null);
         FileOutputStream fop = new FileOutputStream(f);
         final CsvOutputStream out = new CsvOutputStream(new OutputStreamWriter(fop),'|', false);
@@ -104,6 +109,7 @@ public class ExportActionBean implements ActionBean {
         }
         out.flush();
         String filename = "Speeltuinen.csv";
+        downloader.stop();
         return new StreamingResolution("text/csv") {
             @Override
             public void stream(HttpServletResponse response) throws Exception {
@@ -315,14 +321,19 @@ Parkeren
                 captions += SEPERATOR_CHAR;
                 ids += SEPERATOR_CHAR;
             }
-            urls += url;
+            String imageName = url.substring(url.lastIndexOf("/")+1);
+            downloadImage(url, imageName);
+            urls += imageName;
             captions += valueOrEmptyString(image[1]);
             ids += valueOrEmptyString(image[2]);
         }
         record.add(urls);
         record.add(captions);
         record.add(ids);
-
+    }
+    
+    private void downloadImage(String url, String filename){
+        downloader.add(url, filename);
     }
     
     private Object valueOrEmptyString(Object value){

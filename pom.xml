@@ -15,6 +15,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <powermock.version>1.7.0RC2</powermock.version>
         <geotools.version>17.2</geotools.version>
+        <apache.httpcomponents.version>4.5.3</apache.httpcomponents.version>
     </properties>
     
     <dependencies>   
@@ -103,9 +104,24 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.2</version>
-            <type>jar</type>
+            <version>${apache.httpcomponents.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient-cache</artifactId>
+            <version>${apache.httpcomponents.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>fluent-hc</artifactId>
+            <version>${apache.httpcomponents.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpmime</artifactId>
+            <version>${apache.httpcomponents.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>com.vividsolutions</groupId>
             <artifactId>jts</artifactId>
@@ -162,6 +178,8 @@
             <artifactId>java-string-similarity</artifactId>
             <version>0.24</version>
         </dependency>
+        
+
     </dependencies>
     
     <repositories>

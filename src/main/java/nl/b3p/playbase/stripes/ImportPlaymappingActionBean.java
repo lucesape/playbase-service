@@ -207,8 +207,8 @@ public class ImportPlaymappingActionBean implements ActionBean {
                     log.info("Error closing HttpClient: " + ex.getLocalizedMessage());
                 }
             }
-            if (response instanceof CloseableHttpResponse) {
-                try {
+            if (response instanceof CloseableHttpResponse) { 
+               try {
                     ((CloseableHttpResponse) response).close();
                 } catch (IOException ex) {
                     log.info("Error closing HttpResponse: " + ex.getLocalizedMessage());
