@@ -272,7 +272,7 @@ public class PlayadvisorImporter extends Importer {
         l.setPa_id((String) lM.get("pa_id"));
         l.setArea((String) lM.get("area"));
         l.setCountry((String) lM.get("country"));
-        l.setContent((String) lM.get("content"));
+        l.setPa_content((String) lM.get("content"));
         l.setEmail((String) lM.get("e-mail"));
         l.setImages((List<Map<String, Object>>) lM.get("images"));
         l.setDocuments((List<Map<String, Object>>) lM.get("documents"));

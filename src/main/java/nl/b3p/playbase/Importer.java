@@ -199,7 +199,8 @@ public abstract class Importer {
             sb.append("longitude,");
             sb.append("geom,");
             sb.append("averagerating,");
-            sb.append("content,");
+            sb.append("pa_content,");
+            sb.append("pm_content,");
             sb.append("municipality,");
             sb.append("country,");
             sb.append("street,");
@@ -210,10 +211,10 @@ public abstract class Importer {
             sb.append("pa_id,");
             sb.append("pa_title,");
             sb.append("pm_guid) ");
-            sb.append("VALUES( ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);");
+            sb.append("VALUES( ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);");
 
             savedLocation = DB.qr().insert(sb.toString(), locationHandler, location.getTitle(), location.getLatitude(), location.getLongitude(), geom, 
-                    location.getAveragerating() != null ? location.getAveragerating() : 0, location.getContent(), location.getMunicipality(), location.getCountry(),
+                    location.getAveragerating() != null ? location.getAveragerating() : 0, location.getPa_content(), location.getPm_content(), location.getMunicipality(), location.getCountry(),
                    location.getStreet(), location.getPostalcode(), location.getParking(), location.getPhone(), location.getWebsite(), location.getPa_id(), location.getPa_title(), location.getPm_guid());
             id = savedLocation.getId();
             report.increaseInserted(ImportType.LOCATION);
@@ -231,7 +232,8 @@ public abstract class Importer {
             sb.append("longitude = ?,");
             sb.append("geom = ?,");
             sb.append("averagerating = ?,");
-            sb.append("content = ?,");
+            sb.append("pa_content = ?,");
+            sb.append("pm_content = ?,");
             sb.append("municipality = ?,");
             sb.append("country = ?,");
             sb.append("street = ?,");
@@ -245,7 +247,7 @@ public abstract class Importer {
             sb.append("where id = ?;");
 
             DB.qr().update(sb.toString(), location.getTitle(), location.getLatitude(), location.getLongitude(), geom, 
-                    location.getAveragerating() != null ? location.getAveragerating() : 0, location.getContent(), location.getMunicipality(), location.getCountry(),
+                    location.getAveragerating() != null ? location.getAveragerating() : 0, location.getPa_content(),location.getPm_content(), location.getMunicipality(), location.getCountry(),
                     location.getStreet(), location.getPostalcode(), location.getParking(), location.getPhone(), location.getWebsite(), location.getPa_id(), location.getPa_title(), location.getPm_guid(), id);
             report.increaseUpdated(ImportType.LOCATION);
         }

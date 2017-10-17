@@ -30,7 +30,8 @@ public class Location {
     private Integer id;
     private String title;
     private String pa_title;
-    private String content;
+    private String pa_content;
+    private String pm_content;
     private String summary;
     private String street;
     private String number;
@@ -69,13 +70,23 @@ public class Location {
         this.title = title;
     }
 
-    public String getContent() {
-        return content;
+    public String getPa_content() {
+        return pa_content;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setPa_content(String pa_content) {
+        this.pa_content = pa_content;
     }
+
+    public String getPm_content() {
+        return pm_content;
+    }
+
+    public void setPm_content(String pm_content) {
+        this.pm_content = pm_content;
+    }
+
+    
 
     public String getSummary() {
         return summary;

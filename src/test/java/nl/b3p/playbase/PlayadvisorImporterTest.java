@@ -186,7 +186,7 @@ public class PlayadvisorImporterTest extends TestUtil {
         assertEquals("Speeltuinvereniging De Oranjetuin", l.getTitle());
         assertEquals(2, l.getAgecategories().length);
         assertNull(l.getArea());
-        assertEquals("<span class=C-6>De Oranjespeeltuin is de mooiste, gezelligste en groenste speeltuin in héél Barendrecht!<br>De speeltuin is sinds 1958 gevestigd in de Oranjewijk in Barendrecht. In de speeltuin zijn diverse glijbanen, klimtoestellen, schommels, een waterbak en een zandbak te vinden die het tot een waar speelparadijs voor de kinderen maken. De Oranjetuin is op een parkachtige wijze aangelegd en biedt een groene speelomgeving. In de speeltuin zijn eenvoudige consumpties in de vorm van koffie, thee, limonade en ijsjes te verkrijgen.<br></span>", l.getContent());
+        assertEquals("<span class=C-6>De Oranjespeeltuin is de mooiste, gezelligste en groenste speeltuin in héél Barendrecht!<br>De speeltuin is sinds 1958 gevestigd in de Oranjewijk in Barendrecht. In de speeltuin zijn diverse glijbanen, klimtoestellen, schommels, een waterbak en een zandbak te vinden die het tot een waar speelparadijs voor de kinderen maken. De Oranjetuin is op een parkachtige wijze aangelegd en biedt een groene speelomgeving. In de speeltuin zijn eenvoudige consumpties in de vorm van koffie, thee, limonade en ijsjes te verkrijgen.<br></span>", l.getPa_content());
         assertEquals("Nederland", l.getCountry());
         assertNull(l.getDocuments());
         assertNull(l.getEmail());
@@ -219,7 +219,7 @@ public class PlayadvisorImporterTest extends TestUtil {
         assertEquals("30324", l.getPa_id());
         assertEquals("Speeltuinvereniging De Oranjetuin", l.getTitle());
         assertNull(l.getArea());
-        assertEquals("<span class=C-6>De Oranjespeeltuin is de mooiste, gezelligste en groenste speeltuin in héél Barendrecht!<br>De speeltuin is sinds 1958 gevestigd in de Oranjewijk in Barendrecht. In de speeltuin zijn diverse glijbanen, klimtoestellen, schommels, een waterbak en een zandbak te vinden die het tot een waar speelparadijs voor de kinderen maken. De Oranjetuin is op een parkachtige wijze aangelegd en biedt een groene speelomgeving. In de speeltuin zijn eenvoudige consumpties in de vorm van koffie, thee, limonade en ijsjes te verkrijgen.<br></span>", l.getContent());
+        assertEquals("<span class=C-6>De Oranjespeeltuin is de mooiste, gezelligste en groenste speeltuin in héél Barendrecht!<br>De speeltuin is sinds 1958 gevestigd in de Oranjewijk in Barendrecht. In de speeltuin zijn diverse glijbanen, klimtoestellen, schommels, een waterbak en een zandbak te vinden die het tot een waar speelparadijs voor de kinderen maken. De Oranjetuin is op een parkachtige wijze aangelegd en biedt een groene speelomgeving. In de speeltuin zijn eenvoudige consumpties in de vorm van koffie, thee, limonade en ijsjes te verkrijgen.<br></span>", l.getPa_content());
         assertEquals("Nederland", l.getCountry());
         assertNull(l.getEmail());
         assertEquals(new Integer(1),l.getId());

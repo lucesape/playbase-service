@@ -337,7 +337,8 @@ public class MatchActionBean implements ActionBean {
     public static Location mergeLocations(Location pa, Location pm) throws NamingException, SQLException{
         pm.setPa_id(pa.getPa_id());
         pm.setAveragerating(pa.getAveragerating());
-        pm.setContent(pa.getContent());
+        
+        pm.setPa_content(pa.getPa_content());
         pm.setCountry(pa.getCountry());
         pm.setMunicipality(pa.getMunicipality());
         pm.setPa_title(pa.getPa_title());

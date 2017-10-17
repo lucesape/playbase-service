@@ -8,7 +8,7 @@
 -- Started on 2017-07-07 15:56:25 CEST
 
 
-INSERT INTO playservice_locations_playadvisor (id, title, pa_title,content, summary, street, number, numberextra, postalcode, municipality, area, country, website, email, phone, longitude, latitude, pm_guid, pa_id, parking, geom) VALUES (1, 'Speeltuin Assendorp','Speeltuin Assendorp', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '10952', NULL, NULL);
+INSERT INTO playservice_locations_playadvisor (id, title, pa_title,pa_content, summary, street, number, numberextra, postalcode, municipality, area, country, website, email, phone, longitude, latitude, pm_guid, pa_id, parking, geom) VALUES (1, 'Speeltuin Assendorp','Speeltuin Assendorp', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '10952', NULL, NULL);
 
 --
 -- PostgreSQL database dump
