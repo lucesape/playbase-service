@@ -131,7 +131,7 @@ public class ExportActionBean implements ActionBean {
             List<List<String>> records = new ArrayList<>();
             ArrayListHandler rsh = new ArrayListHandler();
             //  id  Titel	Content	Samenvatting	Latitude Longitude Straat Huisnummer Huisnummertoevoeging	Postcode 4 cijfers	Postcode 2 letters  Plaats	Regio	Land	Website	E-mail Telefoon
-            String query = "SELECT id, coalesce(pa_title,title),coalesce(pa_content, pm_content),summary, latitude,longitude,street,number, numberextra,postalcode,"
+            String query = "SELECT id, coalesce(pa_title,title),coalesce(pm_content, pa_content),summary, latitude,longitude,street,number, numberextra,postalcode,"
                     + "municipality,    area,   country,website,email, phone, pa_id from " + DB.LOCATION_TABLE;
             List<Object[]> locations = null;
             if(locationName != null){
