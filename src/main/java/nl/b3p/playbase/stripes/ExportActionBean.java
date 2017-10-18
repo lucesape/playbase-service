@@ -55,6 +55,7 @@ import org.apache.commons.dbutils.handlers.ArrayListHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -155,7 +156,8 @@ public class ExportActionBean implements ActionBean {
         List<String> record = new ArrayList<>();
         Integer id = null;
         int index = 0;
-        int indexOfContentColumn = 2;
+        int []indexOfContentColumn = {2,6};
+        
         for (Object col : location) {
             if (id == null) {
                 id = (Integer) col;
@@ -166,8 +168,7 @@ public class ExportActionBean implements ActionBean {
                 record.add(null);
             } else {
                 String valueString = value.toString();
-                if (index == indexOfContentColumn) {
-                    String s = 
+                if (ArrayUtils.contains(indexOfContentColumn, index)) {
                     valueString = valueString.replace("\n", "").replace("\r", "");
                 }
                 record.add(valueString);
