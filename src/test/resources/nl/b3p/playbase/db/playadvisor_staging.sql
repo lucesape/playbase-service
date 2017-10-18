@@ -321,3 +321,10 @@ ALTER TABLE playservice_location_categories_playadvisor
     
 ALTER TABLE playservice_location_facilities_playadvisor
     ADD CONSTRAINT playservicelocationfacilities_playadvisor_fk2 FOREIGN KEY (facility) REFERENCES playservice_facilities_list(id);
+
+  ALTER TABLE public.playservice_images_playadvisor
+  ADD COLUMN lastupdated timestamp without time zone;
+
+  
+  ALTER TABLE public.playservice_documents_playadvisor
+  ADD COLUMN lastupdated timestamp without time zone;

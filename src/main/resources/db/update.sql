@@ -9,3 +9,10 @@ ALTER TABLE public.playservice_images
 
   ALTER TABLE public.playservice_images_playadvisor
   ADD COLUMN lastupdated timestamp without time zone;
+
+
+ALTER TABLE public.playservice_documents
+  ADD COLUMN lastupdated timestamp without time zone;
+
+  ALTER TABLE public.playservice_documents_playadvisor
+  ADD COLUMN lastupdated timestamp without time zone;

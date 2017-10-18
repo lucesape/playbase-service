@@ -593,3 +593,12 @@ ALTER table playmapping_type_group
       REFERENCES public.playservice_equipment_list (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION
 
+
+ALTER TABLE public.playservice_images
+  ADD COLUMN lastupdated timestamp without time zone;
+
+
+
+ALTER TABLE public.playservice_documents
+  ADD COLUMN lastupdated timestamp without time zone;
+

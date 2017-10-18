@@ -90,6 +90,25 @@ INSERT INTO playmapping_normen VALUES ('Grind', 'veiligheidsondergrond', 'm2', '
 -- Data for Name: playmapping_type_group; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
+INSERT INTO playservice_equipment_list VALUES (1, 'Glijbaan');
+INSERT INTO playservice_equipment_list VALUES (2, 'Schommel');
+INSERT INTO playservice_equipment_list VALUES (3, 'Wip');
+INSERT INTO playservice_equipment_list VALUES (4, 'Wipkip');
+INSERT INTO playservice_equipment_list VALUES (5, 'Klimtoestel');
+INSERT INTO playservice_equipment_list VALUES (6, 'Combinatietoestel');
+INSERT INTO playservice_equipment_list VALUES (7, 'Draaitoestel');
+INSERT INTO playservice_equipment_list VALUES (8, 'Zandbak');
+INSERT INTO playservice_equipment_list VALUES (9, 'Trampoline');
+INSERT INTO playservice_equipment_list VALUES (10, 'Zand-/waterspeeltoestel');
+INSERT INTO playservice_equipment_list VALUES (11, 'Duikelrek');
+INSERT INTO playservice_equipment_list VALUES (12, 'Speelhuis');
+INSERT INTO playservice_equipment_list VALUES (13, 'Kabelbaan');
+INSERT INTO playservice_equipment_list VALUES (14, 'Klimnet');
+INSERT INTO playservice_equipment_list VALUES (15, 'Behendigheid');
+INSERT INTO playservice_equipment_list VALUES (16, 'Sporttoestellen/fitness');
+INSERT INTO playservice_equipment_list VALUES (17, 'Rijdend spel');
+INSERT INTO playservice_equipment_list VALUES (18, 'Sociaal spel');
+INSERT INTO playservice_equipment_list VALUES (19, 'Skatebaan');
 
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Carrousel', 'Anders (specificeer in naam veld)', 'draaitoestel groot', 'Carrousel/Anders (specificeer in naam veld)', 3, 7, 19);
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Speeltoestellen', 'Carrousel', 'draaitoestel groot', 'Speeltoestellen/Carrousel', 4, 7, 19);
@@ -374,20 +393,6 @@ INSERT INTO playservice_categories_list VALUES (26, 'Tennis', 'Sport & Fitness')
 -- Data for Name: playservice_equipment_list; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-INSERT INTO playservice_equipment_list VALUES (1, 'Glijbaan');
-INSERT INTO playservice_equipment_list VALUES (2, 'Schommel');
-INSERT INTO playservice_equipment_list VALUES (3, 'Wip');
-INSERT INTO playservice_equipment_list VALUES (4, 'Wipkip');
-INSERT INTO playservice_equipment_list VALUES (5, 'Klimtoestel');
-INSERT INTO playservice_equipment_list VALUES (6, 'Combinatietoestel');
-INSERT INTO playservice_equipment_list VALUES (7, 'Draaitoestel');
-INSERT INTO playservice_equipment_list VALUES (8, 'Zandbak');
-INSERT INTO playservice_equipment_list VALUES (9, 'Trampoline');
-INSERT INTO playservice_equipment_list VALUES (10, 'Zand-/waterspeeltoestel');
-INSERT INTO playservice_equipment_list VALUES (11, 'Duikelrek');
-INSERT INTO playservice_equipment_list VALUES (12, 'Speelhuis');
-INSERT INTO playservice_equipment_list VALUES (13, 'Kabelbaan');
-INSERT INTO playservice_equipment_list VALUES (14, 'Klimnet');
 
 
 --
