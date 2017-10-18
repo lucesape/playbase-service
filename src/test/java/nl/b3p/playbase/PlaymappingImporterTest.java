@@ -19,6 +19,7 @@ package nl.b3p.playbase;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -146,7 +147,15 @@ public class PlaymappingImporterTest extends TestUtil {
         Map<String,Object> image = images.get(0);
         assertNotNull(image.get("LastUpdated"));
         Date d = (Date)image.get("LastUpdated");
-        assertEquals("Tue Jul 06 18:15:08 CEST 2010",d.toString());
+        
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(d);
+        assertEquals(2010,cal.get(Calendar.YEAR));
+        assertEquals(6,cal.get(Calendar.MONTH));
+        assertEquals(6,cal.get(Calendar.DAY_OF_MONTH));
+        assertEquals(18,cal.get(Calendar.HOUR_OF_DAY));
+        assertEquals(15,cal.get(Calendar.MINUTE));
+        
         //assertEquals(0, ((JSONArray) map.get("Hyperlinks")).length());
     }
 
