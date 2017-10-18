@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         
         <stripes:form beanclass="nl.b3p.playbase.stripes.ExportActionBean" class="form-horizontal">
             Locatie naam: <stripes:text name="locationName"/> <br/>
+            Image downloader: <stripes:text name="downloadlocation"/> <br/>
             <stripes:submit name="export" class="btn btn-primary">Export</stripes:submit>
         </stripes:form>
     </stripes:layout-component>

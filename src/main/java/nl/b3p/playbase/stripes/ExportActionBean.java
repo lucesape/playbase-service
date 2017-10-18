@@ -81,6 +81,8 @@ public class ExportActionBean implements ActionBean {
     
     @Validate
     private String locationName;
+    @Validate
+    private String downloadlocation;
     
     @DefaultHandler
     public Resolution view(){
@@ -88,7 +90,7 @@ public class ExportActionBean implements ActionBean {
     }
 
     public Resolution export() throws IOException {
-        downloader = new ImageDownloader("/home/meine/test/");
+        downloader = new ImageDownloader(downloadlocation);
         downloader.run();
         final File f = File.createTempFile("locations_export", null);
         FileOutputStream fop = new FileOutputStream(f);
@@ -292,14 +294,18 @@ Parkeren
         ArrayListHandler rsh = new ArrayListHandler();
         List<Object[]> cats = DB.qr().query("SELECT cat.main, cat.category from " + DB.LOCATION_CATEGORY_TABLE + " loc inner join " + DB.LIST_CATEGORY_TABLE + " cat on cat.id = loc.category  WHERE location = " + id, rsh);
         String categories = "";
+        Set<String> types = new HashSet<>();
         for (Object[] cat : cats) {
             if (!categories.isEmpty()) {
                 categories += SEPERATOR_CHAR;
             }
-            categories += /*cat[0] + ">" +*/ cat[1];
+            types.add((String)cat[0]);
+            types.add((String)cat[1]);
         }
-        if(categories.isEmpty()){
+        if(types.isEmpty()){
             categories = "Openbare speeltuin";
+        }else{
+            categories = String.join(SEPERATOR_CHAR, types);
         }
         record.add(categories);
     }
@@ -385,5 +391,15 @@ Parkeren
     public void setLocationName(String locationName) {
         this.locationName = locationName;
     }
+    
+    public String getDownloadlocation() {
+        return downloadlocation;
+    }
+
+    public void setDownloadlocation(String downloadlocation) {
+        this.downloadlocation = downloadlocation;
+    }
+    
     //</editor-fold>
+
 }

@@ -50,51 +50,60 @@ public class ImageDownloader {
     private final String downloadPath;
 
     private final int MAX_THREADS = 8;
-    private final ExecutorService threadPool;
-    private final CompletionService<ImageCollector> pool;
-    private final CloseableHttpClient client;
+    private ExecutorService threadPool = null;
+    private CompletionService<ImageCollector> pool = null;
+    private CloseableHttpClient client = null;
     private final PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
 
     private boolean running = false;
 
     public ImageDownloader(String path) {
         downloadPath = path;
-        threadPool = Executors.newFixedThreadPool(MAX_THREADS);
-        pool = new ExecutorCompletionService<>(threadPool);
+        if (path != null) {
+            threadPool = Executors.newFixedThreadPool(MAX_THREADS);
+            pool = new ExecutorCompletionService<>(threadPool);
 
-        client = HttpClients.custom()
-                .setConnectionManager(cm)
-                .build();
+            client = HttpClients.custom()
+                    .setConnectionManager(cm)
+                    .build();
+        }
     }
 
     public void add(String url, String filename) {
-        ImageCollector ic = new ImageCollector(url, filename, client);
-        if (running) {
-            pool.submit(ic);
-        } else {
-            ics.add(ic);
+        if (downloadPath != null) {
+            ImageCollector ic = new ImageCollector(url, filename, client);
+            if (running) {
+                pool.submit(ic);
+            } else {
+                ics.add(ic);
+            }
         }
     }
 
     public void run() {
-        running = true;
-        for (ImageCollector ic : ics) {
-            pool.submit(ic);
-        }
-        //wait for all to complete. Wait max 5 min
-        /* for (int i = 0; i < ics.size(); i++) {
+        if (downloadPath != null) {
+            running = true;
+            for (ImageCollector ic : ics) {
+                pool.submit(ic);
+            }
+            //wait for all to complete. Wait max 5 min
+            /* for (int i = 0; i < ics.size(); i++) {
             pool.poll(5, TimeUnit.MINUTES).get();            
         } */
+        }
     }
 
     public void stop() throws IOException {
-        try {
-            running = false;
-            threadPool.awaitTermination(45, TimeUnit.SECONDS);
-            client.close();
-        } catch (InterruptedException ex) {
-            log.error("Error terminating threadpool", ex);
-            client.close();
+
+        if (downloadPath != null) {
+            try {
+                running = false;
+                threadPool.awaitTermination(45, TimeUnit.SECONDS);
+                client.close();
+            } catch (InterruptedException ex) {
+                log.error("Error terminating threadpool", ex);
+                client.close();
+            }
         }
     }
 
