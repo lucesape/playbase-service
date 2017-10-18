@@ -72,7 +72,7 @@ public class ExportActionBean implements ActionBean {
     private static final String SEPERATOR_CHAR = ",";
     private ActionBeanContext context;
     
-    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     
     private Map<Integer, String> equipmentTypes;
     private Map<Integer, Integer> assetTypes;

@@ -17,6 +17,8 @@
 package nl.b3p.playbase;
 
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -42,6 +44,7 @@ import org.json.JSONObject;
  */
 public class PlaymappingImporter extends Importer {
 
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     private Map<String, List<Integer>> agecategories;
     public PlaymappingImporter() {
         super();
@@ -252,14 +255,19 @@ public class PlaymappingImporter extends Importer {
     }
 
     protected Map<String, Object> parseImageAndWord(JSONObject image) {
+
         Map<String, Object> map = new HashMap<>();
         map.put("$id", image.optString("$id"));
         map.put("ID", image.optString("ID"));
-        map.put("LastUpdated", image.optString("LastUpdated"));
         String url = image.optString("URI");
         url = url.replaceAll("&w=350&h=350", "");
         map.put("URI", url);
         map.put("Description", image.optString("Description"));
+        try {
+            map.put("LastUpdated", image.has("LastUpdated") ? sdf.parse(image.getString("LastUpdated")): null);
+        } catch (ParseException ex) {
+            log.debug("Cannot parse date: " + image.getString("LastUpdated"), ex);
+        }
         return map;
     }
     

@@ -20,6 +20,8 @@ import com.vividsolutions.jts.io.ParseException;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +51,7 @@ import org.apache.commons.logging.LogFactory;
 public abstract class Importer {
 
     private static final Log log = LogFactory.getLog("Importer");
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S");
     private GeometryJdbcConverter geometryConverter;
     protected ResultSetHandler<Location> locationHandler;
     protected ResultSetHandler<Asset> assHandler;
@@ -653,9 +656,11 @@ public abstract class Importer {
                 sb.append("url,");
                 sb.append("location,");
                 sb.append("equipment,");
-                sb.append("pm_guid)");
-                sb.append("VALUES(?,?,?,?,?);");
-                DB.qr().insert(sb.toString(), new ScalarHandler<>(), image.get("Description"), image.get("URI"), locationId, assetId, image.get("ID"));
+                sb.append("pm_guid,");
+                sb.append("lastupdated)");
+                sb.append("VALUES(?,?,?,?,?,?);");
+                java.sql.Date sqldate = image.containsKey("LastUpdated") && !image.get("LastUpdated").equals("") ? new java.sql.Date( ((Date)image.get("LastUpdated")).getTime()) : null;
+                DB.qr().insert(sb.toString(), new ScalarHandler<>(), image.get("Description"), image.get("URI"), locationId, assetId, image.get("ID"), sqldate);
             }
         }
     }
