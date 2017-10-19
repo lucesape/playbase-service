@@ -5,7 +5,7 @@
 -- Dumped from database version 9.6.5
 -- Dumped by pg_dump version 9.6.5
 
--- Started on 2017-10-17 12:24:45 CEST
+-- Started on 2017-10-18 15:43:10 CEST
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -291,7 +291,8 @@ CREATE TABLE playservice_documents (
     caption character varying(255),
     location integer NOT NULL,
     equipment integer,
-    pm_guid character varying(255)
+    pm_guid character varying(255),
+    lastupdated timestamp without time zone
 );
 
 
@@ -332,7 +333,8 @@ CREATE TABLE playservice_documents_playadvisor (
     caption character varying(255),
     location integer NOT NULL,
     equipment integer,
-    pm_guid character varying(255)
+    pm_guid character varying(255),
+    lastupdated timestamp without time zone
 );
 
 
@@ -444,7 +446,7 @@ ALTER SEQUENCE playservice_facilities_id_seq OWNED BY playservice_facilities_lis
 CREATE TABLE playservice_locations (
     id integer NOT NULL,
     title character varying(255) NOT NULL,
-    content text,
+    pa_content text,
     summary character varying(255),
     street character varying(255),
     number character varying(255),
@@ -463,7 +465,8 @@ CREATE TABLE playservice_locations (
     parking integer,
     geom geometry(Point,4326),
     averagerating integer,
-    pa_title character varying(255)
+    pa_title character varying(255),
+    pm_content text
 );
 
 
@@ -504,7 +507,8 @@ CREATE TABLE playservice_images (
     caption character varying(255),
     location integer NOT NULL,
     equipment integer,
-    pm_guid character varying(255)
+    pm_guid character varying(255),
+    lastupdated timestamp without time zone
 );
 
 
@@ -545,7 +549,8 @@ CREATE TABLE playservice_images_playadvisor (
     caption character varying(255),
     location integer NOT NULL,
     equipment integer,
-    pm_guid character varying(255)
+    pm_guid character varying(255),
+    lastupdated timestamp without time zone
 );
 
 
@@ -848,7 +853,7 @@ ALTER TABLE playservice_location_facilities_playadvisor OWNER TO playbase;
 CREATE TABLE playservice_locations_playadvisor (
     id integer NOT NULL,
     title character varying(255) NOT NULL,
-    content text,
+    pa_content text,
     summary character varying(255),
     street character varying(255),
     number character varying(255),
@@ -867,7 +872,8 @@ CREATE TABLE playservice_locations_playadvisor (
     parking integer,
     geom geometry(Point,4326),
     averagerating integer,
-    pa_title character varying(255)
+    pa_title character varying(255),
+    pm_content text
 );
 
 
@@ -1076,79 +1082,77 @@ ALTER TABLE ONLY playservice_parking_list ALTER COLUMN id SET DEFAULT nextval('p
 -- Data for Name: playmapping_normen; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-COPY playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) FROM stdin;
-wipveer speeltoestellen stuk    0 t/m 5 jaar    12  803 60.75
-meerpersoons wipveer    speeltoestellen stuk    0 t/m 5 jaar    10  1430    64.8333333333333
-wip speeltoestellen stuk    0 t/m 11 jaar   10  2500    55.4595238095238
-enkel duikelrek speeltoestellen stuk    6 t/m 11 jaar   14  420 16.9166666666667
-meerdelig duikelrek speeltoestellen stuk    6 t/m 11 jaar   14  750 25.8333333333333
-schommel    speeltoestellen stuk    0 t/m 11 jaar   10  3000    73.23
-evenwichtstoestel   speeltoestellen stuk    0 t/m 11 jaar   12  605 12.6833333333333
-bokspringpaal (set) speeltoestellen stuk    0 t/m 11 jaar   14  275 8.1
-glijbaan laag   speeltoestellen stuk    0 t/m 5 jaar    12  3200    36.6833333333333
-glijbaan hoog   speeltoestellen stuk    0 t/m 11 jaar   12  3740    36.4833333333333
-taludglijbaan   speeltoestellen stuk    0 t/m 11 jaar   12  4235    32.5
-zandbak speeltoestellen stuk    0 t/m 5 jaar    20  1925    64
-zandspeeltoestel    speeltoestellen stuk    0 t/m 5 jaar    10  1150    27.675
-draaitoestel klein  speeltoestellen stuk    0 t/m 11 jaar   10  1700    58.9166666666667
-draaitoestel groot  speeltoestellen stuk    0 t/m 11 jaar   10  3740    47.9166666666667
-klimelement speeltoestellen stuk    0 t/m 11 jaar   12  2970    55.625
-ruimtenet   speeltoestellen stuk    0 t/m 11 jaar   12  6900    115.416666666667
-speelhuis   speeltoestellen stuk    0 t/m 5 jaar    12  2475    58.4166666666667
-combinatie klein    speeltoestellen stuk    0 t/m 5 jaar    12  4500    71.0416666666667
-combinatie middel   speeltoestellen stuk    0 t/m 11 jaar   12  7500    83.5833333333333
-combinatie groot    speeltoestellen stuk    0 t/m 11 jaar   14  13000   105.416666666667
-uitgebreide combinatietoestel   speeltoestellen stuk    6 t/m 11 jaar   16  30000   210
-uitgebreide klimtorens  speeltoestellen stuk    6 t/m 11 jaar   16  55000   240
-JOP speeltoestellen stuk    12 t/m 18 jaar  10  10000   84.5833333333333
-kabelbaan   speeltoestellen stuk    6 t/m 11 jaar   10  8500    74.8958333333333
-tafeltennistafel    sporttoestellen stuk    6 t/m 18 jaar   16  2200    18.9583333333333
-voetbaldoel sporttoestellen stuk    6 t/m 18 jaar   14  1375    33.3055555555556
-basketbalpaal   sporttoestellen stuk    6 t/m 18 jaar   14  1900    28.75
-voetbal-basketbaldoel   sporttoestellen stuk    6 t/m 18 jaar   14  7500    70.4166666666667
-pannaveld klein sporttoestellen stuk    6 t/m 18 jaar   14  6500    \N
-pannaveld   sporttoestellen stuk    6 t/m 18 jaar   14  15000   140.833333333333
-pannaveld groot sporttoestellen stuk    6 t/m 18 jaar   14  40000   \N
-volleybalset    sporttoestellen stuk    6 t/m 18 jaar   12  825 14.2916666666667
-jeu de boulesbaan   sporttoestellen stuk    n.v.t.  12  4550    53.75
-skateboard groot    sporttoestellen stuk    6 t/m 18 jaar   12  50000   279.375
-skateboard middel   sporttoestellen stuk    6 t/m 18 jaar   10  12500   141.25
-skateboard klein    sporttoestellen stuk    6 t/m 18 jaar   10  2500    75.625
-fitness sporttoestellen stuk    6 t/m 18 jaar   12  2500    76
-speelprikkel divers speelaanleiding stuk    0 t/m 11 jaar   20  2000    0
-knikkertegel    speelaanleiding stuk    0 t/m 11 jaar   20  57.5    0
-hinkelbaan  speelaanleiding stuk    0 t/m 11 jaar   20  402.5   0
-poef    speelaanleiding stuk    n.v.t.  20  290 0
-schaaktafel speelaanleiding stuk    6 t/m 18 jaar   14  936 9.41666666666667
-speeltafel  speelaanleiding stuk    0 t/m 11 jaar   12  680 19.6666666666667
-kunst   speelaanleiding stuk    0 t/m 11 jaar   20  6000    0
-asfaltvloer verharding  m2  n.v.t.  30  130 0.901314643352583
-elementverharding (tegels/klinkers) verharding  m2  n.v.t.  30  55  0.345706905726618
-betonvloer (skaten) verharding  m2  n.v.t.  30  90  1.63305555555556
-halfverharding (gralux) verharding  m2  n.v.t.  20  65  0.949181714172014
-kunstgrastrapvelden verharding  m2  n.v.t.  12  95  8.47833799182972
-grastrapveld  (excl. drainage)  verharding  m2  n.v.t.  30  15  1.63207430731575
-ballenvanger    afscheiding m1  n.v.t.  12  180 10.1666666666667
-hekwerk afscheiding m1  n.v.t.  12  85  4.125
-afscheiding afscheiding m1  n.v.t.  12  45  2.08333333333333
-afvalbak    meubilair ed    stuk    n.v.t.  10  185 5.16666666666667
-bank    meubilair ed    stuk    n.v.t.  10  460 25.8333333333333
-picknickset meubilair ed    stuk    n.v.t.  10  1560    43
-zitelement (beton)  meubilair ed    stuk    n.v.t.  12  860 0
-valdempend zand veiligheidsondergrond   m2  n.v.t.  15  27.24   7.505
-houtsnipper: gekleurde vezel    veiligheidsondergrond   m2  n.v.t.  9   58.85   7.949
-houtsnipper: gekleurd verkleind/gezeefd veiligheidsondergrond   m2  n.v.t.  9   53.22   8.725
-franse schors   veiligheidsondergrond   m2  n.v.t.  5   44.62   9.375
-Bumpgrass natuurlijke toplaag van gras  veiligheidsondergrond   m2  n.v.t.  7   55.42   19.19
-rubbertegels    veiligheidsondergrond   m2  n.v.t.  15  132 4.6
-rubbertegels op zand    veiligheidsondergrond   m2  n.v.t.  15  72.05   4.6
-rubber-betontegels 30 x 30  veiligheidsondergrond   m2  n.v.t.  15  136.9   4.95
-rubbertegels 100 x 100  veiligheidsondergrond   m2  n.v.t.  15  98.53   4.6
-in-situ /gegoten rubber veiligheidsondergrond   m2  n.v.t.  15  190 3.9
-kunstgras foam en zandbed   veiligheidsondergrond   m2  n.v.t.  15  81.8    9.99166666666667
-kunstgras polyethyleen  veiligheidsondergrond   m2  n.v.t.  15  87  9.99166666666667
-Grind   veiligheidsondergrond   m2  n.v.t.  15  50  4
-\.
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('wipveer', 'speeltoestellen', 'stuk', '0 t/m 5 jaar', 12, 803, 60.75);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('meerpersoons wipveer', 'speeltoestellen', 'stuk', '0 t/m 5 jaar', 10, 1430, 64.8333333333333);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('wip', 'speeltoestellen', 'stuk', '0 t/m 11 jaar', 10, 2500, 55.4595238095238);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('enkel duikelrek', 'speeltoestellen', 'stuk', '6 t/m 11 jaar', 14, 420, 16.9166666666667);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('meerdelig duikelrek', 'speeltoestellen', 'stuk', '6 t/m 11 jaar', 14, 750, 25.8333333333333);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('schommel', 'speeltoestellen', 'stuk', '0 t/m 11 jaar', 10, 3000, 73.23);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('evenwichtstoestel', 'speeltoestellen', 'stuk', '0 t/m 11 jaar', 12, 605, 12.6833333333333);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('bokspringpaal (set)', 'speeltoestellen', 'stuk', '0 t/m 11 jaar', 14, 275, 8.1);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('glijbaan laag', 'speeltoestellen', 'stuk', '0 t/m 5 jaar', 12, 3200, 36.6833333333333);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('glijbaan hoog', 'speeltoestellen', 'stuk', '0 t/m 11 jaar', 12, 3740, 36.4833333333333);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('taludglijbaan', 'speeltoestellen', 'stuk', '0 t/m 11 jaar', 12, 4235, 32.5);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('zandbak', 'speeltoestellen', 'stuk', '0 t/m 5 jaar', 20, 1925, 64);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('zandspeeltoestel', 'speeltoestellen', 'stuk', '0 t/m 5 jaar', 10, 1150, 27.675);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('draaitoestel klein', 'speeltoestellen', 'stuk', '0 t/m 11 jaar', 10, 1700, 58.9166666666667);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('draaitoestel groot', 'speeltoestellen', 'stuk', '0 t/m 11 jaar', 10, 3740, 47.9166666666667);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('klimelement', 'speeltoestellen', 'stuk', '0 t/m 11 jaar', 12, 2970, 55.625);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('ruimtenet', 'speeltoestellen', 'stuk', '0 t/m 11 jaar', 12, 6900, 115.416666666667);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('speelhuis', 'speeltoestellen', 'stuk', '0 t/m 5 jaar', 12, 2475, 58.4166666666667);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('combinatie klein', 'speeltoestellen', 'stuk', '0 t/m 5 jaar', 12, 4500, 71.0416666666667);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('combinatie middel', 'speeltoestellen', 'stuk', '0 t/m 11 jaar', 12, 7500, 83.5833333333333);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('combinatie groot', 'speeltoestellen', 'stuk', '0 t/m 11 jaar', 14, 13000, 105.416666666667);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('uitgebreide combinatietoestel', 'speeltoestellen', 'stuk', '6 t/m 11 jaar', 16, 30000, 210);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('uitgebreide klimtorens', 'speeltoestellen', 'stuk', '6 t/m 11 jaar', 16, 55000, 240);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('JOP', 'speeltoestellen', 'stuk', '12 t/m 18 jaar', 10, 10000, 84.5833333333333);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('kabelbaan', 'speeltoestellen', 'stuk', '6 t/m 11 jaar', 10, 8500, 74.8958333333333);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('tafeltennistafel', 'sporttoestellen', 'stuk', '6 t/m 18 jaar', 16, 2200, 18.9583333333333);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('voetbaldoel', 'sporttoestellen', 'stuk', '6 t/m 18 jaar', 14, 1375, 33.3055555555556);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('basketbalpaal', 'sporttoestellen', 'stuk', '6 t/m 18 jaar', 14, 1900, 28.75);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('voetbal-basketbaldoel', 'sporttoestellen', 'stuk', '6 t/m 18 jaar', 14, 7500, 70.4166666666667);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('pannaveld klein', 'sporttoestellen', 'stuk', '6 t/m 18 jaar', 14, 6500, NULL);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('pannaveld', 'sporttoestellen', 'stuk', '6 t/m 18 jaar', 14, 15000, 140.833333333333);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('pannaveld groot', 'sporttoestellen', 'stuk', '6 t/m 18 jaar', 14, 40000, NULL);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('volleybalset', 'sporttoestellen', 'stuk', '6 t/m 18 jaar', 12, 825, 14.2916666666667);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('jeu de boulesbaan', 'sporttoestellen', 'stuk', 'n.v.t.', 12, 4550, 53.75);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('skateboard groot', 'sporttoestellen', 'stuk', '6 t/m 18 jaar', 12, 50000, 279.375);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('skateboard middel', 'sporttoestellen', 'stuk', '6 t/m 18 jaar', 10, 12500, 141.25);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('skateboard klein', 'sporttoestellen', 'stuk', '6 t/m 18 jaar', 10, 2500, 75.625);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('fitness', 'sporttoestellen', 'stuk', '6 t/m 18 jaar', 12, 2500, 76);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('speelprikkel divers', 'speelaanleiding', 'stuk', '0 t/m 11 jaar', 20, 2000, 0);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('knikkertegel', 'speelaanleiding', 'stuk', '0 t/m 11 jaar', 20, 57.5, 0);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('hinkelbaan', 'speelaanleiding', 'stuk', '0 t/m 11 jaar', 20, 402.5, 0);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('poef', 'speelaanleiding', 'stuk', 'n.v.t.', 20, 290, 0);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('schaaktafel', 'speelaanleiding', 'stuk', '6 t/m 18 jaar', 14, 936, 9.41666666666667);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('speeltafel', 'speelaanleiding', 'stuk', '0 t/m 11 jaar', 12, 680, 19.6666666666667);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('kunst', 'speelaanleiding', 'stuk', '0 t/m 11 jaar', 20, 6000, 0);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('asfaltvloer', 'verharding', 'm2', 'n.v.t.', 30, 130, 0.901314643352583);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('elementverharding (tegels/klinkers)', 'verharding', 'm2', 'n.v.t.', 30, 55, 0.345706905726618);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('betonvloer (skaten)', 'verharding', 'm2', 'n.v.t.', 30, 90, 1.63305555555556);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('halfverharding (gralux)', 'verharding', 'm2', 'n.v.t.', 20, 65, 0.949181714172014);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('kunstgrastrapvelden', 'verharding', 'm2', 'n.v.t.', 12, 95, 8.47833799182972);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('grastrapveld  (excl. drainage)', 'verharding', 'm2', 'n.v.t.', 30, 15, 1.63207430731575);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('ballenvanger', 'afscheiding', 'm1', 'n.v.t.', 12, 180, 10.1666666666667);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('hekwerk', 'afscheiding', 'm1', 'n.v.t.', 12, 85, 4.125);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('afscheiding', 'afscheiding', 'm1', 'n.v.t.', 12, 45, 2.08333333333333);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('afvalbak', 'meubilair ed', 'stuk', 'n.v.t.', 10, 185, 5.16666666666667);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('bank', 'meubilair ed', 'stuk', 'n.v.t.', 10, 460, 25.8333333333333);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('picknickset', 'meubilair ed', 'stuk', 'n.v.t.', 10, 1560, 43);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('zitelement (beton)', 'meubilair ed', 'stuk', 'n.v.t.', 12, 860, 0);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('valdempend zand', 'veiligheidsondergrond', 'm2', 'n.v.t.', 15, 27.24, 7.505);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('houtsnipper: gekleurde vezel', 'veiligheidsondergrond', 'm2', 'n.v.t.', 9, 58.85, 7.949);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('houtsnipper: gekleurd verkleind/gezeefd', 'veiligheidsondergrond', 'm2', 'n.v.t.', 9, 53.22, 8.725);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('franse schors', 'veiligheidsondergrond', 'm2', 'n.v.t.', 5, 44.62, 9.375);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('Bumpgrass natuurlijke toplaag van gras ', 'veiligheidsondergrond', 'm2', 'n.v.t.', 7, 55.42, 19.19);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('rubbertegels ', 'veiligheidsondergrond', 'm2', 'n.v.t.', 15, 132, 4.6);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('rubbertegels op zand', 'veiligheidsondergrond', 'm2', 'n.v.t.', 15, 72.05, 4.6);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('rubber-betontegels 30 x 30', 'veiligheidsondergrond', 'm2', 'n.v.t.', 15, 136.9, 4.95);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('rubbertegels 100 x 100', 'veiligheidsondergrond', 'm2', 'n.v.t.', 15, 98.53, 4.6);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('in-situ /gegoten rubber', 'veiligheidsondergrond', 'm2', 'n.v.t.', 15, 190, 3.9);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('kunstgras foam en zandbed', 'veiligheidsondergrond', 'm2', 'n.v.t.', 15, 81.8, 9.99166666666667);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('kunstgras polyethyleen ', 'veiligheidsondergrond', 'm2', 'n.v.t.', 15, 87, 9.99166666666667);
+INSERT INTO playmapping_normen (naam, type, eenheid, leeftijdscategorie, vervangingstermijn, aanschafwaarde, onderhoudskosten) VALUES ('Grind', 'veiligheidsondergrond', 'm2', 'n.v.t.', 15, 50, 4);
 
 
 --
@@ -1157,191 +1161,189 @@ Grind   veiligheidsondergrond   m2  n.v.t.  15  50  4
 -- Data for Name: playmapping_type_group; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-COPY playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) FROM stdin;
-Carrousel   Anders (specificeer in naam veld)   draaitoestel groot  Carrousel/Anders (specificeer in naam veld) 3   7   19
-Speeltoestellen Carrousel   draaitoestel groot  Speeltoestellen/Carrousel   4   7   19
-Draaiende toestellen    Pirouette / Rotator draaitoestel klein  Draaiende toestellen/Pirouette / Rotator    5   7   19
-Carrousel   Type B Klassieke draaimolen met meedraaiende vloer  draaitoestel klein  Carrousel/Type B Klassieke draaimolen met meedraaiende vloer    6   7   19
-Ondergrond algemeen Klinkers    elementverharding (tegels/klinkers) Ondergrond algemeen/Klinkers    7   \N  19
-Behendigheid    Duikelrek - enkel   enkel duikelrek Behendigheid/Duikelrek - enkel  8   11  19
-Behendigheid    Anders (specificeer in naam veld)   evenwichtstoestel   Behendigheid/Anders (specificeer in naam veld)  9   15  19
-Behendigheid    Balanceerbalk   evenwichtstoestel   Behendigheid/Balanceerbalk  10  15  19
-Behendigheid    Hangbrug    evenwichtstoestel   Behendigheid/Hangbrug   11  15  19
-Behendigheid    Loopbrug    evenwichtstoestel   Behendigheid/Loopbrug   12  15  19
-Behendigheid    Wiebelplaat evenwichtstoestel   Behendigheid/Wiebelplaat    13  15  19
-Veiligheidsondergrond   Boomschors  franse schors   Veiligheidsondergrond/Boomschors    15  \N  19
-Klimtoestellen  Anders (specificeer in naam veld)   klimelement Klimtoestellen/Anders (specificeer in naam veld)    16  5   19
-Klimtoestellen  Frame   klimelement Klimtoestellen/Frame    17  5   19
-Klimtoestellen  Frame & net klimelement Klimtoestellen/Frame & net  18  14  19
-Speeltoestellen Klimtoestellen  klimelement Speeltoestellen/Klimtoestellen  19  5   19
-Klimtoestellen  Klimwand    klimelement Klimtoestellen/Klimwand 20  5   19
-Behendigheid    Knikkertegel    knikkertegel    Behendigheid/Knikkertegel   21  15  19
-Ondergrond algemeen Kunstgras (zonder valdempende onderbouw)    kunstgras foam en zandbed   Ondergrond algemeen/Kunstgras (zonder valdempende onderbouw)    22  \N  19
-Veiligheidsondergrond   Veiligheidsgras kunstgras polyethyleen  Veiligheidsondergrond/Veiligheidsgras   23  \N  19
-Behendigheid    Duikelrek - meerdelig   meerdelig duikelrek Behendigheid/Duikelrek - meerdelig  24  15  19
-Wiptoestellen   Type 2B - Enkelpunts - Meerdere richtingen  meerpersoons wipveer    Wiptoestellen/Type 2B - Enkelpunts - Meerdere richtingen    25  3   19
-Wiptoestellen   Type 3A - Meerpunts - 1 richting    meerpersoons wipveer    Wiptoestellen/Type 3A - Meerpunts - 1 richting  26  3   19
-Wiptoestellen   Type 3B - Meerpunts - Meerdere richtingen   meerpersoons wipveer    Wiptoestellen/Type 3B - Meerpunts - Meerdere richtingen 27  3   19
-Speeltoestellen Sociaal spel    poef    Speeltoestellen/Sociaal spel    30  16  19
-Veiligheidsondergrond   Rubbertegels    rubber-betontegels 30 x 30  Veiligheidsondergrond/Rubbertegels  31  \N  19
-Veiligheidsondergrond   Rubbertegels 50x50  rubber-betontegels 30 x 30  Veiligheidsondergrond/Rubbertegels 50x50    32  \N  19
-Klimtoestellen  Net ruimtenet   Klimtoestellen/Net  33  14  19
-Schommel    Anders (specificeer in naam veld)   schommel    Schommel/Anders (specificeer in naam veld)  34  2   19
-Speeltoestellen Schommel    schommel    Speeltoestellen/Schommel    35  2   19
-Schommel    Type 1 - Rotatie om 1 as    schommel    Schommel/Type 1 - Rotatie om 1 as   36  2   19
-Schommel    Type 2 - Rotatie op meerdere assen  schommel    Schommel/Type 2 - Rotatie op meerdere assen 37  2   19
-Schommel    Type 3 - Rotatie om 1 punt (Bandenzwaai)    schommel    Schommel/Type 3 - Rotatie om 1 punt (Bandenzwaai)   38  2   19
-Sociaal spel    Speelhuis   speelhuis   Sociaal spel/Speelhuis  41  12  19
-Speeltoestellen Anders  speelprikkel divers Speeltoestellen/Anders  42  \N  19
-Waterspel   Anders (specificeer in naam veld)   speelprikkel divers Waterspel/Anders (specificeer in naam veld) 43  10  19
-Behendigheid    Kruipbuis   speelprikkel divers Behendigheid/Kruipbuis  44  15  19
-Behendigheid    Pleinplakkers   speelprikkel divers Behendigheid/Pleinplakkers  45  15  19
-Waterspel   Pompen en spelen    speelprikkel divers Waterspel/Pompen en spelen  46  10  19
-Waterspel   Pontje  speelprikkel divers Waterspel/Pontje    47  10  19
-Sociaal spel    Speel boot  speelprikkel divers Sociaal spel/Speel boot 48  \N  19
-Sociaal spel    Speel paneel    speelprikkel divers Sociaal spel/Speel paneel   49  \N  19
-Sociaal spel    Speelaanleiding speelprikkel divers Sociaal spel/Speelaanleiding    50  18  19
-Speeltoestellen speelprikkel divers speelprikkel divers Speeltoestellen/speelprikkel divers 51  \N  19
-Speeltoestellen Zand spel   zandbak Speeltoestellen/Zand spel   52  8   19
-Zand spel   Zandbak zandbak Zand spel/Zandbak   53  8   19
-Zand spel   Anders (specificeer in naam veld)   zandspeeltoestel    Zand spel/Anders (specificeer in naam veld) 54  8   19
-Zand spel   Zand spel   zandspeeltoestel    Zand spel/Zand spel 55  8   19
-Ondergrond algemeen Water       Ondergrond algemeen/Water   56  \N  19
-Behendigheid    Trim parcours   \N  Behendigheid/Trim parcours  57  15  19
-Binnenvloer Linoleum    \N  Binnenvloer/Linoleum    58  \N  19
-\N  Faciliteiten    \N  Faciliteiten    59  \N  19
-Faciliteiten    Kunstobjecten   \N  Faciliteiten/Kunstobjecten  60  \N  19
-Natuurlijke elementen   Natuurlijke elementen/anders    \N  Natuurlijke elementen/Natuurlijke elementen/anders  61  \N  19
-Glijbaan    Aangebouwd - Type 1 uitloop - Traditioneel  glijbaan hoog   Glijbaan/Aangebouwd - Type 1 uitloop - Traditioneel 62  1   19
-Glijbaan    Vrijstaand - Type 2 uitloop - Traditioneel  glijbaan hoog   Glijbaan/Vrijstaand - Type 2 uitloop - Traditioneel 63  1   19
-Ondergrond algemeen Zandbak/speelzand   valdempend zand Ondergrond algemeen/Zandbak/speelzand   64  \N  19
-Behendigheid    Turn brug   evenwichtstoestel   Behendigheid/Turn brug  65  15  19
-Carrousel   Type C Hang- en zweefmolens draaitoestel groot  Carrousel/Type C Hang- en zweefmolens   67  7   19
-\N  \N  afscheiding \N  68  \N  19
-\N  \N  afvalbak    \N  69  \N  19
-\N  \N  ballenvanger    \N  70  \N  19
-\N  \N  combinatie groot    \N  71  6   19
-\N  \N  skateboard klein    \N  72  \N  9
-\N  Anders lage rotator draaitoestel klein  Anders lage rotator 74  7   19
-\N  Type A Draaiende stoeltjes  draaitoestel klein  Type A Draaiende stoeltjes  75  7   19
-\N  Type E Reuzen draaischijf   draaitoestel klein  Type E Reuzen draaischijf   76  7   19
-\N  Behendigheid    enkel duikelrek Behendigheid    77  11  19
-\N  Enterrek    enkel duikelrek Enterrek    78  11  19
-\N  Looptouw    evenwichtstoestel   Looptouw    79  15  19
-\N  Turn brug   evenwichtstoestel   Turn brug   80  15  19
-Ondergrond algemeen Asfalt  asfaltvloer Ondergrond algemeen/Asfalt  81  \N  19
-Ondergrond algemeen Asfaltbeton asfaltvloer Ondergrond algemeen/Asfaltbeton 82  \N  19
-Zitgelegenheden Bank    bank    Zitgelegenheden/Bank    83  \N  19
-Ondergrond algemeen Beton   betonvloer (skaten) Ondergrond algemeen/Beton   87  \N  19
-Ondergrond algemeen Betontegels betonvloer (skaten) Ondergrond algemeen/Betontegels 88  \N  19
-Ondergrond algemeen Betontegels 30 x 30 betonvloer (skaten) Ondergrond algemeen/Betontegels 30 x 30 89  \N  19
-Ondergrond algemeen Stelcon platen  betonvloer (skaten) Ondergrond algemeen/Stelcon platen  90  \N  19
-Behendigheid    Bokspringpalen  bokspringpaal (set) Behendigheid/Bokspringpalen 91  15  19
-Ondergrond algemeen Gras    Bumpgrass natuurlijke toplaag van gras  Ondergrond algemeen/Gras    92  \N  19
-Ondergrond algemeen Gras / grond    Bumpgrass natuurlijke toplaag van gras  Ondergrond algemeen/Gras / grond    93  \N  19
-Schommel    Type 2 - Rotatie op meerdere assen  combinatie klein    Schommel/Type 2 - Rotatie op meerdere assen 94  2   19
-Schommel    Speel platform  schommel    Schommel/Type 4 - Contactschommel   104 2   19
-Sociaal spel    Speel platform  speelprikkel divers Sociaal spel/Speel platform 105 18  19
-Sociaal spel    Speeltafel  speelprikkel divers Sociaal spel/Speeltafel 106 18  19
-Speeltoestellen Wiptoestellen   wip Speeltoestellen/Wiptoestellen   107 3   19
-Veiligheidsondergrond   Gras    Bumpgrass natuurlijke toplaag van gras  Veiligheidsondergrond/Gras  108 \N  19
-Veiligheidsondergrond   Rubbertegels 100x100    rubbertegels 100 x 100  Veiligheidsondergrond/Rubbertegels 100x100  109 \N  19
-Veiligheidsondergrond   Rubbertegels 30x30  rubbertegels 100 x 100  Veiligheidsondergrond/Rubbertegels 30x30    110 \N  19
-Veiligheidsondergrond   Valdempend Kunstgras    kunstgras polyethyleen  Veiligheidsondergrond/Valdempend Kunstgras  111 \N  19
-Wiptoestellen   Anders (specificeer in naam veld)   wip Wiptoestellen/Anders (specificeer in naam veld) 112 3   19
-Wiptoestellen   Type 6 - Schommelwip met enkelvoudige hoge as   wip Wiptoestellen/Type 6 - Schommelwip met enkelvoudige hoge as 113 3   19
-Zand spel   Tafel   zandspeeltoestel    Zand spel/Tafel 114 8   19
-\N  \N  halfverharding (gralux) \N  115 \N  19
-\N  Vrijstaand - Type 2 uitloop - Traditioneel  glijbaan laag   Vrijstaand - Type 2 uitloop - Traditioneel  116 1   19
-\N  Grind   Grind   Grind   117 \N  19
-\N  Houtsnippers    houtsnipper: gekleurd verkleind/gezeefd Houtsnippers    118 \N  19
-\N  Aangebouwd- Type 2 uitloop - Traditioneel   klimelement Aangebouwd- Type 2 uitloop - Traditioneel   119 \N  19
-\N  Duoslaper   klimelement Duoslaper   120 \N  19
-Glijbaan    Vrijstaand - Type 1 glijbaan hoog   Glijbaan/Vrijstaand - Type 1    121 1   19
-Speeltoestellen Glijbaan    glijbaan laag   Speeltoestellen/Glijbaan    122 1   19
-Glijbaan    Vrijstaand - Type 1 uitloop - Traditioneel  glijbaan laag   Glijbaan/Vrijstaand - Type 1 uitloop - Traditioneel 123 1   19
-Glijbaan    Vrijstaand - Type 2 glijbaan laag   Glijbaan/Vrijstaand - Type 2    124 1   19
-Ondergrond algemeen Gravel  Grind   Ondergrond algemeen/Gravel  125 \N  19
-Behendigheid    Hinkelbaan  hinkelbaan  Behendigheid/Hinkelbaan 126 15  19
-Veiligheidsondergrond   Gesmeerde insitu rubber vloer   in-situ /gegoten rubber Veiligheidsondergrond/Gesmeerde insitu rubber vloer 127 \N  19
-Sociaal spel    JOP JOP Sociaal spel/JOP    130 18  19
-Kabelbaan   Kabelbaan   kabelbaan   Kabelbaan/Kabelbaan 131 13  19
-Speeltoestellen Kabelbaan   kabelbaan   Speeltoestellen/Kabelbaan   132 13  19
-Behendigheid    Aaneengeschakelde toestellen    klimelement Behendigheid/Aaneengeschakelde toestellen   133 5   19
-\N  \N  grastrapveld  (excl. drainage)  \N  138 \N  19
-\N  \N  hekwerk \N  139 \N  19
-\N  \N  houtsnipper: gekleurde vezel    \N  140 \N  19
-\N  \N  kunst   \N  141 \N  19
-\N  \N  pannaveld klein \N  142 16  19
-\N  \N  picknickset \N  143 \N  19
-\N  \N  rubbertegels 100 x 100  \N  144 \N  19
-\N  \N  rubbertegels op zand    \N  145 \N  19
-\N  \N  schaaktafel \N  146 \N  19
-\N  \N  speeltafel  \N  147 \N  19
-\N  \N  uitgebreide combinatietoestel   \N  148 6   19
-\N  \N  uitgebreide klimtorens  \N  149 5   19
-\N  \N  voetbal-basketbaldoel   \N  150 16  19
-\N  Eigen bouw  klimelement Eigen bouw  151 5   19
-\N  Valdempend Kunstgras    kunstgras polyethyleen  Valdempend Kunstgras    152 \N  19
-\N  Basketbal veld  kunstgrastrapvelden Basketbal veld  153 16  8
-\N  Tennis banen    kunstgrastrapvelden Tennis banen    154 16  26
-\N  Rubbertegels 30x30  rubber-betontegels 30 x 30  Rubbertegels 30x30  155 \N  19
-\N  Rubber grastegels   rubbertegels    Rubber grastegels   156 \N  19
-\N  Anders (migratie)   speelprikkel divers Anders (migratie)   166 \N  19
-\N  Speeltoestellen speelprikkel divers Speeltoestellen 167 \N  19
-\N  Speeltafel  speeltafel  Speeltafel  168 \N  19
-\N  Wiptoestellen   wipveer Wiptoestellen   170 3   19
-\N  Telefoon palen      Telefoon palen  171 \N  19
-Sociaal spel    Speeltrein  speelprikkel divers Sociaal spel/Speeltrein 172 17  19
-Behendigheid    Stapstenen  speelprikkel divers Behendigheid/Stapstenen 173 15  19
-Glijbaan    Tallud / helling - Type 2 uitloop - Traditioneel    taludglijbaan   Glijbaan/Tallud / helling - Type 2 uitloop - Traditioneel   175 1   19
-Glijbaan    Talud / helling - Type 1    taludglijbaan   Glijbaan/Talud / helling - Type 1   176 1   19
-Ondergrond algemeen Grond   valdempend zand Ondergrond algemeen/Grond   177 \N  19
-Veiligheidsondergrond   Valdempend Zand valdempend zand Veiligheidsondergrond/Valdempend Zand   178 \N  19
-Wiptoestellen   Type 1 - wip 1 richting wip Wiptoestellen/Type 1 - wip 1 richting   182 3   19
-Wiptoestellen   Type 2A - Enkelpunts - 1 richting   wipveer Wiptoestellen/Type 2A - Enkelpunts - 1 richting 183 3   19
-Speeltoestellen Combinatietoestellen    combinatie middel   Speeltoestellen/Combinatietoestellen    1   6   19
-Combinatietoestellen    Glijbaan aan huisje combinatie middel   Combinatietoestellen/Glijbaan aan huisje    2   12  19
-Rijdend spel    Skateboard - Anders skateboard groot    Rijdend spel/Skateboard - Anders    39  17  9
-Rijdend spel    Anders (specificeer in naam veld)   skateboard middel   Rijdend spel/Anders (specificeer in naam veld)  40  17  9
-Combinatietoestellen    Combinatie - Peuter combinatie middel   Combinatietoestellen/Combinatie - Peuter    66  6   19
-\N  Combinatie - Peuter combinatie middel   Combinatie - Peuter 73  6   19
-Combinatietoestellen    Anders (Specifceer in veld) combinatie middel   Combinatietoestellen/Anders (Specifceer in veld)    95  6   19
-Anders  Anders (Specificeer in naam veld)   combinatie middel   Anders/Anders (Specificeer in naam veld)    96  6   19
-Glijbaan    Anders (specificeer in naam veld)   combinatie middel   Glijbaan/Anders (specificeer in naam veld)  97  1   19
-Combinatietoestellen    Combinatie - Kind   combinatie middel   Combinatietoestellen/Combinatie - Kind  98  6   19
-Combinatietoestellen    Combinatie - Kleuter    combinatie middel   Combinatietoestellen/Combinatie - Kleuter   99  6   19
-Rijdend spel    Skateboard - Pyramid    skateboard middel   Rijdend spel/Skateboard - Pyramid   100 17  9
-Rijdend spel    Skateboard - Ramp   skateboard middel   Rijdend spel/Skateboard - Ramp  101 17  9
-Rijdend spel    Skateboard - Spine  skateboard middel   Rijdend spel/Skateboard - Spine 102 17  9
-Rijdend spel    Skateboard -  Faciliteit    skateboard middel   Rijdend spel/Skateboard -  Faciliteit   103 17  9
-Rijdend spel    Skateboard - Bench  skateboard middel   Rijdend spel/Skateboard - Bench 134 17  9
-Rijdend spel    Skateboard - Fun Box    skateboard middel   Rijdend spel/Skateboard - Fun Box   135 17  9
-Rijdend spel    Skateboard - Grind Rail skateboard middel   Rijdend spel/Skateboard - Grind Rail    136 17  9
-Rijdend spel    Skateboard - Platform   skateboard middel   Rijdend spel/Skateboard - Platform  137 17  9
-\N  Skateboard - Flat Ramp  skateboard groot    Skateboard - Flat Ramp  157 19  9
-\N  Skateboard - Fun Box    skateboard groot    Skateboard - Fun Box    158 19  9
-\N  Skateboard - Grind Box  skateboard groot    Skateboard - Grind Box  159 19  9
-\N  Skateboard - Grind Rail skateboard groot    Skateboard - Grind Rail 160 19  9
-\N  Skateboard - Half Pipe  skateboard groot    Skateboard - Half Pipe  161 19  9
-\N  Skateboard - Jump Box   skateboard groot    Skateboard - Jump Box   162 19  9
-\N  Skateboard - Jump Ramp  skateboard groot    Skateboard - Jump Ramp  163 19  9
-\N  Skateboard - Spine  skateboard groot    Skateboard - Spine  164 19  9
-\N  Skateboard - Â Faciliteit   skateboard klein    Skateboard - Â Faciliteit   165 19  9
-\N  Basketbal bord  voetbal-basketbaldoel   Basketbal bord  169 16  8
-Sporttoestellen Fitness fitness Sporttoestellen/Fitness 14  16  24
-Sporttoestellen Pannaveld   Pannaveld   Sporttoestellen/Pannaveld   28  16  7
-Sporttoestellen Voetbal veld    pannaveld groot Sporttoestellen/Voetbal veld    29  16  7
-Sporttoestellen Ballenvanger    basketbalpaal   Sporttoestellen/Ballenvanger    84  16  8
-Sporttoestellen Basketbalpaal   basketbalpaal   Sporttoestellen/Basketbalpaal   85  16  8
-Sporttoestellen Korfbalpaal basketbalpaal   Sporttoestellen/Korfbalpaal 86  16  8
-Sporttoestellen Anders (Specificeer in naam veld)   jeu de boulesbaan   Sporttoestellen/Anders (Specificeer in naam veld)   128 \N  12
-Sporttoestellen Jeu de Boules   jeu de boulesbaan   Sporttoestellen/Jeu de Boules   129 \N  12
-Sporttoestellen Tafeltennistafel    tafeltennistafel    Sporttoestellen/Tafeltennistafel    174 16  11
-Sporttoestellen Doel    voetbaldoel Sporttoestellen/Doel    179 16  7
-Sporttoestellen Mini Goal   voetbaldoel Sporttoestellen/Mini Goal   180 16  7
-Sporttoestellen Volleybal set   volleybalset    Sporttoestellen/Volleybal set   181 16  13
-\.
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Carrousel', 'Anders (specificeer in naam veld)', 'draaitoestel groot', 'Carrousel/Anders (specificeer in naam veld)', 3, 7, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Speeltoestellen', 'Carrousel', 'draaitoestel groot', 'Speeltoestellen/Carrousel', 4, 7, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Draaiende toestellen', 'Pirouette / Rotator', 'draaitoestel klein', 'Draaiende toestellen/Pirouette / Rotator', 5, 7, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Carrousel', 'Type B Klassieke draaimolen met meedraaiende vloer', 'draaitoestel klein', 'Carrousel/Type B Klassieke draaimolen met meedraaiende vloer', 6, 7, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Ondergrond algemeen', 'Klinkers', 'elementverharding (tegels/klinkers)', 'Ondergrond algemeen/Klinkers', 7, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Behendigheid', 'Duikelrek - enkel', 'enkel duikelrek', 'Behendigheid/Duikelrek - enkel', 8, 11, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Behendigheid', 'Anders (specificeer in naam veld)', 'evenwichtstoestel', 'Behendigheid/Anders (specificeer in naam veld)', 9, 15, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Behendigheid', 'Balanceerbalk', 'evenwichtstoestel', 'Behendigheid/Balanceerbalk', 10, 15, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Behendigheid', 'Hangbrug', 'evenwichtstoestel', 'Behendigheid/Hangbrug', 11, 15, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Behendigheid', 'Loopbrug', 'evenwichtstoestel', 'Behendigheid/Loopbrug', 12, 15, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Behendigheid', 'Wiebelplaat', 'evenwichtstoestel', 'Behendigheid/Wiebelplaat', 13, 15, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Veiligheidsondergrond', 'Boomschors', 'franse schors', 'Veiligheidsondergrond/Boomschors', 15, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Klimtoestellen', 'Anders (specificeer in naam veld)', 'klimelement', 'Klimtoestellen/Anders (specificeer in naam veld)', 16, 5, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Klimtoestellen', 'Frame', 'klimelement', 'Klimtoestellen/Frame', 17, 5, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Klimtoestellen', 'Frame & net', 'klimelement', 'Klimtoestellen/Frame & net', 18, 14, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Speeltoestellen', 'Klimtoestellen', 'klimelement', 'Speeltoestellen/Klimtoestellen', 19, 5, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Klimtoestellen', 'Klimwand', 'klimelement', 'Klimtoestellen/Klimwand', 20, 5, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Behendigheid', 'Knikkertegel', 'knikkertegel', 'Behendigheid/Knikkertegel', 21, 15, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Ondergrond algemeen', 'Kunstgras (zonder valdempende onderbouw)', 'kunstgras foam en zandbed', 'Ondergrond algemeen/Kunstgras (zonder valdempende onderbouw)', 22, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Veiligheidsondergrond', 'Veiligheidsgras', 'kunstgras polyethyleen', 'Veiligheidsondergrond/Veiligheidsgras', 23, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Behendigheid', 'Duikelrek - meerdelig', 'meerdelig duikelrek', 'Behendigheid/Duikelrek - meerdelig', 24, 15, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Wiptoestellen', 'Type 2B - Enkelpunts - Meerdere richtingen', 'meerpersoons wipveer', 'Wiptoestellen/Type 2B - Enkelpunts - Meerdere richtingen', 25, 3, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Wiptoestellen', 'Type 3A - Meerpunts - 1 richting', 'meerpersoons wipveer', 'Wiptoestellen/Type 3A - Meerpunts - 1 richting', 26, 3, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Wiptoestellen', 'Type 3B - Meerpunts - Meerdere richtingen', 'meerpersoons wipveer', 'Wiptoestellen/Type 3B - Meerpunts - Meerdere richtingen', 27, 3, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Speeltoestellen', 'Sociaal spel', 'poef', 'Speeltoestellen/Sociaal spel', 30, 16, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Veiligheidsondergrond', 'Rubbertegels', 'rubber-betontegels 30 x 30', 'Veiligheidsondergrond/Rubbertegels', 31, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Veiligheidsondergrond', 'Rubbertegels 50x50', 'rubber-betontegels 30 x 30', 'Veiligheidsondergrond/Rubbertegels 50x50', 32, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Klimtoestellen', 'Net', 'ruimtenet', 'Klimtoestellen/Net', 33, 14, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Schommel', 'Anders (specificeer in naam veld)', 'schommel', 'Schommel/Anders (specificeer in naam veld)', 34, 2, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Speeltoestellen', 'Schommel', 'schommel', 'Speeltoestellen/Schommel', 35, 2, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Schommel', 'Type 1 - Rotatie om 1 as', 'schommel', 'Schommel/Type 1 - Rotatie om 1 as', 36, 2, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Schommel', 'Type 2 - Rotatie op meerdere assen', 'schommel', 'Schommel/Type 2 - Rotatie op meerdere assen', 37, 2, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Schommel', 'Type 3 - Rotatie om 1 punt (Bandenzwaai)', 'schommel', 'Schommel/Type 3 - Rotatie om 1 punt (Bandenzwaai)', 38, 2, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sociaal spel', 'Speelhuis', 'speelhuis', 'Sociaal spel/Speelhuis', 41, 12, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Speeltoestellen', 'Anders', 'speelprikkel divers', 'Speeltoestellen/Anders', 42, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Waterspel', 'Anders (specificeer in naam veld)', 'speelprikkel divers', 'Waterspel/Anders (specificeer in naam veld)', 43, 10, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Behendigheid', 'Kruipbuis', 'speelprikkel divers', 'Behendigheid/Kruipbuis', 44, 15, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Behendigheid', 'Pleinplakkers', 'speelprikkel divers', 'Behendigheid/Pleinplakkers', 45, 15, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Waterspel', 'Pompen en spelen', 'speelprikkel divers', 'Waterspel/Pompen en spelen', 46, 10, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Waterspel', 'Pontje', 'speelprikkel divers', 'Waterspel/Pontje', 47, 10, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sociaal spel', 'Speel boot', 'speelprikkel divers', 'Sociaal spel/Speel boot', 48, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sociaal spel', 'Speel paneel', 'speelprikkel divers', 'Sociaal spel/Speel paneel', 49, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sociaal spel', 'Speelaanleiding', 'speelprikkel divers', 'Sociaal spel/Speelaanleiding', 50, 18, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Speeltoestellen', 'speelprikkel divers', 'speelprikkel divers', 'Speeltoestellen/speelprikkel divers', 51, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Speeltoestellen', 'Zand spel', 'zandbak', 'Speeltoestellen/Zand spel', 52, 8, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Zand spel', 'Zandbak', 'zandbak', 'Zand spel/Zandbak', 53, 8, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Zand spel', 'Anders (specificeer in naam veld)', 'zandspeeltoestel', 'Zand spel/Anders (specificeer in naam veld)', 54, 8, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Zand spel', 'Zand spel', 'zandspeeltoestel', 'Zand spel/Zand spel', 55, 8, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Ondergrond algemeen', 'Water', '', 'Ondergrond algemeen/Water', 56, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Behendigheid', 'Trim parcours', NULL, 'Behendigheid/Trim parcours', 57, 15, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Binnenvloer', 'Linoleum', NULL, 'Binnenvloer/Linoleum', 58, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Faciliteiten', NULL, 'Faciliteiten', 59, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Faciliteiten', 'Kunstobjecten', NULL, 'Faciliteiten/Kunstobjecten', 60, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Natuurlijke elementen', 'Natuurlijke elementen/anders', NULL, 'Natuurlijke elementen/Natuurlijke elementen/anders', 61, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Glijbaan', 'Aangebouwd - Type 1 uitloop - Traditioneel', 'glijbaan hoog', 'Glijbaan/Aangebouwd - Type 1 uitloop - Traditioneel', 62, 1, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Glijbaan', 'Vrijstaand - Type 2 uitloop - Traditioneel', 'glijbaan hoog', 'Glijbaan/Vrijstaand - Type 2 uitloop - Traditioneel', 63, 1, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Ondergrond algemeen', 'Zandbak/speelzand', 'valdempend zand', 'Ondergrond algemeen/Zandbak/speelzand', 64, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Behendigheid', 'Turn brug', 'evenwichtstoestel', 'Behendigheid/Turn brug', 65, 15, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Carrousel', 'Type C Hang- en zweefmolens', 'draaitoestel groot', 'Carrousel/Type C Hang- en zweefmolens', 67, 7, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'afscheiding', NULL, 68, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'afvalbak', NULL, 69, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'ballenvanger', NULL, 70, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'combinatie groot', NULL, 71, 6, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'skateboard klein', NULL, 72, NULL, 9);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Anders lage rotator', 'draaitoestel klein', 'Anders lage rotator', 74, 7, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Type A Draaiende stoeltjes', 'draaitoestel klein', 'Type A Draaiende stoeltjes', 75, 7, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Type E Reuzen draaischijf', 'draaitoestel klein', 'Type E Reuzen draaischijf', 76, 7, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Behendigheid', 'enkel duikelrek', 'Behendigheid', 77, 11, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Enterrek', 'enkel duikelrek', 'Enterrek', 78, 11, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Looptouw', 'evenwichtstoestel', 'Looptouw', 79, 15, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Turn brug', 'evenwichtstoestel', 'Turn brug', 80, 15, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Ondergrond algemeen', 'Asfalt', 'asfaltvloer', 'Ondergrond algemeen/Asfalt', 81, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Ondergrond algemeen', 'Asfaltbeton', 'asfaltvloer', 'Ondergrond algemeen/Asfaltbeton', 82, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Zitgelegenheden', 'Bank', 'bank', 'Zitgelegenheden/Bank', 83, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Ondergrond algemeen', 'Beton', 'betonvloer (skaten)', 'Ondergrond algemeen/Beton', 87, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Ondergrond algemeen', 'Betontegels', 'betonvloer (skaten)', 'Ondergrond algemeen/Betontegels', 88, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Ondergrond algemeen', 'Betontegels 30 x 30', 'betonvloer (skaten)', 'Ondergrond algemeen/Betontegels 30 x 30', 89, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Ondergrond algemeen', 'Stelcon platen', 'betonvloer (skaten)', 'Ondergrond algemeen/Stelcon platen', 90, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Behendigheid', 'Bokspringpalen', 'bokspringpaal (set)', 'Behendigheid/Bokspringpalen', 91, 15, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Ondergrond algemeen', 'Gras', 'Bumpgrass natuurlijke toplaag van gras ', 'Ondergrond algemeen/Gras', 92, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Ondergrond algemeen', 'Gras / grond', 'Bumpgrass natuurlijke toplaag van gras ', 'Ondergrond algemeen/Gras / grond', 93, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Schommel', 'Type 2 - Rotatie op meerdere assen', 'combinatie klein', 'Schommel/Type 2 - Rotatie op meerdere assen', 94, 2, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Schommel', 'Speel platform', 'schommel', 'Schommel/Type 4 - Contactschommel', 104, 2, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sociaal spel', 'Speel platform', 'speelprikkel divers', 'Sociaal spel/Speel platform', 105, 18, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sociaal spel', 'Speeltafel', 'speelprikkel divers', 'Sociaal spel/Speeltafel', 106, 18, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Speeltoestellen', 'Wiptoestellen', 'wip', 'Speeltoestellen/Wiptoestellen', 107, 3, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Veiligheidsondergrond', 'Gras', 'Bumpgrass natuurlijke toplaag van gras ', 'Veiligheidsondergrond/Gras', 108, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Veiligheidsondergrond', 'Rubbertegels 100x100', 'rubbertegels 100 x 100', 'Veiligheidsondergrond/Rubbertegels 100x100', 109, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Veiligheidsondergrond', 'Rubbertegels 30x30', 'rubbertegels 100 x 100', 'Veiligheidsondergrond/Rubbertegels 30x30', 110, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Veiligheidsondergrond', 'Valdempend Kunstgras', 'kunstgras polyethyleen', 'Veiligheidsondergrond/Valdempend Kunstgras', 111, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Wiptoestellen', 'Anders (specificeer in naam veld)', 'wip', 'Wiptoestellen/Anders (specificeer in naam veld)', 112, 3, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Wiptoestellen', 'Type 6 - Schommelwip met enkelvoudige hoge as', 'wip', 'Wiptoestellen/Type 6 - Schommelwip met enkelvoudige hoge as', 113, 3, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Zand spel', 'Tafel', 'zandspeeltoestel', 'Zand spel/Tafel', 114, 8, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'halfverharding (gralux)', NULL, 115, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Vrijstaand - Type 2 uitloop - Traditioneel', 'glijbaan laag', 'Vrijstaand - Type 2 uitloop - Traditioneel', 116, 1, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Grind', 'Grind', 'Grind', 117, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Houtsnippers', 'houtsnipper: gekleurd verkleind/gezeefd', 'Houtsnippers', 118, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Aangebouwd- Type 2 uitloop - Traditioneel', 'klimelement', 'Aangebouwd- Type 2 uitloop - Traditioneel', 119, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Duoslaper', 'klimelement', 'Duoslaper', 120, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Glijbaan', 'Vrijstaand - Type 1', 'glijbaan hoog', 'Glijbaan/Vrijstaand - Type 1', 121, 1, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Speeltoestellen', 'Glijbaan', 'glijbaan laag', 'Speeltoestellen/Glijbaan', 122, 1, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Glijbaan', 'Vrijstaand - Type 1 uitloop - Traditioneel', 'glijbaan laag', 'Glijbaan/Vrijstaand - Type 1 uitloop - Traditioneel', 123, 1, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Glijbaan', 'Vrijstaand - Type 2', 'glijbaan laag', 'Glijbaan/Vrijstaand - Type 2', 124, 1, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Ondergrond algemeen', 'Gravel', 'Grind', 'Ondergrond algemeen/Gravel', 125, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Behendigheid', 'Hinkelbaan', 'hinkelbaan', 'Behendigheid/Hinkelbaan', 126, 15, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Veiligheidsondergrond', 'Gesmeerde insitu rubber vloer', 'in-situ /gegoten rubber', 'Veiligheidsondergrond/Gesmeerde insitu rubber vloer', 127, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sociaal spel', 'JOP', 'JOP', 'Sociaal spel/JOP', 130, 18, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Kabelbaan', 'Kabelbaan', 'kabelbaan', 'Kabelbaan/Kabelbaan', 131, 13, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Speeltoestellen', 'Kabelbaan', 'kabelbaan', 'Speeltoestellen/Kabelbaan', 132, 13, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Behendigheid', 'Aaneengeschakelde toestellen', 'klimelement', 'Behendigheid/Aaneengeschakelde toestellen', 133, 5, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'grastrapveld  (excl. drainage)', NULL, 138, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'hekwerk', NULL, 139, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'houtsnipper: gekleurde vezel', NULL, 140, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'kunst', NULL, 141, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'pannaveld klein', NULL, 142, 16, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'picknickset', NULL, 143, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'rubbertegels 100 x 100', NULL, 144, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'rubbertegels op zand', NULL, 145, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'schaaktafel', NULL, 146, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'speeltafel', NULL, 147, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'uitgebreide combinatietoestel', NULL, 148, 6, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'uitgebreide klimtorens', NULL, 149, 5, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'voetbal-basketbaldoel', NULL, 150, 16, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Eigen bouw', 'klimelement', 'Eigen bouw', 151, 5, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Valdempend Kunstgras', 'kunstgras polyethyleen', 'Valdempend Kunstgras', 152, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Basketbal veld', 'kunstgrastrapvelden', 'Basketbal veld', 153, 16, 8);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Tennis banen', 'kunstgrastrapvelden', 'Tennis banen', 154, 16, 26);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Rubbertegels 30x30', 'rubber-betontegels 30 x 30', 'Rubbertegels 30x30', 155, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Rubber grastegels', 'rubbertegels ', 'Rubber grastegels', 156, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Anders (migratie)', 'speelprikkel divers', 'Anders (migratie)', 166, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Speeltoestellen', 'speelprikkel divers', 'Speeltoestellen', 167, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Speeltafel', 'speeltafel', 'Speeltafel', 168, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Wiptoestellen', 'wipveer', 'Wiptoestellen', 170, 3, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Telefoon palen', '', 'Telefoon palen', 171, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sociaal spel', 'Speeltrein', 'speelprikkel divers', 'Sociaal spel/Speeltrein', 172, 17, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Behendigheid', 'Stapstenen', 'speelprikkel divers', 'Behendigheid/Stapstenen', 173, 15, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Glijbaan', 'Tallud / helling - Type 2 uitloop - Traditioneel', 'taludglijbaan', 'Glijbaan/Tallud / helling - Type 2 uitloop - Traditioneel', 175, 1, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Glijbaan', 'Talud / helling - Type 1', 'taludglijbaan', 'Glijbaan/Talud / helling - Type 1', 176, 1, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Ondergrond algemeen', 'Grond', 'valdempend zand', 'Ondergrond algemeen/Grond', 177, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Veiligheidsondergrond', 'Valdempend Zand', 'valdempend zand', 'Veiligheidsondergrond/Valdempend Zand', 178, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Wiptoestellen', 'Type 1 - wip 1 richting', 'wip', 'Wiptoestellen/Type 1 - wip 1 richting', 182, 3, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Wiptoestellen', 'Type 2A - Enkelpunts - 1 richting', 'wipveer', 'Wiptoestellen/Type 2A - Enkelpunts - 1 richting', 183, 3, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Speeltoestellen', 'Combinatietoestellen', 'combinatie middel', 'Speeltoestellen/Combinatietoestellen', 1, 6, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Combinatietoestellen', 'Glijbaan aan huisje', 'combinatie middel', 'Combinatietoestellen/Glijbaan aan huisje', 2, 12, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Rijdend spel', 'Skateboard - Anders', 'skateboard groot', 'Rijdend spel/Skateboard - Anders', 39, 17, 9);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Rijdend spel', 'Anders (specificeer in naam veld)', 'skateboard middel', 'Rijdend spel/Anders (specificeer in naam veld)', 40, 17, 9);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Combinatietoestellen', 'Combinatie - Peuter', 'combinatie middel', 'Combinatietoestellen/Combinatie - Peuter', 66, 6, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Combinatie - Peuter', 'combinatie middel', 'Combinatie - Peuter', 73, 6, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Combinatietoestellen', 'Anders (Specifceer in veld)', 'combinatie middel', 'Combinatietoestellen/Anders (Specifceer in veld)', 95, 6, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Anders', 'Anders (Specificeer in naam veld)', 'combinatie middel', 'Anders/Anders (Specificeer in naam veld)', 96, 6, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Glijbaan', 'Anders (specificeer in naam veld)', 'combinatie middel', 'Glijbaan/Anders (specificeer in naam veld)', 97, 1, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Combinatietoestellen', 'Combinatie - Kind', 'combinatie middel', 'Combinatietoestellen/Combinatie - Kind', 98, 6, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Combinatietoestellen', 'Combinatie - Kleuter', 'combinatie middel', 'Combinatietoestellen/Combinatie - Kleuter', 99, 6, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Rijdend spel', 'Skateboard - Pyramid', 'skateboard middel', 'Rijdend spel/Skateboard - Pyramid', 100, 17, 9);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Rijdend spel', 'Skateboard - Ramp', 'skateboard middel', 'Rijdend spel/Skateboard - Ramp', 101, 17, 9);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Rijdend spel', 'Skateboard - Spine', 'skateboard middel', 'Rijdend spel/Skateboard - Spine', 102, 17, 9);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Rijdend spel', 'Skateboard -  Faciliteit', 'skateboard middel', 'Rijdend spel/Skateboard -  Faciliteit', 103, 17, 9);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Rijdend spel', 'Skateboard - Bench', 'skateboard middel', 'Rijdend spel/Skateboard - Bench', 134, 17, 9);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Rijdend spel', 'Skateboard - Fun Box', 'skateboard middel', 'Rijdend spel/Skateboard - Fun Box', 135, 17, 9);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Rijdend spel', 'Skateboard - Grind Rail', 'skateboard middel', 'Rijdend spel/Skateboard - Grind Rail', 136, 17, 9);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Rijdend spel', 'Skateboard - Platform', 'skateboard middel', 'Rijdend spel/Skateboard - Platform', 137, 17, 9);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Skateboard - Flat Ramp', 'skateboard groot', 'Skateboard - Flat Ramp', 157, 19, 9);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Skateboard - Fun Box', 'skateboard groot', 'Skateboard - Fun Box', 158, 19, 9);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Skateboard - Grind Box', 'skateboard groot', 'Skateboard - Grind Box', 159, 19, 9);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Skateboard - Grind Rail', 'skateboard groot', 'Skateboard - Grind Rail', 160, 19, 9);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Skateboard - Half Pipe', 'skateboard groot', 'Skateboard - Half Pipe', 161, 19, 9);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Skateboard - Jump Box', 'skateboard groot', 'Skateboard - Jump Box', 162, 19, 9);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Skateboard - Jump Ramp', 'skateboard groot', 'Skateboard - Jump Ramp', 163, 19, 9);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Skateboard - Spine', 'skateboard groot', 'Skateboard - Spine', 164, 19, 9);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Skateboard - Â Faciliteit', 'skateboard klein', 'Skateboard - Â Faciliteit', 165, 19, 9);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Basketbal bord', 'voetbal-basketbaldoel', 'Basketbal bord', 169, 16, 8);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Fitness', 'fitness', 'Sporttoestellen/Fitness', 14, 16, 24);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Pannaveld', 'Pannaveld', 'Sporttoestellen/Pannaveld', 28, 16, 7);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Voetbal veld', 'pannaveld groot', 'Sporttoestellen/Voetbal veld', 29, 16, 7);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Ballenvanger', 'basketbalpaal', 'Sporttoestellen/Ballenvanger', 84, 16, 8);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Basketbalpaal', 'basketbalpaal', 'Sporttoestellen/Basketbalpaal', 85, 16, 8);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Korfbalpaal', 'basketbalpaal', 'Sporttoestellen/Korfbalpaal', 86, 16, 8);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Anders (Specificeer in naam veld)', 'jeu de boulesbaan', 'Sporttoestellen/Anders (Specificeer in naam veld)', 128, NULL, 12);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Jeu de Boules', 'jeu de boulesbaan', 'Sporttoestellen/Jeu de Boules', 129, NULL, 12);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Tafeltennistafel', 'tafeltennistafel', 'Sporttoestellen/Tafeltennistafel', 174, 16, 11);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Doel', 'voetbaldoel', 'Sporttoestellen/Doel', 179, 16, 7);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Mini Goal', 'voetbaldoel', 'Sporttoestellen/Mini Goal', 180, 16, 7);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Volleybal set', 'volleybalset', 'Sporttoestellen/Volleybal set', 181, 16, 13);
 
 
 --
@@ -1368,15 +1370,13 @@ SELECT pg_catalog.setval('playservice_accessibility_id_seq', 5, true);
 -- Data for Name: playservice_accessibility_list; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-COPY playservice_accessibility_list (id, accessibility) FROM stdin;
-1   Mindervaliden parkeerplaats
-2   Rolstoelvriendelijk
-3   Invalidentoilet
-4   samenspeelplek
-5   Inclusive playground
-6   NVWA verscherpt toezicht
-7   NVWA voldoet
-\.
+INSERT INTO playservice_accessibility_list (id, accessibility) VALUES (1, 'Mindervaliden parkeerplaats');
+INSERT INTO playservice_accessibility_list (id, accessibility) VALUES (2, 'Rolstoelvriendelijk');
+INSERT INTO playservice_accessibility_list (id, accessibility) VALUES (3, 'Invalidentoilet');
+INSERT INTO playservice_accessibility_list (id, accessibility) VALUES (4, 'samenspeelplek');
+INSERT INTO playservice_accessibility_list (id, accessibility) VALUES (5, 'Inclusive playground');
+INSERT INTO playservice_accessibility_list (id, accessibility) VALUES (6, 'NVWA verscherpt toezicht');
+INSERT INTO playservice_accessibility_list (id, accessibility) VALUES (7, 'NVWA voldoet');
 
 
 --
@@ -1394,13 +1394,11 @@ SELECT pg_catalog.setval('playservice_agecategories_id_seq', 5, true);
 -- Data for Name: playservice_agecategories_list; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-COPY playservice_agecategories_list (id, agecategory) FROM stdin;
-1   0 - 5 jaar
-2   6 - 11 jaar
-3   12 - 18 jaar
-4   Volwassenen
-5   Senioren
-\.
+INSERT INTO playservice_agecategories_list (id, agecategory) VALUES (1, '0 - 5 jaar');
+INSERT INTO playservice_agecategories_list (id, agecategory) VALUES (2, '6 - 11 jaar');
+INSERT INTO playservice_agecategories_list (id, agecategory) VALUES (3, '12 - 18 jaar');
+INSERT INTO playservice_agecategories_list (id, agecategory) VALUES (4, 'Volwassenen');
+INSERT INTO playservice_agecategories_list (id, agecategory) VALUES (5, 'Senioren');
 
 
 --
@@ -1418,30 +1416,28 @@ SELECT pg_catalog.setval('playservice_categories_id_seq', 22, true);
 -- Data for Name: playservice_categories_list; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-COPY playservice_categories_list (id, category, main) FROM stdin;
-5   Outdoor fitness toestellen  Sport & Fitness
-6   Fitness parcours    Sport & Fitness
-7   Voetbalveld/Pannakooi   Sport & Fitness
-8   Basketbalpaal   Sport & Fitness
-9   Skatebaan   Sport & Fitness
-10  Fietscrossbaan  Sport & Fitness
-11  Tafeltennistafel    Sport & Fitness
-12  Jeu de boulesbaan   Sport & Fitness
-13  Volleybalveld   Sport & Fitness
-14  Pretpark    Amusement
-15  Waterpark   Amusement
-16  Dierentuin  Amusement
-17  Kinderboerderij Amusement
-18  Zwembad Amusement
-19  Openbare speeltuin  Speeltuinen
-20  Speeltuinvereniging Speeltuinen
-21  Binnenspeeltuin Speeltuinen
-22  Natuurspeeltuin Speeltuinen
-23  Speeltuinen Speeltuinen
-25  Amusement   Amusement
-26  Tennis  Sport & Fitness
-24  Sport & Fitness Sport & Fitness
-\.
+INSERT INTO playservice_categories_list (id, category, main) VALUES (5, 'Outdoor fitness toestellen', 'Sport & Fitness');
+INSERT INTO playservice_categories_list (id, category, main) VALUES (6, 'Fitness parcours', 'Sport & Fitness');
+INSERT INTO playservice_categories_list (id, category, main) VALUES (7, 'Voetbalveld/Pannakooi', 'Sport & Fitness');
+INSERT INTO playservice_categories_list (id, category, main) VALUES (8, 'Basketbalpaal', 'Sport & Fitness');
+INSERT INTO playservice_categories_list (id, category, main) VALUES (9, 'Skatebaan', 'Sport & Fitness');
+INSERT INTO playservice_categories_list (id, category, main) VALUES (10, 'Fietscrossbaan', 'Sport & Fitness');
+INSERT INTO playservice_categories_list (id, category, main) VALUES (11, 'Tafeltennistafel', 'Sport & Fitness');
+INSERT INTO playservice_categories_list (id, category, main) VALUES (12, 'Jeu de boulesbaan', 'Sport & Fitness');
+INSERT INTO playservice_categories_list (id, category, main) VALUES (13, 'Volleybalveld', 'Sport & Fitness');
+INSERT INTO playservice_categories_list (id, category, main) VALUES (14, 'Pretpark', 'Amusement');
+INSERT INTO playservice_categories_list (id, category, main) VALUES (15, 'Waterpark', 'Amusement');
+INSERT INTO playservice_categories_list (id, category, main) VALUES (16, 'Dierentuin', 'Amusement');
+INSERT INTO playservice_categories_list (id, category, main) VALUES (17, 'Kinderboerderij', 'Amusement');
+INSERT INTO playservice_categories_list (id, category, main) VALUES (18, 'Zwembad', 'Amusement');
+INSERT INTO playservice_categories_list (id, category, main) VALUES (19, 'Openbare speeltuin', 'Speeltuinen');
+INSERT INTO playservice_categories_list (id, category, main) VALUES (20, 'Speeltuinvereniging', 'Speeltuinen');
+INSERT INTO playservice_categories_list (id, category, main) VALUES (21, 'Binnenspeeltuin', 'Speeltuinen');
+INSERT INTO playservice_categories_list (id, category, main) VALUES (22, 'Natuurspeeltuin', 'Speeltuinen');
+INSERT INTO playservice_categories_list (id, category, main) VALUES (23, 'Speeltuinen', 'Speeltuinen');
+INSERT INTO playservice_categories_list (id, category, main) VALUES (25, 'Amusement', 'Amusement');
+INSERT INTO playservice_categories_list (id, category, main) VALUES (26, 'Tennis', 'Sport & Fitness');
+INSERT INTO playservice_categories_list (id, category, main) VALUES (24, 'Sport & Fitness', 'Sport & Fitness');
 
 
 --
@@ -1450,8 +1446,6 @@ COPY playservice_categories_list (id, category, main) FROM stdin;
 -- Data for Name: playservice_comment; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-COPY playservice_comment (id, playadvisor_id, post_id, location, content, stars, author, date) FROM stdin;
-\.
 
 
 --
@@ -1469,8 +1463,6 @@ SELECT pg_catalog.setval('playservice_comment_id_seq', 5, true);
 -- Data for Name: playservice_comment_playadvisor; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-COPY playservice_comment_playadvisor (id, playadvisor_id, post_id, location, content, stars, author, date) FROM stdin;
-\.
 
 
 --
@@ -1488,8 +1480,6 @@ SELECT pg_catalog.setval('playservice_comment_playadvisor_id_seq', 2160, true);
 -- Data for Name: playservice_documents; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-COPY playservice_documents (id, url, caption, location, equipment, pm_guid) FROM stdin;
-\.
 
 
 --
@@ -1507,8 +1497,6 @@ SELECT pg_catalog.setval('playservice_documents_id_seq', 10148, true);
 -- Data for Name: playservice_documents_playadvisor; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-COPY playservice_documents_playadvisor (id, url, caption, location, equipment, pm_guid) FROM stdin;
-\.
 
 
 --
@@ -1535,27 +1523,25 @@ SELECT pg_catalog.setval('playservice_equipment_id_seq', 14, true);
 -- Data for Name: playservice_equipment_list; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-COPY playservice_equipment_list (id, equipment) FROM stdin;
-1   Glijbaan
-2   Schommel
-3   Wip
-4   Wipkip
-5   Klimtoestel
-6   Combinatietoestel
-7   Draaitoestel
-8   Zandbak
-9   Trampoline
-10  Zand-/waterspeeltoestel
-11  Duikelrek
-12  Speelhuis
-13  Kabelbaan
-14  Klimnet
-15  Behendigheid
-16  Sporttoestellen/fitness
-17  Rijdend spel
-18  Sociaal spel
-19  Skatebaan
-\.
+INSERT INTO playservice_equipment_list (id, equipment) VALUES (1, 'Glijbaan');
+INSERT INTO playservice_equipment_list (id, equipment) VALUES (2, 'Schommel');
+INSERT INTO playservice_equipment_list (id, equipment) VALUES (3, 'Wip');
+INSERT INTO playservice_equipment_list (id, equipment) VALUES (4, 'Wipkip');
+INSERT INTO playservice_equipment_list (id, equipment) VALUES (5, 'Klimtoestel');
+INSERT INTO playservice_equipment_list (id, equipment) VALUES (6, 'Combinatietoestel');
+INSERT INTO playservice_equipment_list (id, equipment) VALUES (7, 'Draaitoestel');
+INSERT INTO playservice_equipment_list (id, equipment) VALUES (8, 'Zandbak');
+INSERT INTO playservice_equipment_list (id, equipment) VALUES (9, 'Trampoline');
+INSERT INTO playservice_equipment_list (id, equipment) VALUES (10, 'Zand-/waterspeeltoestel');
+INSERT INTO playservice_equipment_list (id, equipment) VALUES (11, 'Duikelrek');
+INSERT INTO playservice_equipment_list (id, equipment) VALUES (12, 'Speelhuis');
+INSERT INTO playservice_equipment_list (id, equipment) VALUES (13, 'Kabelbaan');
+INSERT INTO playservice_equipment_list (id, equipment) VALUES (14, 'Klimnet');
+INSERT INTO playservice_equipment_list (id, equipment) VALUES (15, 'Behendigheid');
+INSERT INTO playservice_equipment_list (id, equipment) VALUES (16, 'Sporttoestellen/fitness');
+INSERT INTO playservice_equipment_list (id, equipment) VALUES (17, 'Rijdend spel');
+INSERT INTO playservice_equipment_list (id, equipment) VALUES (18, 'Sociaal spel');
+INSERT INTO playservice_equipment_list (id, equipment) VALUES (19, 'Skatebaan');
 
 
 --
@@ -1573,21 +1559,19 @@ SELECT pg_catalog.setval('playservice_facilities_id_seq', 12, true);
 -- Data for Name: playservice_facilities_list; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-COPY playservice_facilities_list (id, facility) FROM stdin;
-1   Kracht
-2   Cardio
-3   Fitness oefeningen aanwezig
-4   Toilet
-5   Verschoontafel
-6   Winkeltje
-7   Restaurant
-8   WiFi
-9   Beheerder/toezicht aanwezig
-10  Bankje
-11  Picknicktafel
-12  Afgesloten terrein/hek aanwezig
-13  Rolstoelvriendelijk
-\.
+INSERT INTO playservice_facilities_list (id, facility) VALUES (1, 'Kracht');
+INSERT INTO playservice_facilities_list (id, facility) VALUES (2, 'Cardio');
+INSERT INTO playservice_facilities_list (id, facility) VALUES (3, 'Fitness oefeningen aanwezig');
+INSERT INTO playservice_facilities_list (id, facility) VALUES (4, 'Toilet');
+INSERT INTO playservice_facilities_list (id, facility) VALUES (5, 'Verschoontafel');
+INSERT INTO playservice_facilities_list (id, facility) VALUES (6, 'Winkeltje');
+INSERT INTO playservice_facilities_list (id, facility) VALUES (7, 'Restaurant');
+INSERT INTO playservice_facilities_list (id, facility) VALUES (8, 'WiFi');
+INSERT INTO playservice_facilities_list (id, facility) VALUES (9, 'Beheerder/toezicht aanwezig');
+INSERT INTO playservice_facilities_list (id, facility) VALUES (10, 'Bankje');
+INSERT INTO playservice_facilities_list (id, facility) VALUES (11, 'Picknicktafel');
+INSERT INTO playservice_facilities_list (id, facility) VALUES (12, 'Afgesloten terrein/hek aanwezig');
+INSERT INTO playservice_facilities_list (id, facility) VALUES (13, 'Rolstoelvriendelijk');
 
 
 --
@@ -1596,7 +1580,7 @@ COPY playservice_facilities_list (id, facility) FROM stdin;
 -- Name: playservice_id_seq; Type: SEQUENCE SET; Schema: public; Owner: playbase
 --
 
-SELECT pg_catalog.setval('playservice_id_seq', 67410, true);
+SELECT pg_catalog.setval('playservice_id_seq', 70757, true);
 
 
 --
@@ -1605,8 +1589,6 @@ SELECT pg_catalog.setval('playservice_id_seq', 67410, true);
 -- Data for Name: playservice_images; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-COPY playservice_images (id, url, caption, location, equipment, pm_guid) FROM stdin;
-\.
 
 
 --
@@ -1615,7 +1597,7 @@ COPY playservice_images (id, url, caption, location, equipment, pm_guid) FROM st
 -- Name: playservice_images_id_seq; Type: SEQUENCE SET; Schema: public; Owner: playbase
 --
 
-SELECT pg_catalog.setval('playservice_images_id_seq', 395467, true);
+SELECT pg_catalog.setval('playservice_images_id_seq', 410648, true);
 
 
 --
@@ -1624,8 +1606,6 @@ SELECT pg_catalog.setval('playservice_images_id_seq', 395467, true);
 -- Data for Name: playservice_images_playadvisor; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-COPY playservice_images_playadvisor (id, url, caption, location, equipment, pm_guid) FROM stdin;
-\.
 
 
 --
@@ -1634,7 +1614,7 @@ COPY playservice_images_playadvisor (id, url, caption, location, equipment, pm_g
 -- Name: playservice_images_playadvisor_id_seq; Type: SEQUENCE SET; Schema: public; Owner: playbase
 --
 
-SELECT pg_catalog.setval('playservice_images_playadvisor_id_seq', 203527, true);
+SELECT pg_catalog.setval('playservice_images_playadvisor_id_seq', 214882, true);
 
 
 --
@@ -1643,8 +1623,6 @@ SELECT pg_catalog.setval('playservice_images_playadvisor_id_seq', 203527, true);
 -- Data for Name: playservice_location_accessibility; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-COPY playservice_location_accessibility (location, accessibility) FROM stdin;
-\.
 
 
 --
@@ -1653,8 +1631,6 @@ COPY playservice_location_accessibility (location, accessibility) FROM stdin;
 -- Data for Name: playservice_location_accessibility_playadvisor; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-COPY playservice_location_accessibility_playadvisor (location, accessibility) FROM stdin;
-\.
 
 
 --
@@ -1663,8 +1639,6 @@ COPY playservice_location_accessibility_playadvisor (location, accessibility) FR
 -- Data for Name: playservice_location_agecategories; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-COPY playservice_location_agecategories (location, agecategory, pa_id) FROM stdin;
-\.
 
 
 --
@@ -1673,8 +1647,6 @@ COPY playservice_location_agecategories (location, agecategory, pa_id) FROM stdi
 -- Data for Name: playservice_location_agecategories_playadvisor; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-COPY playservice_location_agecategories_playadvisor (location, agecategory, pa_id) FROM stdin;
-\.
 
 
 --
@@ -1683,8 +1655,6 @@ COPY playservice_location_agecategories_playadvisor (location, agecategory, pa_i
 -- Data for Name: playservice_location_categories; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-COPY playservice_location_categories (location, category, pa_id, pm_guid) FROM stdin;
-\.
 
 
 --
@@ -1693,8 +1663,6 @@ COPY playservice_location_categories (location, category, pa_id, pm_guid) FROM s
 -- Data for Name: playservice_location_categories_playadvisor; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-COPY playservice_location_categories_playadvisor (location, category, pa_id) FROM stdin;
-\.
 
 
 --
@@ -1703,8 +1671,6 @@ COPY playservice_location_categories_playadvisor (location, category, pa_id) FRO
 -- Data for Name: playservice_location_equipment; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-COPY playservice_location_equipment (id, location, equipment, pa_guid, longitude, latitude, type_, installeddate, pm_guid, name, priceindexation, priceinstallation, pricemaintenance, pricepurchase, pricereinvestment, depth, width, height, endoflifeyear, freefallheight, safetyzonelength, safetyzonewidth, manufacturer, material, product, productid, productvariantid, serialnumber, geom) FROM stdin;
-\.
 
 
 --
@@ -1713,8 +1679,6 @@ COPY playservice_location_equipment (id, location, equipment, pa_guid, longitude
 -- Data for Name: playservice_location_equipment_agecategories; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-COPY playservice_location_equipment_agecategories (location_equipment, agecategory) FROM stdin;
-\.
 
 
 --
@@ -1723,8 +1687,6 @@ COPY playservice_location_equipment_agecategories (location_equipment, agecatego
 -- Data for Name: playservice_location_equipment_agecategories_playadvisor; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-COPY playservice_location_equipment_agecategories_playadvisor (location_equipment, agecategory) FROM stdin;
-\.
 
 
 --
@@ -1733,7 +1695,7 @@ COPY playservice_location_equipment_agecategories_playadvisor (location_equipmen
 -- Name: playservice_location_equipment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: playbase
 --
 
-SELECT pg_catalog.setval('playservice_location_equipment_id_seq', 349829, true);
+SELECT pg_catalog.setval('playservice_location_equipment_id_seq', 365192, true);
 
 
 --
@@ -1742,8 +1704,6 @@ SELECT pg_catalog.setval('playservice_location_equipment_id_seq', 349829, true);
 -- Data for Name: playservice_location_equipment_playadvisor; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-COPY playservice_location_equipment_playadvisor (id, location, equipment, pa_guid, longitude, latitude, type_, installeddate, pm_guid, name, priceindexation, priceinstallation, pricemaintenance, pricepurchase, pricereinvestment, depth, width, height, endoflifeyear, freefallheight, safetyzonelength, safetyzonewidth, manufacturer, material, product, productid, productvariantid, serialnumber, geom) FROM stdin;
-\.
 
 
 --
@@ -1752,7 +1712,7 @@ COPY playservice_location_equipment_playadvisor (id, location, equipment, pa_gui
 -- Name: playservice_location_equipment_playadvisor_id_seq; Type: SEQUENCE SET; Schema: public; Owner: playbase
 --
 
-SELECT pg_catalog.setval('playservice_location_equipment_playadvisor_id_seq', 34042, true);
+SELECT pg_catalog.setval('playservice_location_equipment_playadvisor_id_seq', 36013, true);
 
 
 --
@@ -1761,8 +1721,6 @@ SELECT pg_catalog.setval('playservice_location_equipment_playadvisor_id_seq', 34
 -- Data for Name: playservice_location_facilities; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-COPY playservice_location_facilities (location, facility, pa_id) FROM stdin;
-\.
 
 
 --
@@ -1771,8 +1729,6 @@ COPY playservice_location_facilities (location, facility, pa_id) FROM stdin;
 -- Data for Name: playservice_location_facilities_playadvisor; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-COPY playservice_location_facilities_playadvisor (location, facility, pa_id) FROM stdin;
-\.
 
 
 --
@@ -1781,8 +1737,6 @@ COPY playservice_location_facilities_playadvisor (location, facility, pa_id) FRO
 -- Data for Name: playservice_locations; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-COPY playservice_locations (id, title, content, summary, street, number, numberextra, postalcode, municipality, area, country, website, email, phone, longitude, latitude, pm_guid, pa_id, parking, geom, averagerating, pa_title) FROM stdin;
-\.
 
 
 --
@@ -1791,8 +1745,6 @@ COPY playservice_locations (id, title, content, summary, street, number, numbere
 -- Data for Name: playservice_locations_playadvisor; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-COPY playservice_locations_playadvisor (id, title, content, summary, street, number, numberextra, postalcode, municipality, area, country, website, email, phone, longitude, latitude, pm_guid, pa_id, parking, geom, averagerating, pa_title) FROM stdin;
-\.
 
 
 --
@@ -1801,7 +1753,7 @@ COPY playservice_locations_playadvisor (id, title, content, summary, street, num
 -- Name: playservice_locations_playadvisor_id_seq; Type: SEQUENCE SET; Schema: public; Owner: playbase
 --
 
-SELECT pg_catalog.setval('playservice_locations_playadvisor_id_seq', 32190, true);
+SELECT pg_catalog.setval('playservice_locations_playadvisor_id_seq', 34161, true);
 
 
 --
@@ -1819,11 +1771,9 @@ SELECT pg_catalog.setval('playservice_parking_id_seq', 3, true);
 -- Data for Name: playservice_parking_list; Type: TABLE DATA; Schema: public; Owner: playbase
 --
 
-COPY playservice_parking_list (id, parking) FROM stdin;
-1   ja - gratis
-2   ja - betaald
-3   nee
-\.
+INSERT INTO playservice_parking_list (id, parking) VALUES (1, 'ja - gratis');
+INSERT INTO playservice_parking_list (id, parking) VALUES (2, 'ja - betaald');
+INSERT INTO playservice_parking_list (id, parking) VALUES (3, 'nee');
 
 
 --
@@ -2447,7 +2397,7 @@ ALTER TABLE ONLY playservice_locations_playadvisor
     ADD CONSTRAINT playservicelocations_playadvisor_fk1 FOREIGN KEY (parking) REFERENCES playservice_parking_list(id);
 
 
--- Completed on 2017-10-17 12:24:45 CEST
+-- Completed on 2017-10-18 15:43:10 CEST
 
 --
 -- PostgreSQL database dump complete

@@ -48,7 +48,8 @@ ALTER TABLE public.v_equipment_rd
 CREATE OR REPLACE VIEW public.v_locations_rd AS 
  SELECT pl.id,
     pl.title,
-    pl.content,
+    pl.pa_content,
+    pl.pm_content,
     pl.summary,
     pl.street,
     pl.number,
@@ -80,7 +81,8 @@ ALTER TABLE public.v_locations_rd
 CREATE OR REPLACE VIEW public.v_locations_pa_rd AS 
  SELECT pl.id,
     pl.title,
-    pl.content,
+    pl.pa_content,
+    pl.pm_content,
     pl.summary,
     pl.street,
     pl.number,

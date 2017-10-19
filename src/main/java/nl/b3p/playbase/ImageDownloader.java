@@ -98,7 +98,7 @@ public class ImageDownloader {
         if (downloadPath != null) {
             try {
                 running = false;
-                threadPool.awaitTermination(45, TimeUnit.SECONDS);
+                threadPool.awaitTermination(5, TimeUnit.MINUTES);
                 client.close();
             } catch (InterruptedException ex) {
                 log.error("Error terminating threadpool", ex);

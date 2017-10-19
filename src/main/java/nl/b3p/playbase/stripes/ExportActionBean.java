@@ -318,6 +318,7 @@ Parkeren
         String urls = "";
         String captions = "";
         String ids = "";
+        int index = 0;
         for (Object[] image : images) {
             String url = (String)valueOrEmptyString(image[0]);
             if(url.isEmpty()){
@@ -328,18 +329,22 @@ Parkeren
                 captions += SEPERATOR_CHAR;
                 ids += SEPERATOR_CHAR;
             }
-            String imageName = url.substring(url.lastIndexOf("/")+1);
+            String imageName = url.substring(url.lastIndexOf("/") + 1);
+            if (imageName.contains("GetImage.ashx")) {
+                imageName = "Image" + id + "-" + index + ".jpg";
+            }
             downloadImage(url, imageName);
             urls += imageName;
             captions += valueOrEmptyString(image[1]);
             ids += valueOrEmptyString(image[2]);
+            index++;
         }
         record.add(urls);
         record.add(captions);
         record.add(ids);
     }
     
-    private void downloadImage(String url, String filename){
+    private void downloadImage(String url, String filename) {
         downloader.add(url, filename);
     }
     
