@@ -24,13 +24,18 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.naming.NamingException;
 import javax.servlet.http.HttpServletResponse;
 import net.sourceforge.stripes.action.ActionBean;
@@ -101,7 +106,7 @@ public class ExportActionBean implements ActionBean {
         
         String[] header = {"id", "Titel", "Content", "Samenvatting", "Latitude", "Longitude", "Straat", "Huisnummer", "Huisnummertoevoeging",
             "Postcode 4 cijfers", "Plaats", "Regio", "Land", "Website", "E-mail", "Telefoon", "Playadvisor id", "Image URL", "Image Caption", "Image Id", "Categorie", 
-            "Leeftijdscategorie", "Toegankelijkheid", "Faciliteiten", "Parkeren", "Assets","youngestAssetDate"};
+            "Leeftijdscategorie", "Toegankelijkheid", "Faciliteiten", "Parkeren", "Assets","newPlayGround"};
         
         out.writeRecord(header);
         List<List<String>> records = getRecords();
@@ -231,15 +236,29 @@ Parkeren
     }
     
     private void retrieveYoungestAssetDate(Integer id, List<String> record) throws NamingException, SQLException {
-        MapHandler rsh = new MapHandler();
-
-        Map m = DB.qr().query("select max(to_timestamp(installeddate, 'yyyy-MM-dd')) as youngestAssetDate from " +DB.ASSETS_TABLE + " where installeddate <> '' and location = " + id, rsh);
-        Object o = m.get("youngestAssetDate");
-        if(o != null){
-            record.add(sdf.format(o));
-        }else{
-            record.add(null);
+        ArrayListHandler rsh = new ArrayListHandler();
+        List<Object[]> m = DB.qr().query("select installeddate from " +DB.ASSETS_TABLE + " where  location = " + id, rsh);
+        int numNew = 0;
+        Calendar c = Calendar.getInstance();
+        c.add(Calendar.YEAR, -1);
+        Date mustBeAfter = c.getTime();
+        for (Object[] asset : m) {
+            String d = (String)asset[0];
+            if(d == null || d.equals("")){
+                continue;
+            }
+            try {
+                Date date = sdf.parse(d);
+                if(mustBeAfter.before(date)){
+                    numNew++;
+                }
+            } catch (ParseException ex) {
+                log.debug("Cannot parse date: " + d, ex);
+            }
         }
+        double ratio = (double)numNew / m.size();
+        Boolean isNew = ratio > 0.5;
+        record.add(isNew.toString());
     }
 
     protected void retrieveParking(Integer id, List<String> record) throws NamingException, SQLException {
