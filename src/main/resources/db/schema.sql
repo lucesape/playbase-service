@@ -1332,14 +1332,14 @@ INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, e
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Skateboard - Spine', 'skateboard groot', 'Skateboard - Spine', 164, 19, 9);
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Skateboard - Â Faciliteit', 'skateboard klein', 'Skateboard - Â Faciliteit', 165, 19, 9);
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Basketbal bord', 'voetbal-basketbaldoel', 'Basketbal bord', 169, 16, 8);
-INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Fitness', 'fitness', 'Sporttoestellen/Fitness', 14, 16, 24);
-INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Pannaveld', 'Pannaveld', 'Sporttoestellen/Pannaveld', 28, 16, 7);
-INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Voetbal veld', 'pannaveld groot', 'Sporttoestellen/Voetbal veld', 29, 16, 7);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Fitness', 'fitness', 'Sporttoestellen/Fitness', 14, 16, 5);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Pannaveld', 'Pannaveld', 'Sporttoestellen/Pannaveld', 28, 20, 7);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Voetbal veld', 'pannaveld groot', 'Sporttoestellen/Voetbal veld', 29, 20, 7);
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Ballenvanger', 'basketbalpaal', 'Sporttoestellen/Ballenvanger', 84, 16, 8);
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Basketbalpaal', 'basketbalpaal', 'Sporttoestellen/Basketbalpaal', 85, 16, 8);
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Korfbalpaal', 'basketbalpaal', 'Sporttoestellen/Korfbalpaal', 86, 16, 8);
-INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Anders (Specificeer in naam veld)', 'jeu de boulesbaan', 'Sporttoestellen/Anders (Specificeer in naam veld)', 128, NULL, 12);
-INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Jeu de Boules', 'jeu de boulesbaan', 'Sporttoestellen/Jeu de Boules', 129, NULL, 12);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Anders (Specificeer in naam veld)', 'jeu de boulesbaan', 'Sporttoestellen/Anders (Specificeer in naam veld)', 128, 20, 12);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Jeu de Boules', 'jeu de boulesbaan', 'Sporttoestellen/Jeu de Boules', 129, 20, 12);
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Tafeltennistafel', 'tafeltennistafel', 'Sporttoestellen/Tafeltennistafel', 174, 16, 11);
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Doel', 'voetbaldoel', 'Sporttoestellen/Doel', 179, 16, 7);
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Mini Goal', 'voetbaldoel', 'Sporttoestellen/Mini Goal', 180, 16, 7);
@@ -1542,7 +1542,7 @@ INSERT INTO playservice_equipment_list (id, equipment) VALUES (16, 'Sporttoestel
 INSERT INTO playservice_equipment_list (id, equipment) VALUES (17, 'Rijdend spel');
 INSERT INTO playservice_equipment_list (id, equipment) VALUES (18, 'Sociaal spel');
 INSERT INTO playservice_equipment_list (id, equipment) VALUES (19, 'Skatebaan');
-
+INSERT INTO playservice_equipment_list (id, equipment) VALUES (20, 'Sportveld');
 
 --
 -- TOC entry 3861 (class 0 OID 0)
