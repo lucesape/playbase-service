@@ -27,6 +27,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -84,6 +85,9 @@ public class ExportActionBean implements ActionBean {
     private Map<Integer, Integer> assetTypes;
     private Map<Integer, Integer> assetTypeToLocationCategory;
     protected Map<Integer, List<String>> locationTypes;
+    
+    private Integer [] excl = {58,60,61,93,22,7,56,64,177,81,82,125,87,88,89,90,92,178,111,110,109,108,127,15,23,31,32,83,171,156,155,69,68,59,152,145,144,143,141,140,139,120,119,118,117,116,115};
+    private List<Integer> excludedAssetTypes = Arrays.asList(excl);
 
     private ImageDownloader downloader;
 
@@ -332,7 +336,9 @@ Parkeren
             Set<String> lts = new HashSet<>();
             for (Asset asset : assets) {
                 Integer type = asset.getType_();
-
+                if(excludedAssetTypes.contains(type)){
+                    continue;
+                }
                 Integer eq = assetTypeToLocationCategory.get(type);
                 List<String> locCats = locationTypes.get(eq);
                 lts.addAll(locCats);
