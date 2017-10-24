@@ -102,13 +102,6 @@ public class PlaymappingImporter extends Importer {
                 report.addError(ex.getLocalizedMessage(), ImportType.ASSET);
             }
         }
-        for (Integer location : assetTypes.keySet()) {
-            if(location == null){
-                continue;
-            }
-            Set<Integer> types = assetTypes.get(location);
-            saveLocationTypes(types, location);
-        }
         return report;
     }
 

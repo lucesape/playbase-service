@@ -77,21 +77,23 @@ public class ExportActionBean implements ActionBean {
 
     private static final String SEPERATOR_CHAR = ",";
     private ActionBeanContext context;
-    
+
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-    
+
     private Map<Integer, String> equipmentTypes;
     private Map<Integer, Integer> assetTypes;
-    
+    private Map<Integer, Integer> assetTypeToLocationCategory;
+    protected Map<Integer, List<String>> locationTypes;
+
     private ImageDownloader downloader;
-    
+
     @Validate
     private String locationName;
     @Validate
     private String downloadlocation;
-    
+
     @DefaultHandler
-    public Resolution view(){
+    public Resolution view() {
         return new ForwardResolution(JSP);
     }
 
@@ -100,14 +102,14 @@ public class ExportActionBean implements ActionBean {
         downloader.run();
         final File f = File.createTempFile("locations_export", null);
         FileOutputStream fop = new FileOutputStream(f);
-        final CsvOutputStream out = new CsvOutputStream(new OutputStreamWriter(fop),'|', false);
-        
+        final CsvOutputStream out = new CsvOutputStream(new OutputStreamWriter(fop), '|', false);
+
         initLists();
-        
+
         String[] header = {"id", "Titel", "Content", "Samenvatting", "Latitude", "Longitude", "Straat", "Huisnummer", "Huisnummertoevoeging",
-            "Postcode 4 cijfers", "Plaats", "Regio", "Land", "Website", "E-mail", "Telefoon", "Playadvisor id", "Image URL", "Image Caption", "Image Id", "Categorie", 
-            "Leeftijdscategorie", "Toegankelijkheid", "Faciliteiten", "Parkeren", "Assets","newPlayGround"};
-        
+            "Postcode 4 cijfers", "Plaats", "Regio", "Land", "Website", "E-mail", "Telefoon", "Playadvisor id", "Image URL", "Image Caption", "Image Id", "Categorie",
+            "Leeftijdscategorie", "Toegankelijkheid", "Faciliteiten", "Parkeren", "Assets", "newPlayGround"};
+
         out.writeRecord(header);
         List<List<String>> records = getRecords();
         for (List<String> record : records) {
@@ -139,14 +141,14 @@ public class ExportActionBean implements ActionBean {
             String query = "SELECT id, coalesce(pa_title,title),coalesce(pm_content, pa_content),summary, latitude,longitude,street,number, numberextra,postalcode,"
                     + "municipality,    area,   country,website,email, phone, pa_id from " + DB.LOCATION_TABLE;
             List<Object[]> locations = null;
-            if(locationName != null){
+            if (locationName != null) {
                 query += " where pa_title like ? or title like ?";
                 String wildcard = "%" + locationName + "%";
-                locations =DB.qr().query(query, rsh, wildcard, wildcard);
-            }else{
-                locations =DB.qr().query(query, rsh);
+                locations = DB.qr().query(query, rsh, wildcard, wildcard);
+            } else {
+                locations = DB.qr().query(query, rsh);
             }
-             
+
             for (Object[] location : locations) {
                 records.add(getRecord(location));
             }
@@ -161,14 +163,14 @@ public class ExportActionBean implements ActionBean {
         List<String> record = new ArrayList<>();
         Integer id = null;
         int index = 0;
-        int []indexOfContentColumn = {2,6};
-        
+        int[] indexOfContentColumn = {2, 6};
+
         for (Object col : location) {
             if (id == null) {
                 id = (Integer) col;
-            } 
+            }
             Object value = col;
-            
+
             if (value == null) {
                 record.add(null);
             } else {
@@ -204,26 +206,26 @@ Parkeren
         retrieveAssets(id, record);
         retrieveYoungestAssetDate(id, record);
     }
-    
+
     private void retrieveAssets(Integer id, List<String> record) throws NamingException, SQLException {
-          
-        try(Connection con = DB.getConnection()) {
+
+        try (Connection con = DB.getConnection()) {
             GeometryJdbcConverter geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(con);
             ResultSetHandler<List<Asset>> assHandler = new BeanListHandler(Asset.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
-            List<Asset> assets = DB.qr().query("SELECT * FROM " + DB.ASSETS_TABLE +" WHERE location = ?",assHandler, id);
+            List<Asset> assets = DB.qr().query("SELECT * FROM " + DB.ASSETS_TABLE + " WHERE location = ?", assHandler, id);
             Set<String> equipments = new HashSet<>();
             for (Asset asset : assets) {
                 Integer type = asset.getType_();
                 Integer equipment = assetTypes.get(type);
                 String eq = equipmentTypes.get(equipment);
-                if(eq != null){
+                if (eq != null) {
                     equipments.add(eq);
                 }
             }
-            
+
             String equipmentTypeString = "";
             for (String assetType : equipments) {
-                if(equipmentTypeString.length() != 0){
+                if (equipmentTypeString.length() != 0) {
                     equipmentTypeString += SEPERATOR_CHAR;
                 }
                 equipmentTypeString += assetType;
@@ -232,31 +234,31 @@ Parkeren
         } catch (NamingException | SQLException ex) {
             log.error("Cannot get geometryConverter: ", ex);
         }
-        
+
     }
-    
+
     private void retrieveYoungestAssetDate(Integer id, List<String> record) throws NamingException, SQLException {
         ArrayListHandler rsh = new ArrayListHandler();
-        List<Object[]> m = DB.qr().query("select installeddate from " +DB.ASSETS_TABLE + " where  location = " + id, rsh);
+        List<Object[]> m = DB.qr().query("select installeddate from " + DB.ASSETS_TABLE + " where  location = " + id, rsh);
         int numNew = 0;
         Calendar c = Calendar.getInstance();
         c.add(Calendar.YEAR, -1);
         Date mustBeAfter = c.getTime();
         for (Object[] asset : m) {
-            String d = (String)asset[0];
-            if(d == null || d.equals("")){
+            String d = (String) asset[0];
+            if (d == null || d.equals("")) {
                 continue;
             }
             try {
                 Date date = sdf.parse(d);
-                if(mustBeAfter.before(date)){
+                if (mustBeAfter.before(date)) {
                     numNew++;
                 }
             } catch (ParseException ex) {
                 log.debug("Cannot parse date: " + d, ex);
             }
         }
-        double ratio = (double)numNew / m.size();
+        double ratio = (double) numNew / m.size();
         Boolean isNew = ratio > 0.5;
         record.add(isNew.toString());
     }
@@ -264,9 +266,9 @@ Parkeren
     protected void retrieveParking(Integer id, List<String> record) throws NamingException, SQLException {
         MapHandler rsh = new MapHandler();
         Map m = DB.qr().query("SELECT park.parking from " + DB.LOCATION_TABLE + " loc inner join " + DB.LIST_PARKING_TABLE + " park on loc.parking = park.id", rsh);
-        if(m != null){
-            record.add((String)m.get("parking"));
-        }else{
+        if (m != null) {
+            record.add((String) m.get("parking"));
+        } else {
             record.add(null);
         }
     }
@@ -319,12 +321,38 @@ Parkeren
             if (!categories.isEmpty()) {
                 categories += SEPERATOR_CHAR;
             }
-            types.add((String)cat[0]);
-            types.add((String)cat[1]);
+            types.add((String) cat[0]);
+            types.add((String) cat[1]);
         }
-        if(types.isEmpty()){
+
+        try (Connection con = DB.getConnection()) {
+            GeometryJdbcConverter geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(con);
+            ResultSetHandler<List<Asset>> assHandler = new BeanListHandler(Asset.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
+            List<Asset> assets = DB.qr().query("SELECT * FROM " + DB.ASSETS_TABLE + " WHERE location = ?", assHandler, id);
+            Set<String> lts = new HashSet<>();
+            for (Asset asset : assets) {
+                Integer type = asset.getType_();
+
+                Integer eq = assetTypeToLocationCategory.get(type);
+                List<String> locCats = locationTypes.get(eq);
+                lts.addAll(locCats);
+            }
+
+            String equipmentTypeString = "";
+            for (String assetType : lts) {
+                if (equipmentTypeString.length() != 0) {
+                    equipmentTypeString += SEPERATOR_CHAR;
+                }
+                equipmentTypeString += assetType;
+            }
+            record.add(equipmentTypeString);
+        } catch (NamingException | SQLException ex) {
+            log.error("Cannot get geometryConverter: ", ex);
+        }
+
+        if (types.isEmpty()) {
             categories = "Openbare speeltuin";
-        }else{
+        } else {
             categories = String.join(SEPERATOR_CHAR, types);
         }
         record.add(categories);
@@ -332,15 +360,15 @@ Parkeren
 
     protected void retrieveImages(Integer id, List<String> record) throws NamingException, SQLException {
         ArrayListHandler rsh = new ArrayListHandler();
-        
+
         List<Object[]> images = DB.qr().query("SELECT url, caption,pm_guid from " + DB.IMAGES_TABLE + " WHERE location = ? order by equipment desc, lastupdated desc", rsh, id);
         String urls = "";
         String captions = "";
         String ids = "";
         int index = 0;
         for (Object[] image : images) {
-            String url = (String)valueOrEmptyString(image[0]);
-            if(url.isEmpty()){
+            String url = (String) valueOrEmptyString(image[0]);
+            if (url.isEmpty()) {
                 continue;
             }
             if (!urls.isEmpty()) {
@@ -362,16 +390,16 @@ Parkeren
         record.add(captions);
         record.add(ids);
     }
-    
+
     private void downloadImage(String url, String filename) {
         downloader.add(url, filename);
     }
-    
-    private Object valueOrEmptyString(Object value){
+
+    private Object valueOrEmptyString(Object value) {
         return value == null ? "" : value;
     }
-    
-    private void initLists(){
+
+    private void initLists() {
         ArrayListHandler rsh = new ArrayListHandler();
         try {
             equipmentTypes = new HashMap<>();
@@ -384,18 +412,38 @@ Parkeren
         } catch (NamingException | SQLException ex) {
             log.error("Cannot initialize playmapping assettypes:", ex);
         }
-        
-         try {
+
+        try {
+            locationTypes = new HashMap<>();
+            List<Object[]> o = DB.qr().query("SELECT id, category, main from " + DB.LIST_CATEGORY_TABLE, rsh);
+            for (Object[] type : o) {
+                Integer id = (Integer) type[0];
+                String category = (String) type[1];
+                String main = (String) type[2];
+                
+                locationTypes.put(id, new ArrayList<>());
+                locationTypes.get(id).add(category);
+                locationTypes.get(id).add(main);
+            }
+        } catch (NamingException | SQLException ex) {
+            log.error("Cannot initialize playadvisor location types:", ex);
+        }
+
+        try {
             assetTypes = new HashMap<>();
-            List<Object[]> o = DB.qr().query("SELECT id, equipment_type from " + DB.ASSETS_TYPE_GROUP_LIST_TABLE, rsh);
+            assetTypeToLocationCategory = new HashMap<>();
+            List<Object[]> o = DB.qr().query("SELECT id, equipment_type, locationcategory from " + DB.ASSETS_TYPE_GROUP_LIST_TABLE, rsh);
             for (Object[] type : o) {
                 Integer id = (Integer) type[0];
                 Integer equipmentType = (Integer) type[1];
+                Integer locationcategory = (Integer) type[2];
                 assetTypes.put(id, equipmentType);
+                assetTypeToLocationCategory.put(id, locationcategory);
             }
         } catch (NamingException | SQLException ex) {
             log.error("Cannot initialize playmapping assettypes:", ex);
         }
+
     }
 
     //<editor-fold desc="Getters enzo" defaultstate="collapsed">
@@ -408,7 +456,7 @@ Parkeren
     public void setContext(ActionBeanContext context) {
         this.context = context;
     }
-    
+
     public String getLocationName() {
         return locationName;
     }
@@ -416,7 +464,7 @@ Parkeren
     public void setLocationName(String locationName) {
         this.locationName = locationName;
     }
-    
+
     public String getDownloadlocation() {
         return downloadlocation;
     }
@@ -424,7 +472,6 @@ Parkeren
     public void setDownloadlocation(String downloadlocation) {
         this.downloadlocation = downloadlocation;
     }
-    
-    //</editor-fold>
 
+    //</editor-fold>
 }
