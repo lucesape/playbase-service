@@ -198,7 +198,7 @@ public class PlaymappingImporterTest extends TestUtil {
         assertEquals(0, report.getNumberUpdated(ImportType.LOCATION));
         
         List<Object[]> assets = DB.qr().query("select location, category from " + DB.LOCATION_CATEGORY_TABLE, new ArrayListHandler());
-        assertEquals(1, assets.size());
+        assertEquals(0, assets.size());
         for (Object[] asset : assets) {
             assertNotNull("equipmenttype not set.", asset[1]);
         }
