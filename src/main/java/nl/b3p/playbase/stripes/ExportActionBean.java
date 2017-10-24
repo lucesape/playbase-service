@@ -336,7 +336,7 @@ Parkeren
             Set<String> lts = new HashSet<>();
             for (Asset asset : assets) {
                 Integer type = asset.getType_();
-                if(excludedAssetTypes.contains(type)){
+                if(excludedAssetTypes.contains(type) || type == null){
                     continue;
                 }
                 Integer eq = assetTypeToLocationCategory.get(type);

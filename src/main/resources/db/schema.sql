@@ -1271,11 +1271,11 @@ INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, e
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Kabelbaan', 'Kabelbaan', 'kabelbaan', 'Kabelbaan/Kabelbaan', 131, 13, 19);
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Speeltoestellen', 'Kabelbaan', 'kabelbaan', 'Speeltoestellen/Kabelbaan', 132, 13, 19);
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Behendigheid', 'Aaneengeschakelde toestellen', 'klimelement', 'Behendigheid/Aaneengeschakelde toestellen', 133, 5, 19);
-INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'grastrapveld  (excl. drainage)', NULL, 138, NULL, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'grastrapveld  (excl. drainage)', NULL, 138, 20, 7);
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'hekwerk', NULL, 139, NULL, 19);
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'houtsnipper: gekleurde vezel', NULL, 140, NULL, 19);
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'kunst', NULL, 141, NULL, 19);
-INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'pannaveld klein', NULL, 142, 16, 19);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'pannaveld klein', NULL, 142, 20, 7);
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'picknickset', NULL, 143, NULL, 19);
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'rubbertegels 100 x 100', NULL, 144, NULL, 19);
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, NULL, 'rubbertegels op zand', NULL, 145, NULL, 19);
