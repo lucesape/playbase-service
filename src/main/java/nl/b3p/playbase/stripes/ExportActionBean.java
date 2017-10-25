@@ -333,7 +333,6 @@ Parkeren
             GeometryJdbcConverter geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(con);
             ResultSetHandler<List<Asset>> assHandler = new BeanListHandler(Asset.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
             List<Asset> assets = DB.qr().query("SELECT * FROM " + DB.ASSETS_TABLE + " WHERE location = ?", assHandler, id);
-            Set<String> lts = new HashSet<>();
             for (Asset asset : assets) {
                 Integer type = asset.getType_();
                 if(excludedAssetTypes.contains(type) || type == null){
@@ -341,17 +340,8 @@ Parkeren
                 }
                 Integer eq = assetTypeToLocationCategory.get(type);
                 List<String> locCats = locationTypes.get(eq);
-                lts.addAll(locCats);
+                types.addAll(locCats);
             }
-
-            String equipmentTypeString = "";
-            for (String assetType : lts) {
-                if (equipmentTypeString.length() != 0) {
-                    equipmentTypeString += SEPERATOR_CHAR;
-                }
-                equipmentTypeString += assetType;
-            }
-            record.add(equipmentTypeString);
         } catch (NamingException | SQLException ex) {
             log.error("Cannot get geometryConverter: ", ex);
         }
