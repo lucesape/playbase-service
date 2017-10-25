@@ -222,7 +222,9 @@ public class PlaymappingImporter extends Importer {
         location.setMunicipality( json.optString("City"));
         location.setArea(json.optString("Area"));
         location.setPostalcode(json.optString("PostCode"));
-        location.setPm_content(json.optString("Notes"));
+        String content = json.optString("Notes");
+        content = content == null || content.isEmpty() ? null : content;
+        location.setPm_content(content);
         //location.put("AssetCount", json.optInt("AssetCount"));
         location.setLatitude(Double.parseDouble(json.optString("Lat").replaceAll(",", ".")));
         location.setLongitude( Double.parseDouble(json.optString("Lng").replaceAll(",", ".")));
