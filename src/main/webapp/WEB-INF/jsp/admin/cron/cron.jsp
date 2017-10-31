@@ -18,21 +18,53 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 
 <stripes:layout-render name="/WEB-INF/jsp/templates/admin.jsp" pageTitle="Planner voor automagische taken" menuitem="planner">
+    <stripes:layout-component name="head">
+        <script type="text/javascript">
+              var url = "${contextPath}/action/cron/";
+        </script>
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css" />
+
+        <script type="text/javascript" src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.js"></script>
+        <script type="text/javascript" src="${contextPath}/public/js/cron.js"></script>
+    </stripes:layout-component>
     <stripes:layout-component name="content">
         <h1>Planner</h1>
         <jsp:include page="/WEB-INF/jsp/common/messages.jsp"/>
 
-        <stripes:form beanclass="nl.b3p.playbase.stripes.CronActionBean" class="form-horizontal">
-            <table>
-                <tr><td>Type</td><td> <stripes:select name="cronjob.type_">
-                            <stripes:option value="">Selecteer</stripes:option>
-                            <stripes:options-enumeration enum="nl.b3p.playbase.entities.CronType" />
-                        </stripes:select></td></tr>
-                <tr><td>Cron expressie </td><td><stripes:text name="cronjob.cronexpressie"/></td></tr>
-                <tr><td>User</td><td><stripes:text name="cronjob.username"/></td></tr>
-                <tr><td>Password </td><td><stripes:text name="cronjob.password"/></td></tr>
-                <tr><td>Project</td><td><stripes:text name="cronjob.project"/></td></tr>
-                <tr><td><stripes:submit name="save" class="btn btn-primary">Opslaan</stripes:submit></td></tr>
+        <div class="playadvisorClass">
+            <table id="playbasetable" class="display" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th>Project</th>
+                        <th>Type</th>
+                        <th>Expressie</th>
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr>
+                        <th>Project</th>
+                        <th>Type</th>
+                        <th>Expressie</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <div>
+            <stripes:form beanclass="nl.b3p.playbase.stripes.CronActionBean" class="form-horizontal">
+                <table>
+                    <stripes:hidden name="cronjob.id"/>
+                    <tr><td>Type</td><td> <stripes:select name="cronjob.type_">
+                                <stripes:option value="">Selecteer</stripes:option>
+                                <stripes:options-enumeration enum="nl.b3p.playbase.entities.CronType" />
+                            </stripes:select></td></tr>
+                    <tr><td>Cron expressie </td><td><stripes:text name="cronjob.cronexpressie"/></td></tr>
+                    <tr><td>User</td><td><stripes:text name="cronjob.username"/></td></tr>
+                    <tr><td>Password </td><td><stripes:text name="cronjob.password"/></td></tr>
+                    <tr><td>Project</td><td><stripes:text name="cronjob.project"/></td></tr>
+                    <tr><td><stripes:submit name="save" class="btn btn-primary">Opslaan</stripes:submit></td><td><stripes:submit name="nieuw" class="btn btn-default">Nieuw</stripes:submit></td><c:if test="${not empty actionBean.cronjob.id}"><td><stripes:submit name="removeCron" class="btn btn-danger">Verwijder</stripes:submit></c:if></td></tr>
+                    </table>
+
             </stripes:form>
-        </stripes:layout-component>
-    </stripes:layout-render>
+        </div>
+    </stripes:layout-component>
+</stripes:layout-render>
