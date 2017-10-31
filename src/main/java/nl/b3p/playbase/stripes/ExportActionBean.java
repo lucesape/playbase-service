@@ -143,7 +143,7 @@ public class ExportActionBean implements ActionBean {
             ArrayListHandler rsh = new ArrayListHandler();
             //  id  Titel	Content	Samenvatting	Latitude Longitude Straat Huisnummer Huisnummertoevoeging	Postcode 4 cijfers	Postcode 2 letters  Plaats	Regio	Land	Website	E-mail Telefoon
             String query = "SELECT id, coalesce(pa_title,title),coalesce(pm_content, pa_content),summary, latitude,longitude,street,number, numberextra,postalcode,"
-                    + "municipality,    area,   country,website,email, phone, pa_id from " + DB.LOCATION_TABLE;
+                    + "municipality,    area,   coalesce(country,'Nederland'),website,email, phone, pa_id from " + DB.LOCATION_TABLE;
             List<Object[]> locations = null;
             if (locationName != null) {
                 query += " where pa_title like ? or title like ?";
