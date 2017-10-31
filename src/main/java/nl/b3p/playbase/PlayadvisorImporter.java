@@ -91,6 +91,7 @@ public class PlayadvisorImporter extends Importer {
         playadvisorColumnToPlaybase.put(25, "Phone");
         playadvisorColumnToPlaybase.put(26, "Street");
         playadvisorColumnToPlaybase.put(27, "Postcode");
+        playadvisorColumnToPlaybase.put(49, "PlaybaseID");
 
         parkingMapping = new HashMap<>();
         parkingMapping.put("Betaald", "ja - betaald");
@@ -207,16 +208,22 @@ public class PlayadvisorImporter extends Importer {
 
     }
     
-    public Location getMergedLocation(Location newLocation) throws NamingException, SQLException{
+    public Location getMergedLocation(Location newLocation) throws NamingException, SQLException {
+        Location loc;
+
         StringBuilder sb = new StringBuilder();
         sb.append("select * from ");
 
         sb.append(DB.LOCATION_TABLE);
-        sb.append(" where pa_id = '");
-        sb.append(newLocation.getPa_id());
-
+        if (newLocation.getId() != null) {
+            sb.append(" where id = '");
+            sb.append(newLocation.getId());
+        } else {
+            sb.append(" where pa_id = '");
+            sb.append(newLocation.getPa_id());
+        }
         sb.append("';");
-        Location loc = DB.qr().query(sb.toString(), locationHandler);
+        loc = DB.qr().query(sb.toString(), locationHandler);
         return loc;
     }
     
@@ -255,7 +262,9 @@ public class PlayadvisorImporter extends Importer {
                     value = val == null || val.isEmpty() ? null : Double.parseDouble(val);
                     break;
                 case "average_rating":
+                case "PlaybaseID":
                     value = val == null || val.isEmpty() ? null : Integer.parseInt(val);
+                    break;
                 default:
                     break;
             }
@@ -305,6 +314,7 @@ public class PlayadvisorImporter extends Importer {
             }
         }
         l.setAgecategories(ids.toArray(new Integer[0]));
+        l.setId((Integer)lM.get("PlaybaseID"));;
 
         return l;
     }
