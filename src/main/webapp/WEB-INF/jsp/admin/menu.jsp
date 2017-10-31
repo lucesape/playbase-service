@@ -20,5 +20,8 @@
     <li${menuitem == 'match' ? ' class="active"' : ''}>
         <stripes:link beanclass="nl.b3p.playbase.stripes.MatchActionBean">Match</stripes:link>
     </li>
+    <li${menuitem == 'planner' ? ' class="active"' : ''}>
+        <stripes:link beanclass="nl.b3p.playbase.stripes.CronActionBean">Planner</stripes:link>
+    </li>
   
 </ul>
