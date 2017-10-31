@@ -1287,7 +1287,7 @@ INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, e
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Eigen bouw', 'klimelement', 'Eigen bouw', 151, 5, 19);
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Valdempend Kunstgras', 'kunstgras polyethyleen', 'Valdempend Kunstgras', 152, NULL, 19);
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Basketbal veld', 'kunstgrastrapvelden', 'Basketbal veld', 153, 16, 8);
-INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Tennis banen', 'kunstgrastrapvelden', 'Tennis banen', 154, 16, 26);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Tennis banen', 'kunstgrastrapvelden', 'Tennis banen', 154, 20, 26);
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Rubbertegels 30x30', 'rubber-betontegels 30 x 30', 'Rubbertegels 30x30', 155, NULL, 19);
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Rubber grastegels', 'rubbertegels ', 'Rubber grastegels', 156, NULL, 19);
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES (NULL, 'Anders (migratie)', 'speelprikkel divers', 'Anders (migratie)', 166, NULL, 19);
@@ -1344,6 +1344,7 @@ INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, e
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Doel', 'voetbaldoel', 'Sporttoestellen/Doel', 179, 16, 7);
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Mini Goal', 'voetbaldoel', 'Sporttoestellen/Mini Goal', 180, 16, 7);
 INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Volleybal set', 'volleybalset', 'Sporttoestellen/Volleybal set', 181, 16, 13);
+INSERT INTO playmapping_type_group (categorie, assettype, groep, catasset, id, equipment_type, locationcategory) VALUES ('Sporttoestellen', 'Tennisbaan', 'tennisbaan', 'Sporttoestellen/Tennis banen', 184, 20, 26);
 
 
 --
