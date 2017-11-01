@@ -50,11 +50,13 @@ public class PlaymappingImporterTest extends TestUtil {
     }
 
     public PlaymappingImporter instance;
+    private ImportReport report;
 
     @Before
     public void beforeTest() {
         instance = new PlaymappingImporter();
         instance.init();
+        report = new ImportReport();
     }
 
     @Test
@@ -173,7 +175,7 @@ public class PlaymappingImporterTest extends TestUtil {
     public void testSaveAssets() throws IOException, NamingException, SQLException {
         InputStream in = PlaymappingImporterTest.class.getResourceAsStream("singleAssetWithLinked.json");
         String asset = IOUtils.toString(in);
-        ImportReport report= instance.processAssets(asset);
+        instance.processAssets(asset, report);
         
         assertEquals(0, report.getErrors().size());
         assertEquals(2, report.getNumberInserted(ImportType.ASSET));
@@ -189,7 +191,7 @@ public class PlaymappingImporterTest extends TestUtil {
     public void testSaveAssetType() throws IOException, NamingException, SQLException {
         InputStream in = PlaymappingImporterTest.class.getResourceAsStream("singleAssetWithLinked.json");
         String assetString = IOUtils.toString(in);
-        ImportReport report= instance.processAssets(assetString);
+        instance.processAssets(assetString, report);
         
         assertEquals(0, report.getErrors().size());
         assertEquals(2, report.getNumberInserted(ImportType.ASSET));
@@ -210,15 +212,15 @@ public class PlaymappingImporterTest extends TestUtil {
         String asset = IOUtils.toString(in);
         
         
-        ImportReport report= instance.processAssets(asset);
+        instance.processAssets(asset, report);
         
         assertEquals(0, report.getErrors().size());
         assertEquals(2, report.getNumberInserted(ImportType.ASSET));
         assertEquals(0, report.getNumberInserted(ImportType.LOCATION));
         assertEquals(0, report.getNumberUpdated(ImportType.ASSET));
         assertEquals(0, report.getNumberUpdated(ImportType.LOCATION));
-        
-        report= instance.processAssets(asset);
+        report = new ImportReport();
+        instance.processAssets(asset, report);
         
         assertEquals(0, report.getErrors().size());
         assertEquals(0, report.getNumberInserted(ImportType.ASSET));
