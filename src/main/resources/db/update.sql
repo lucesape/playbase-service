@@ -5,7 +5,10 @@ CREATE TABLE public.cronjob
    type_ text, 
    username text, 
    password text, 
-   project text
+   project text, 
+   log text, 
+   importedstring text,
+   lastrun timestamp without time zone
 ) 
 WITH (
   OIDS = FALSE
@@ -13,3 +16,6 @@ WITH (
 ;
 ALTER TABLE public.cronjob
   OWNER TO playbase;
+
+ALTER TABLE public.cronjob
+  ADD CONSTRAINT prim_key_cronjob PRIMARY KEY (id);

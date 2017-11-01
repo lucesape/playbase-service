@@ -34,7 +34,8 @@ function CronTable() {
                 {"data": "project"},
                 {"data": "type_"},
                 {"data": "cronexpressie"},
-                {"data": "next_fire_time"},
+                {"data": "lastrun"},
+                {"data": "next_fire_time"}
             ]
         });
         var me = this;

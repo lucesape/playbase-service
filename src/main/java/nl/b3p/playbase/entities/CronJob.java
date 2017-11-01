@@ -16,6 +16,7 @@
  */
 package nl.b3p.playbase.entities;
 
+import java.util.Date;
 import nl.b3p.playbase.cron.CronType;
 
 /**
@@ -29,6 +30,9 @@ public class CronJob {
     private String username;
     private String password;
     private String project;
+    private Date lastrun;
+    private String log;
+    private String importedstring;
     
 
     public Integer getId() {
@@ -78,6 +82,30 @@ public class CronJob {
 
     public void setProject(String project) {
         this.project = project;
+    }
+
+    public Date getLastrun() {
+        return lastrun;
+    }
+
+    public void setLastrun(Date lastrun) {
+        this.lastrun = lastrun;
+    }
+
+    public String getLog() {
+        return log;
+    }
+
+    public void setLog(String log) {
+        this.log = log;
+    }
+
+    public String getImportedstring() {
+        return importedstring;
+    }
+
+    public void setImportedstring(String importedstring) {
+        this.importedstring = importedstring;
     }
 
     

@@ -83,7 +83,7 @@ public class CronActionBean implements ActionBean {
     public Resolution view() {
         if (cronjobid != null) {
             try {
-                cronjob = DB.qr().query("SELECT * from " + DB.CRONJOB_TABLE + " WHERE id = ?", cronHandler, cronjobid);
+                cronjob = DB.qr().query("SELECT id,cronexpressie,type_,username,password,project,log,lastrun from " + DB.CRONJOB_TABLE + " WHERE id = ?", cronHandler, cronjobid);
             } catch (NamingException | SQLException ex) {
                 log.error("Cannot load cronjob", ex);
             }
@@ -171,10 +171,10 @@ public class CronActionBean implements ActionBean {
         builder.serializeSpecialFloatingPointValues();
         Gson gson = builder.create();
 
-        try (Connection con = DB.getConnection()) {
+        try {
 
             ResultSetHandler<List<CronJob>> handler = new BeanListHandler(CronJob.class);
-            String sql = "select * from " + DB.CRONJOB_TABLE;
+            String sql = "select id,cronexpressie,type_,username,password,project,log,lastrun from " + DB.CRONJOB_TABLE;
             List<CronJob> jobs = DB.qr().query(sql, handler);
             JSONArray ar = new JSONArray();
             for (CronJob job : jobs) {
@@ -182,6 +182,7 @@ public class CronActionBean implements ActionBean {
                 Date d = CronListener.getNextFireTime(job);
                 String formattedDate = d !=  null ? sdf.format(d) : "";
                 obj.put("next_fire_time",formattedDate);
+                obj.put("lastrun", obj.optString("lastrun", " - "));
                 ar.put(obj);
             }
             result.put("data", ar);

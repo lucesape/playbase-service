@@ -38,6 +38,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         <th>Project</th>
                         <th>Type</th>
                         <th>Expressie</th>
+                        <th>Vorige run</th>
                         <th>Volgende run</th>
                     </tr>
                 </thead>
@@ -46,6 +47,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         <th>Project</th>
                         <th>Type</th>
                         <th>Expressie</th>
+                        <th>Vorige run</th>
                         <th>Volgende run</th>
                     </tr>
                 </tfoot>

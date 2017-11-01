@@ -305,17 +305,18 @@ public class PlaymappingImporter extends Importer {
 
     public void importString(String stringResult, String apiurl,ImportReport report ) throws NamingException, SQLException {
         if (stringResult != null) {
-            String type;
+            ImportType type;
 
             if (apiurl.contains("Location")) {
                 processLocations(stringResult, report);
-                type = "locaties";
+                type = ImportType.LOCATION;
             } else if (apiurl.contains("Asset")) {
                 processAssets(stringResult, report);
-                type = "assets";
+                type = ImportType.ASSET;
             } else {
                 throw new IllegalArgumentException("Wrong url selected");
             }
+            report.setImportedstring(type, stringResult);
         }
     }
     
