@@ -84,7 +84,7 @@ public class CronActionBean implements ActionBean {
     public Resolution view() {
         if (cronjobid != null) {
             try {
-                cronjob = DB.qr().query("SELECT id,cronexpressie,type_,username,password,project,log,lastrun from " + DB.CRONJOB_TABLE + " WHERE id = ?", cronHandler, cronjobid);
+                cronjob = DB.qr().query("SELECT id,cronexpressie,type_,username,password,project,log,lastrun,mailaddress from " + DB.CRONJOB_TABLE + " WHERE id = ?", cronHandler, cronjobid);
             } catch (NamingException | SQLException ex) {
                 log.error("Cannot load cronjob", ex);
             }
@@ -137,10 +137,11 @@ public class CronActionBean implements ActionBean {
                 sb.append("username,");
                 sb.append("password,");
                 sb.append("project,");
+                sb.append("mailaddress,");
                 sb.append("cronexpressie) ");
-                sb.append("VALUES(  ?,?,?,?,?);");
+                sb.append("VALUES(  ?,?,?,?,?,?);");
 
-                cronjob = DB.qr().insert(sb.toString(), cronHandler, cronjob.getType_().name(), cronjob.getUsername(), cronjob.getPassword(), cronjob.getProject(), cronjob.getCronexpressie());
+                cronjob = DB.qr().insert(sb.toString(), cronHandler, cronjob.getType_().name(), cronjob.getUsername(), cronjob.getPassword(), cronjob.getProject(), cronjob.getMailaddress(), cronjob.getCronexpressie());
                 CronListener.scheduleJob(cronjob);
             } else {
                 sb.append("update ");
@@ -150,10 +151,11 @@ public class CronActionBean implements ActionBean {
                 sb.append("username = ?,");
                 sb.append("password = ?,");
                 sb.append("project = ?,");
+                sb.append("mailaddress= ?,");
                 sb.append("cronexpressie = ?");
                 sb.append(" where id = ?");
 
-                DB.qr().update(sb.toString(), cronjob.getType_().name(), cronjob.getUsername(), cronjob.getPassword(), cronjob.getProject(), cronjob.getCronexpressie(), cronjob.getId());
+                DB.qr().update(sb.toString(), cronjob.getType_().name(), cronjob.getUsername(), cronjob.getPassword(), cronjob.getProject(),cronjob.getMailaddress(), cronjob.getCronexpressie(), cronjob.getId());
                 CronListener.rescheduleJob(cronjob);
             }
         } catch (NamingException | SQLException ex) {

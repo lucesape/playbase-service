@@ -85,7 +85,7 @@ public class PlaybaseJob implements Job {
                 logString = "Kon niet importeren. Zie logfile.";
             }
             savecronjob(job, logString, importedString);
-            
+            sendMail(job, logString);
         } catch (SQLException | NamingException ex) {
             log.error("Cannot save report: ", ex);
         }
