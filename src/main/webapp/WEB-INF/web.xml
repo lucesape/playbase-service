@@ -10,6 +10,12 @@
         <param-name>javax.servlet.jsp.jstl.fmt.locale</param-name>
         <param-value>nl</param-value>
     </context-param>
+    
+    <listener>
+        <description>The class which initializes the quartz scheduler and saved jobs.</description>
+        <listener-class> nl.b3p.playbase.cron.CronListener</listener-class>
+    </listener>
+    
     <filter>
         <display-name>Stripes Filter</display-name>
         <filter-name>StripesFilter</filter-name>

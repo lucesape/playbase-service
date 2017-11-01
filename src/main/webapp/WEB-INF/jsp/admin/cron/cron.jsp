@@ -38,6 +38,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         <th>Project</th>
                         <th>Type</th>
                         <th>Expressie</th>
+                        <th>Volgende run</th>
                     </tr>
                 </thead>
                 <tfoot>
@@ -45,6 +46,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         <th>Project</th>
                         <th>Type</th>
                         <th>Expressie</th>
+                        <th>Volgende run</th>
                     </tr>
                 </tfoot>
             </table>
@@ -55,13 +57,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     <stripes:hidden name="cronjob.id"/>
                     <tr><td>Type</td><td> <stripes:select name="cronjob.type_">
                                 <stripes:option value="">Selecteer</stripes:option>
-                                <stripes:options-enumeration enum="nl.b3p.playbase.entities.CronType" />
+                                <stripes:options-enumeration enum="nl.b3p.playbase.cron.CronType" />
                             </stripes:select></td></tr>
                     <tr><td>Cron expressie </td><td><stripes:text name="cronjob.cronexpressie"/></td></tr>
                     <tr><td>User</td><td><stripes:text name="cronjob.username"/></td></tr>
                     <tr><td>Password </td><td><stripes:text name="cronjob.password"/></td></tr>
                     <tr><td>Project</td><td><stripes:text name="cronjob.project"/></td></tr>
-                    <tr><td><stripes:submit name="save" class="btn btn-primary">Opslaan</stripes:submit></td><td><stripes:submit name="nieuw" class="btn btn-default">Nieuw</stripes:submit></td><c:if test="${not empty actionBean.cronjob.id}"><td><stripes:submit name="removeCron" class="btn btn-danger">Verwijder</stripes:submit></c:if></td></tr>
+                    <tr><td><stripes:submit name="save" class="btn btn-primary">Opslaan</stripes:submit></td>
+                        <td><stripes:submit name="nieuw" class="btn btn-default">Nieuw</stripes:submit></td>
+                        <td><c:if test="${not empty actionBean.cronjob.id}"><stripes:submit name="removeCron" class="btn btn-danger">Verwijder</stripes:submit>
+                       <stripes:submit name="runNow" class="btn btn-warning">Voer nu uit</stripes:submit></c:if></td>
+                    </tr>
                     </table>
 
             </stripes:form>

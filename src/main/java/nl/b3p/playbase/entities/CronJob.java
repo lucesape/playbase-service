@@ -16,6 +16,8 @@
  */
 package nl.b3p.playbase.entities;
 
+import nl.b3p.playbase.cron.CronType;
+
 /**
  *
  * @author Meine Toonen

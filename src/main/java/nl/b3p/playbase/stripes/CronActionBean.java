@@ -20,6 +20,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -36,6 +38,7 @@ import net.sourceforge.stripes.validation.EnumeratedTypeConverter;
 import net.sourceforge.stripes.validation.SimpleError;
 import net.sourceforge.stripes.validation.Validate;
 import net.sourceforge.stripes.validation.ValidateNestedProperties;
+import nl.b3p.playbase.cron.CronListener;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.CronJob;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -45,6 +48,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.quartz.CronExpression;
+import org.quartz.SchedulerException;
 
 /**
  *
@@ -59,6 +64,7 @@ public class CronActionBean implements ActionBean {
 
     private ActionBeanContext context;
     private static final String JSP = "/WEB-INF/jsp/admin/cron/cron.jsp";
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Validate
     private Integer cronjobid;
@@ -94,6 +100,7 @@ public class CronActionBean implements ActionBean {
     
     public Resolution removeCron(){
         try {
+            CronListener.unscheduleJob(cronjob);
             DB.qr().query("delete from " + DB.CRONJOB_TABLE + " WHERE id = ?", cronHandler, cronjob.getId());
         } catch (NamingException | SQLException ex) {
             log.error("Cannot delete cronjob", ex);
@@ -101,9 +108,23 @@ public class CronActionBean implements ActionBean {
         }
         return nieuw();
     }
+    
+    public Resolution runNow(){
+        try {
+            CronListener.runNow(cronjob);
+        } catch (SchedulerException ex) {
+            log.error("Cannot run cronjob", ex);
+            context.getValidationErrors().add("cronjob", new SimpleError("Error running:", ex.getLocalizedMessage()));
+        }
+        return nieuw();
+    }
 
     public Resolution save() {
 
+        if (!CronExpression.isValidExpression(cronjob.getCronexpressie())) {
+            context.getValidationErrors().add("cronjob.cronexpressie", new SimpleError("Cronexpressie niet correct"));
+            return view();
+        }
         try {
             StringBuilder sb = new StringBuilder();
             if (cronjob.getId() == null) {
@@ -119,6 +140,7 @@ public class CronActionBean implements ActionBean {
                 sb.append("VALUES(  ?,?,?,?,?);");
 
                 cronjob = DB.qr().insert(sb.toString(), cronHandler, cronjob.getType_().name(), cronjob.getUsername(), cronjob.getPassword(), cronjob.getProject(), cronjob.getCronexpressie());
+                CronListener.scheduleJob(cronjob);
             } else {
                 sb.append("update ");
                 sb.append(DB.CRONJOB_TABLE);
@@ -131,11 +153,13 @@ public class CronActionBean implements ActionBean {
                 sb.append(" where id = ?");
 
                 DB.qr().update(sb.toString(), cronjob.getType_().name(), cronjob.getUsername(), cronjob.getPassword(), cronjob.getProject(), cronjob.getCronexpressie(), cronjob.getId());
- 
+                CronListener.rescheduleJob(cronjob);
             }
         } catch (NamingException | SQLException ex) {
             log.error("Cannot save cronjob", ex);
             context.getValidationErrors().add("cronjob", new SimpleError("Error saving:", ex.getLocalizedMessage()));
+        } catch (SchedulerException ex) {
+            Logger.getLogger(CronActionBean.class.getName()).log(Level.SEVERE, null, ex);
         }
         return view();
     }
@@ -154,7 +178,11 @@ public class CronActionBean implements ActionBean {
             List<CronJob> jobs = DB.qr().query(sql, handler);
             JSONArray ar = new JSONArray();
             for (CronJob job : jobs) {
-                ar.put(new JSONObject(gson.toJson(job, CronJob.class)));
+                JSONObject obj = new JSONObject(gson.toJson(job, CronJob.class));
+                Date d = CronListener.getNextFireTime(job);
+                String formattedDate = d !=  null ? sdf.format(d) : "";
+                obj.put("next_fire_time",formattedDate);
+                ar.put(obj);
             }
             result.put("data", ar);
 
