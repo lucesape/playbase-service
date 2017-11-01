@@ -88,10 +88,10 @@ public class ImportPlaymappingActionBean implements ActionBean {
     private String password;
     @Validate(required = true)
     private String apiurl;
-    
+
     @Validate
     private String file;
-    
+
     private final PlaymappingImporter processor = new PlaymappingImporter();
 
     @DefaultHandler
@@ -101,163 +101,45 @@ public class ImportPlaymappingActionBean implements ActionBean {
     }
 
     public Resolution importPM() throws NamingException, SQLException {
-        if(file.equalsIgnoreCase("Via API")){
-            return collectJSON();
-        }else{
+        ImportReport report;
+        processor.init();
+        if (file.equalsIgnoreCase("Via API")) {
+            report = processor.importJSONFromAPI(getUsername(), getPassword(), getApiurl());
+        } else {
 
             try {
                 InputStream in = ImportPlaymappingActionBean.class.getResourceAsStream(file);
                 String theString = IOUtils.toString(in, "UTF-8");
                 in.close();
-                Resolution res = importString(theString);
-                if (res != null) {
-                    return res;
-                } else {
-                    return new ForwardResolution(JSP);
-                }
+                report = new ImportReport();
+                processor.importString(theString, apiurl, report);
+
             } catch (IOException ex) {
                 log.error(ex);
                 return new ForwardResolution(JSP);
             }
         }
-    }
 
-    private Resolution collectJSON() throws SQLException, NamingException {
+        context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberInserted(ImportType.ASSET) + " " + ImportType.ASSET.toString() + " weggeschreven."));
+        context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberInserted(ImportType.LOCATION) + " " + ImportType.LOCATION.toString() + " weggeschreven."));
+        context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberUpdated(ImportType.ASSET) + " " + ImportType.ASSET.toString() + " geupdatet."));
+        context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberUpdated(ImportType.LOCATION) + " " + ImportType.LOCATION.toString() + " geupdatet."));
 
-        RequestConfig defaultRequestConfig = RequestConfig.custom()
-                .setStaleConnectionCheckEnabled(false)
-                .setTargetPreferredAuthSchemes(Arrays.asList(AuthSchemes.BASIC))
-                .setProxyPreferredAuthSchemes(Arrays.asList(AuthSchemes.BASIC))
-                .setConnectionRequestTimeout(60)
-                .build();
+        if (report.getErrors().size() > 0) {
+            context.getMessages().add(new SimpleMessage("Er zijn " + report.getErrors(ImportType.ASSET).size() + " " + ImportType.ASSET.toString() + " mislukt:"));
+            context.getMessages().add(new SimpleMessage("Er zijn " + report.getErrors(ImportType.LOCATION).size() + " " + ImportType.LOCATION.toString() + " mislukt:"));
 
-        HttpClientBuilder hcb = HttpClients.custom()
-                .setDefaultRequestConfig(defaultRequestConfig);
-
-        HttpClientContext httpContext = HttpClientContext.create();
-        if (getUsername() != null && getPassword() != null) {
-            String hostname = null; //any
-            int port = -1; //any
-            String scheme = "http"; //default
-            URL aURL;
-            try {
-                aURL = new URL(getApiurl());
-                hostname = aURL.getHost();
-                port = aURL.getPort();
-                scheme = aURL.getProtocol();
-            } catch (MalformedURLException ex) {
-                // ignore
-            }
-
-            CredentialsProvider credentialsProvider
-                    = new BasicCredentialsProvider();
-            Credentials defaultcreds
-                    = new UsernamePasswordCredentials(getUsername(), getPassword());
-            AuthScope authScope
-                    = new AuthScope(hostname, port);
-            credentialsProvider.setCredentials(authScope, defaultcreds);
-
-            hcb = hcb.setDefaultCredentialsProvider(credentialsProvider);
-
-            //preemptive not possible without hostname
-            if (hostname != null) {
-                // Create AuthCache instance for preemptive authentication
-                AuthCache authCache = new BasicAuthCache();
-                BasicScheme basicAuth = new BasicScheme();
-                HttpHost targetHost = new HttpHost(hostname, port, scheme);
-                authCache.put(targetHost, basicAuth);
-                // Add AuthCache to the execution context
-                httpContext.setCredentialsProvider(credentialsProvider);
-                httpContext.setAuthCache(authCache);
-                log.debug("Preemptive credentials: hostname: " + hostname
-                        + ", port: " + port
-                        + ", username: " + getUsername()
-                        + ", password: ****.");
-            }
-
-        }
-
-        HttpClient hc = hcb.build();
-
-        HttpGet request = new HttpGet(getApiurl());
-        request.setHeader("Accept-Language", "NL");
-        request.setHeader("Accept", "application/json");
-
-        String stringResult = null;
-        HttpResponse response = null;
-        try {
-            response = hc.execute(request, httpContext);
-            int statusCode = response.getStatusLine().getStatusCode();
-
-            HttpEntity entity = response.getEntity();
-            if (statusCode != 200) {
-                context.getValidationErrors().add("status", new SimpleError("Could not retrieve JSON. Status " + statusCode + ". Reason given: " + response.getStatusLine().getReasonPhrase()));
-            } else {
-                //InputStream is = entity.getContent();
-                stringResult = EntityUtils.toString(entity);
-            }
-        } catch (IOException ex) {
-            log.debug("Exception False: ", ex);
-            context.getValidationErrors().add("status", new SimpleError("Could not retrieve JSON." + ex.getLocalizedMessage()));
-        } finally {
-            if (hc instanceof CloseableHttpClient) {
-                try {
-                    ((CloseableHttpClient) hc).close();
-                } catch (IOException ex) {
-                    log.info("Error closing HttpClient: " + ex.getLocalizedMessage());
-                }
-            }
-            if (response instanceof CloseableHttpResponse) { 
-               try {
-                    ((CloseableHttpResponse) response).close();
-                } catch (IOException ex) {
-                    log.info("Error closing HttpResponse: " + ex.getLocalizedMessage());
+            for (ImportType importType : report.getAllErrors().keySet()) {
+                Set<String> errors = report.getAllErrors().get(importType);
+                for (String error : errors) {
+                    context.getMessages().add(new SimpleMessage(importType.toString() + ": " + error));
                 }
             }
         }
-        Resolution res = importString(stringResult);
-        if(res != null){
-            return res;
-        }else{
-            return new ForwardResolution(JSP);
-        }
+        return new ForwardResolution(JSP);
     }
+
     
-    private Resolution importString(String stringResult) throws NamingException, SQLException {
-        if (stringResult != null) {
-            String type;
-            ImportReport report = null;
-            processor.init();
-            if (apiurl.contains("Location")) {
-                report = processor.processLocations(stringResult);
-                type = "locaties";
-            } else if (apiurl.contains("Asset")) {
-                report = processor.processAssets(stringResult);
-                type = "assets";
-            } else {
-                context.getValidationErrors().add("apiurl", new SimpleError("Wrong url selected."));
-                return new ForwardResolution(JSP);
-            }
-            context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberInserted(ImportType.ASSET) + " " + ImportType.ASSET.toString() + " weggeschreven."));
-            context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberInserted(ImportType.LOCATION) + " " + ImportType.LOCATION.toString() + " weggeschreven."));
-            context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberUpdated(ImportType.ASSET) + " " + ImportType.ASSET.toString() + " geupdatet."));
-            context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberUpdated(ImportType.LOCATION) + " " + ImportType.LOCATION.toString() + " geupdatet."));
-            
-            if(report.getErrors().size() > 0){
-                context.getMessages().add(new SimpleMessage("Er zijn " + report.getErrors(ImportType.ASSET).size()+ " " + ImportType.ASSET.toString()  + " mislukt:"));
-                context.getMessages().add(new SimpleMessage("Er zijn " + report.getErrors(ImportType.LOCATION).size()+ " " + ImportType.LOCATION.toString() + " mislukt:"));
-                
-                for (ImportType importType : report.getAllErrors().keySet()) {
-                    Set<String> errors = report.getAllErrors().get(importType);
-                    for (String error : errors) {
-                        context.getMessages().add(new SimpleMessage(importType.toString() + ": " + error));
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
     // <editor-fold desc="Getters and setters" defaultstate="collapsed">
     /**
      * @return the locationGuid
@@ -332,8 +214,6 @@ public class ImportPlaymappingActionBean implements ActionBean {
     public void setFile(String file) {
         this.file = file;
     }
-    
-    // </editor-fold> 
 
-    
+    // </editor-fold> 
 }

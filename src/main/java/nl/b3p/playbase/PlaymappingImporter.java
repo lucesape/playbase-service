@@ -16,6 +16,9 @@
  */
 package nl.b3p.playbase;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -27,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.naming.NamingException;
+import net.sourceforge.stripes.validation.SimpleError;
 import nl.b3p.playbase.ImportReport.ImportType;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.Asset;
@@ -35,6 +39,27 @@ import org.apache.commons.dbutils.handlers.ArrayListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.AuthCache;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.AuthSchemes;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.BasicAuthCache;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -90,10 +115,9 @@ public class PlaymappingImporter extends Importer {
 
     }
 
-    public ImportReport processAssets(String assetsString) throws NamingException, SQLException {
+    public ImportReport processAssets(String assetsString, ImportReport report) throws NamingException, SQLException {
         Map<Integer,Set<Integer>> assetTypes = new HashMap<>();
         List<Asset> assets = parseAssets(assetsString, assetTypes);
-        ImportReport report = new ImportReport();
         for (Asset asset : assets) {
             try {
                 saveAsset(asset, report);
@@ -105,13 +129,12 @@ public class PlaymappingImporter extends Importer {
         return report;
     }
 
-    public ImportReport processLocations(String temp) throws NamingException, SQLException {
+    public void processLocations(String temp, ImportReport report) throws NamingException, SQLException {
         List<Location> childLocations = parseChildLocations(temp);
-        ImportReport report = new ImportReport();
+        
         for (Location childLocation : childLocations) {
             saveLocation(childLocation, report);
         }
-        return report;
     }
 
     // <editor-fold desc="Assets" defaultstate="collapsed">
@@ -279,5 +302,118 @@ public class PlaymappingImporter extends Importer {
         return id;
     }
     // </editor-fold>
+
+    public void importString(String stringResult, String apiurl,ImportReport report ) throws NamingException, SQLException {
+        if (stringResult != null) {
+            String type;
+
+            if (apiurl.contains("Location")) {
+                processLocations(stringResult, report);
+                type = "locaties";
+            } else if (apiurl.contains("Asset")) {
+                processAssets(stringResult, report);
+                type = "assets";
+            } else {
+                throw new IllegalArgumentException("Wrong url selected");
+            }
+        }
+    }
+    
+    public ImportReport importJSONFromAPI(String username, String password, String apiurl) throws SQLException, NamingException {
+        ImportReport report = new ImportReport();
+        RequestConfig defaultRequestConfig = RequestConfig.custom()
+                .setStaleConnectionCheckEnabled(false)
+                .setTargetPreferredAuthSchemes(Arrays.asList(AuthSchemes.BASIC))
+                .setProxyPreferredAuthSchemes(Arrays.asList(AuthSchemes.BASIC))
+                .setConnectionRequestTimeout(60)
+                .build();
+
+        HttpClientBuilder hcb = HttpClients.custom()
+                .setDefaultRequestConfig(defaultRequestConfig);
+
+        HttpClientContext httpContext = HttpClientContext.create();
+        if (username != null && password != null) {
+            String hostname = null; //any
+            int port = -1; //any
+            String scheme = "http"; //default
+            URL aURL;
+            try {
+                aURL = new URL(apiurl);
+                hostname = aURL.getHost();
+                port = aURL.getPort();
+                scheme = aURL.getProtocol();
+            } catch (MalformedURLException ex) {
+                // ignore
+            }
+
+            CredentialsProvider credentialsProvider
+                    = new BasicCredentialsProvider();
+            Credentials defaultcreds
+                    = new UsernamePasswordCredentials(username, password);
+            AuthScope authScope
+                    = new AuthScope(hostname, port);
+            credentialsProvider.setCredentials(authScope, defaultcreds);
+
+            hcb = hcb.setDefaultCredentialsProvider(credentialsProvider);
+
+            //preemptive not possible without hostname
+            if (hostname != null) {
+                // Create AuthCache instance for preemptive authentication
+                AuthCache authCache = new BasicAuthCache();
+                BasicScheme basicAuth = new BasicScheme();
+                HttpHost targetHost = new HttpHost(hostname, port, scheme);
+                authCache.put(targetHost, basicAuth);
+                // Add AuthCache to the execution context
+                httpContext.setCredentialsProvider(credentialsProvider);
+                httpContext.setAuthCache(authCache);
+                log.debug("Preemptive credentials: hostname: " + hostname
+                        + ", port: " + port
+                        + ", username: " + username
+                        + ", password: ****.");
+            }
+
+        }
+
+        HttpClient hc = hcb.build();
+
+        HttpGet request = new HttpGet(apiurl);
+        request.setHeader("Accept-Language", "NL");
+        request.setHeader("Accept", "application/json");
+
+        String stringResult = null;
+        HttpResponse response = null;
+        try {
+            response = hc.execute(request, httpContext);
+            int statusCode = response.getStatusLine().getStatusCode();
+
+            HttpEntity entity = response.getEntity();
+            if (statusCode != 200) {
+                report.addError("Could not retrieve JSON. Status " + statusCode + ". Reason given: " + response.getStatusLine().getReasonPhrase(), ImportType.GENERAL);
+            } else {
+                //InputStream is = entity.getContent();
+                stringResult = EntityUtils.toString(entity);
+            }
+        } catch (IOException ex) {
+            log.debug("Exception False: ", ex);
+            report.addError("Could not retrieve JSON." + ex.getLocalizedMessage(), ImportType.GENERAL);
+        } finally {
+            if (hc instanceof CloseableHttpClient) {
+                try {
+                    ((CloseableHttpClient) hc).close();
+                } catch (IOException ex) {
+                    log.info("Error closing HttpClient: " + ex.getLocalizedMessage());
+                }
+            }
+            if (response instanceof CloseableHttpResponse) {
+                try {
+                    ((CloseableHttpResponse) response).close();
+                } catch (IOException ex) {
+                    log.info("Error closing HttpResponse: " + ex.getLocalizedMessage());
+                }
+            }
+        }
+        importString(stringResult, apiurl, report);
+        return report;
+    }
 
 }

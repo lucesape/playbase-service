@@ -31,6 +31,7 @@ public class ImportReport {
 
     public enum ImportType{
         
+        GENERAL ("Algemeen"),
         LOCATION ("Locatie"),
         ASSET("Asset"),
         COMMENT("Commentaar");
