@@ -17,6 +17,7 @@
 package nl.b3p.playbase.cron;
 
 import org.quartz.Job;
+import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
@@ -28,6 +29,7 @@ public class PlaybaseJob implements Job{
 
     @Override
     public void execute(JobExecutionContext jec) throws JobExecutionException {
+        JobDataMap jdm = jec.getJobDetail().getJobDataMap();
         String t = null;
         int a= 0;
     }

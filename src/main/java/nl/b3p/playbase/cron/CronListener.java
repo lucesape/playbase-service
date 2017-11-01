@@ -33,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import org.quartz.CronExpression;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
@@ -54,7 +55,8 @@ public class CronListener implements ServletContextListener {
 
     public static final String QUARTZ_GROUP_NAME = "PlaybaseJobgroup";
     public static final String QUARTZ_JOB_NAME = "PlaybaseJob";
-    public static final String QUARTZ_TRIGGER_NAME = "PlaybaseTriggerZ";
+    public static final String QUARTZ_TRIGGER_NAME = "PlaybaseTrigger";
+    public static final String QUARTZ_JOB_DATA_MAP_ENTITY_KEY = "CronJobEntity";
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
@@ -84,20 +86,30 @@ public class CronListener implements ServletContextListener {
                     log.error("Cannot create jobs", ex);
                 }
             }
-            
+
             scheduler.start();
         } catch (NamingException | SQLException | SchedulerException ex) {
             log.error("Cannot retrieve jobs", ex);
         }
     }
 
+    public static void runNow(CronJob job) throws SchedulerException {
+        //Create a new Job 
+        JobKey jobKey = JobKey.jobKey(QUARTZ_JOB_NAME + job.getId(), QUARTZ_GROUP_NAME);
+
+        JobDetail jobDetail = createJobDetail(job, true);
+        //Register this job to the scheduler
+        scheduler.addJob(jobDetail, true);
+
+        //Immediately fire the Job 
+        scheduler.triggerJob(jobKey);
+    }
+
     public static void scheduleJob(CronJob jobEntity) throws SchedulerException {
         if (CronExpression.isValidExpression(jobEntity.getCronexpressie())) {
-            JobDetail job = JobBuilder.newJob(PlaybaseJob.class)
-                    .withIdentity(QUARTZ_JOB_NAME + jobEntity.getId(), QUARTZ_GROUP_NAME)
-                    .build();
-            log.info("Scheduling job for expression " + jobEntity.getCronexpressie());
 
+            log.info("Scheduling job for expression " + jobEntity.getCronexpressie());
+            JobDetail job = createJobDetail(jobEntity, false);
             CronScheduleBuilder cronSchedule = CronScheduleBuilder.cronSchedule(jobEntity.getCronexpressie());
 
             Trigger trigger = TriggerBuilder.newTrigger()
@@ -109,12 +121,13 @@ public class CronListener implements ServletContextListener {
             scheduler.scheduleJob(job, trigger);
         }
     }
+
     public static void rescheduleJob(CronJob jobEntity) throws SchedulerException {
         if (CronExpression.isValidExpression(jobEntity.getCronexpressie())) {
-                 log.info("Rescheduling job for expression " + jobEntity.getCronexpressie());
+            log.info("Rescheduling job for expression " + jobEntity.getCronexpressie());
 
             CronScheduleBuilder cronSchedule = CronScheduleBuilder.cronSchedule(jobEntity.getCronexpressie());
-            
+
             TriggerKey oldTk = new TriggerKey(QUARTZ_TRIGGER_NAME + jobEntity.getId(), QUARTZ_GROUP_NAME);
             Trigger trigger = TriggerBuilder.newTrigger()
                     .withIdentity(QUARTZ_TRIGGER_NAME + jobEntity.getId(), QUARTZ_GROUP_NAME)
@@ -145,17 +158,20 @@ public class CronListener implements ServletContextListener {
         }
         return null;
     }
+
+    private static JobDetail createJobDetail(CronJob jobEntity, boolean durable) {
+        JobDetail job = JobBuilder.newJob(PlaybaseJob.class)
+                .withIdentity(QUARTZ_JOB_NAME + jobEntity.getId(), QUARTZ_GROUP_NAME)
+                .storeDurably(durable)
+                .usingJobData(createJobDataMap(jobEntity))
+                .build();
+        return job;
+    }
     
-    public static void runNow(CronJob job) throws SchedulerException{
-        //Create a new Job 
-        JobKey jobKey = JobKey.jobKey(QUARTZ_JOB_NAME + job.getId(), QUARTZ_GROUP_NAME);
-        JobDetail jobDetail = JobBuilder.newJob(PlaybaseJob.class).withIdentity(jobKey).storeDurably().build();
-
-        //Register this job to the scheduler
-        scheduler.addJob(jobDetail, true);
-
-        //Immediately fire the Job 
-        scheduler.triggerJob(jobKey);
+    private static JobDataMap createJobDataMap(CronJob job){
+        JobDataMap jdm = new JobDataMap();
+        jdm.put(QUARTZ_JOB_DATA_MAP_ENTITY_KEY, job);
+        return jdm;
     }
 
     @Override
