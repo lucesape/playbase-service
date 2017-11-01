@@ -21,6 +21,7 @@ import java.sql.Timestamp;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.NamingException;
+import nl.b3p.mail.Mailer;
 import nl.b3p.playbase.ImportReport;
 import nl.b3p.playbase.ImportReport.ImportType;
 import nl.b3p.playbase.PlaymappingImporter;
@@ -84,6 +85,7 @@ public class PlaybaseJob implements Job {
                 logString = "Kon niet importeren. Zie logfile.";
             }
             savecronjob(job, logString, importedString);
+            
         } catch (SQLException | NamingException ex) {
             log.error("Cannot save report: ", ex);
         }
@@ -105,5 +107,22 @@ public class PlaybaseJob implements Job {
         sb.append(" where id = ?");
 
         DB.qr().update(sb.toString(), logString, importedString, new Timestamp(new java.util.Date().getTime()), cronjob.getId());
+    }
+    
+    private void sendMail(CronJob cronjob, String logString) {
+        if (cronjob.getMailaddress() != null) {
+            String subject = "Playbase cron status: " + cronjob.getType_().toString() + " voor project " + cronjob.getProject();
+            StringBuilder content = new StringBuilder();
+            content.append("Status rapport ").append(cronjob.getId());
+            content.append(System.lineSeparator());
+            content.append("Log: ");
+            content.append(System.lineSeparator());
+            content.append(logString);
+            try {
+                Mailer.sendMail("Playbase", "support@b3partners.nl", cronjob.getMailaddress(), subject, content.toString());
+            } catch (Exception ex) {
+                log.error("Cannot send mail:",ex);
+            }
+        }
     }
 }

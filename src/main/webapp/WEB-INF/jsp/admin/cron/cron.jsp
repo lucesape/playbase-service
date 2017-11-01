@@ -65,10 +65,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     <tr><td>User</td><td><stripes:text name="cronjob.username"/></td></tr>
                     <tr><td>Password </td><td><stripes:text name="cronjob.password"/></td></tr>
                     <tr><td>Project</td><td><stripes:text name="cronjob.project"/></td></tr>
+                    <tr><td>Mail adres</td><td><stripes:text name="cronjob.mailaddress"/></td></tr>
                     <tr><td><stripes:submit name="save" class="btn btn-primary">Opslaan</stripes:submit></td>
                         <td><stripes:submit name="nieuw" class="btn btn-default">Nieuw</stripes:submit></td>
                         <td><c:if test="${not empty actionBean.cronjob.id}"><stripes:submit name="removeCron" class="btn btn-danger">Verwijder</stripes:submit>
                        <stripes:submit name="runNow" class="btn btn-warning">Voer nu uit</stripes:submit></c:if></td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">Log: <stripes:textarea cols="80" disabled="true" rows="30" name="cronjob.log"/></td>
                     </tr>
                     </table>
 

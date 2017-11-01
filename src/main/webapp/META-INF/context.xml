@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Context antiJARLocking="true" path="/playbase-service">
   <ResourceLink global="jdbc/playbase-service" name="jdbc/playbase-service" type="javax.sql.DataSource"/>
+  <ResourceLink global="mail/session" name="mail/session" type="javax.mail.Session"/>
 </Context>

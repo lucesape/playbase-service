@@ -33,6 +33,7 @@ public class CronJob {
     private Date lastrun;
     private String log;
     private String importedstring;
+    private String mailaddress;
     
 
     public Integer getId() {
@@ -108,5 +109,11 @@ public class CronJob {
         this.importedstring = importedstring;
     }
 
-    
+    public String getMailaddress() {
+        return mailaddress;
+    }
+
+    public void setMailaddress(String mailaddress) {
+        this.mailaddress = mailaddress;
+    }
 }

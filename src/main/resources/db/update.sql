@@ -8,6 +8,7 @@ CREATE TABLE public.cronjob
    project text, 
    log text, 
    importedstring text,
+   mailaddress text,
    lastrun timestamp without time zone
 ) 
 WITH (

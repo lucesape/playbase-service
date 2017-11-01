@@ -18,7 +18,6 @@ package nl.b3p.playbase.stripes;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -38,6 +37,7 @@ import net.sourceforge.stripes.validation.EnumeratedTypeConverter;
 import net.sourceforge.stripes.validation.SimpleError;
 import net.sourceforge.stripes.validation.Validate;
 import net.sourceforge.stripes.validation.ValidateNestedProperties;
+import nl.b3p.mail.Mailer;
 import nl.b3p.playbase.cron.CronListener;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.CronJob;
@@ -73,6 +73,7 @@ public class CronActionBean implements ActionBean {
         @Validate(field = "cronexpressie"),
         @Validate(field = "username"),
         @Validate(field = "password"),
+        @Validate(field = "mailaddress"),
         @Validate(field = "project"),
         @Validate(field = "id"),
         @Validate(field = "type_", converter = EnumeratedTypeConverter.class, required = true, on = "save")
