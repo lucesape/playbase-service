@@ -160,6 +160,7 @@ public class PlayadvisorImporter extends Importer {
         Location existingLocation = getMergedLocation(location);
         String prevPostfix = postfix;
         boolean locationAlreadyMerged = existingLocation != null;
+        boolean locationAlreadyExists = false; // alreadymerged is for playadvisor locations which are already merge into the playmapping table. alreadyexists are for playadvisor locations not yet merged (ie. exist in playadvisor_locations_playadvisor table)
         if(locationAlreadyMerged){
             MatchActionBean.mergeLocations(location, existingLocation);
             location = existingLocation;
@@ -169,6 +170,10 @@ public class PlayadvisorImporter extends Importer {
             DB.qr().update("DELETE FROM " + DB.LOCATION_CATEGORY_TABLE + " WHERE pa_id = ?", location.getPa_id());
             // remove assets from playadvisor which are not in playmapping
             DB.qr().update("delete from " + DB.ASSETS_TABLE + " where location = ? and pa_guid = ? and pm_guid is null", location.getId(), location.getPa_id());
+            locationAlreadyExists = true;
+        }else{
+            Location existingLoc= getExistingLocation(location);
+            locationAlreadyExists = existingLoc != null;
         }
         int id = saveLocation(location, report);
         List<Asset> assets = parseAssets(location, locationMap, locationAlreadyMerged);
@@ -177,11 +182,11 @@ public class PlayadvisorImporter extends Importer {
             saveAsset(asset, report);
         }
 
-        saveLocationAgeCategory(location, Arrays.asList(location.getAgecategories()), !locationAlreadyMerged);
+        saveLocationAgeCategory(location, Arrays.asList(location.getAgecategories()), locationAlreadyExists);
 
         try {
             if (((String) locationMap.get(LOCATIONSUBTYPE)).length() > 0) {
-                saveLocationType((String) locationMap.get(LOCATIONSUBTYPE), location, !locationAlreadyMerged);
+                saveLocationType((String) locationMap.get(LOCATIONSUBTYPE), location, locationAlreadyExists);
             }
         } catch (IllegalArgumentException ex) {
             report.addError(ex.getLocalizedMessage() + ". Location is saved, but type is not.", ImportType.LOCATION);
@@ -189,7 +194,7 @@ public class PlayadvisorImporter extends Importer {
 
         try {
             if (((String) locationMap.get(FACILITIES)).length() > 0) {
-                saveFacilities(location, (String) locationMap.get(FACILITIES), locationAlreadyMerged);
+                saveFacilities(location, (String) locationMap.get(FACILITIES), locationAlreadyExists);
             }
         } catch (IllegalArgumentException ex) {
             report.addError(ex.getLocalizedMessage() + ". Location is saved, but facilities are not.", ImportType.LOCATION);
@@ -226,7 +231,26 @@ public class PlayadvisorImporter extends Importer {
         loc = DB.qr().query(sb.toString(), locationHandler);
         return loc;
     }
-    
+
+    public Location getExistingLocation(Location newLocation) throws NamingException, SQLException {
+        Location loc;
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("select * from ");
+
+        sb.append(DB.LOCATION_TABLE).append(postfix);
+        if (newLocation.getId() != null) {
+            sb.append(" where id = '");
+            sb.append(newLocation.getId());
+        } else {
+            sb.append(" where pa_id = '");
+            sb.append(newLocation.getPa_id());
+        }
+        sb.append("';");
+        loc = DB.qr().query(sb.toString(), locationHandler);
+        return loc;
+    }
+
     protected Map<String, Object> parseRecord(String[] record) {
         Map<String, Object> dbvalues = new HashMap<>();
         String[] imageUrls = null;
@@ -302,7 +326,7 @@ public class PlayadvisorImporter extends Importer {
         String parking = (String) lM.get("parking");
         l.setParking(parkingTypes.get(parkingMapping.get(parking)));
         String agecats = (String) lM.get(AGECATEGORIES);
-        String[] agecategories = agecats.split(",");
+        String[] agecategories = agecats.split("\\|");
         List<Integer> ids = new ArrayList<>();
         for (String agecategory : agecategories) {
             if (agecategory.length() > 0) {

@@ -29,8 +29,8 @@ import java.util.Set;
  * @author Meine Toonen
  */
 public class ImportReport {
- 
-    private final Map<ImportType,String> importedstring = new HashMap<>();
+
+    private final Map<ImportType, String> importedstring = new HashMap<>();
     private final Map<ImportType, Set<String>> errorsMessages = new HashMap<>();
     private final Map<ImportType, Integer> errors = new HashMap<>();
     private final Map<ImportType, Integer> inserted = new HashMap<>();
@@ -86,7 +86,7 @@ public class ImportReport {
         return allErrors;
     }
 
-    public Map<ImportType,String> getImportedstring() {
+    public Map<ImportType, String> getImportedstring() {
         return importedstring;
     }
 
@@ -101,7 +101,8 @@ public class ImportReport {
         sb.append(new Date());
         sb.append(ls);
         sb.append("*******************");
-        
+
+        sb.append(ls);
         sb.append("Er zijn ").append(getNumberInserted(ImportType.ASSET)).append(" ").append(ImportType.ASSET.toString()).append(" weggeschreven.");
         sb.append(ls);
         sb.append("Er zijn ").append(getNumberInserted(ImportType.LOCATION)).append(" ").append(ImportType.LOCATION.toString()).append(" weggeschreven.");
@@ -113,9 +114,9 @@ public class ImportReport {
 
         if (getErrors().size() > 0) {
             sb.append("Er zijn ").append(getErrors(ImportType.ASSET).size()).append(" ").append(ImportType.ASSET.toString()).append(" mislukt:");
-        sb.append(ls);
+            sb.append(ls);
             sb.append("Er zijn ").append(getErrors(ImportType.LOCATION).size()).append(" ").append(ImportType.LOCATION.toString()).append(" mislukt:");
-        sb.append(ls);
+            sb.append(ls);
 
             for (ImportType importType : getAllErrors().keySet()) {
                 Set<String> errs = getAllErrors().get(importType);
@@ -125,7 +126,7 @@ public class ImportReport {
                 }
             }
         }
-        
+
         return sb.toString();
     }
 

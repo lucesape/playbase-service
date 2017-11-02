@@ -290,7 +290,7 @@ ALTER TABLE playservice_location_accessibility_playadvisor
 --
 
 ALTER TABLE playservice_location_agecategories_playadvisor
-    ADD CONSTRAINT playservicelocationagecategories_playadvisor_fk2 FOREIGN KEY (location) REFERENCES playservice_locations_playadvisor(id);
+    ADD CONSTRAINT playservicelocationagecategories_playadvisor_fk2 FOREIGN KEY (location) REFERENCES playservice_locations_playadvisor(id) ON DELETE CASCADE;
 
 
 --
