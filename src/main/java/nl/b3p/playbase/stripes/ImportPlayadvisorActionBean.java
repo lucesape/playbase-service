@@ -47,7 +47,7 @@ public class ImportPlayadvisorActionBean implements ActionBean {
     private ActionBeanContext context;
     private static final String JSP = "/WEB-INF/jsp/admin/import/playadvisor.jsp";
 
-    private PlayadvisorImporter processor = new PlayadvisorImporter();
+    private PlayadvisorImporter processor;
 
     @Validate
     private FileBean csv;
@@ -57,6 +57,9 @@ public class ImportPlayadvisorActionBean implements ActionBean {
 
     @Validate
     private String file;
+
+    @Validate
+    private String project;
 
     // <editor-fold desc="Getters and setters" defaultstate="collapsed">
     public ActionBeanContext getContext() {
@@ -91,6 +94,14 @@ public class ImportPlayadvisorActionBean implements ActionBean {
         this.comments = comments;
     }
 
+    public String getProject() {
+        return project;
+    }
+
+    public void setProject(String project) {
+        this.project = project;
+    }
+
     // </editor-fold>
     
     @DefaultHandler
@@ -101,6 +112,7 @@ public class ImportPlayadvisorActionBean implements ActionBean {
     public Resolution importLocations() {
         try {
             ImportReport report = new ImportReport();
+            processor = new PlayadvisorImporter(project);
             if (csv != null) {
                 processor.importStream(csv.getInputStream(), report);
             }

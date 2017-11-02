@@ -71,8 +71,8 @@ public class PlaymappingImporter extends Importer {
 
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     private Map<String, List<Integer>> agecategories;
-    public PlaymappingImporter() {
-        super();
+    public PlaymappingImporter(String project) {
+        super(project);
         ArrayListHandler rsh = new ArrayListHandler();
         try {
             agecategories = new HashMap<>();

@@ -25,3 +25,10 @@ ALTER TABLE public.playservice_location_equipment_agecategories
   DROP CONSTRAINT playservicelocationequipmentagecategories_fk2;
 ALTER TABLE public.playservice_location_equipment_agecategories
   ADD CONSTRAINT playservicelocationequipmentagecategories_fk2 FOREIGN KEY (location_equipment) REFERENCES public.playservice_location_equipment (id) ON UPDATE NO ACTION ON DELETE CASCADE;
+
+ALTER TABLE public.playservice_locations
+  ADD COLUMN project character varying(255);
+
+
+ALTER TABLE public.playservice_locations_playadvisor
+  ADD COLUMN project character varying(255);

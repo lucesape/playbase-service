@@ -55,6 +55,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     <label class="col-sm-2 control-label">password</label>
                     <div class="col-sm-10"><stripes:text class="form-control" value="Chris.234!" name="password"/></div>
                 </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Project</label>
+                    <div class="col-sm-10"><stripes:text class="form-control" value="groningen" name="project"/></div>
+                </div>
 
          </stripes:form>
     </stripes:layout-component>

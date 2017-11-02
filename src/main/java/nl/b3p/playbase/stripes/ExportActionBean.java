@@ -35,8 +35,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.naming.NamingException;
 import javax.servlet.http.HttpServletResponse;
 import net.sourceforge.stripes.action.ActionBean;
@@ -95,6 +93,8 @@ public class ExportActionBean implements ActionBean {
     private String locationName;
     @Validate
     private String downloadlocation;
+    @Validate
+    private String project;
 
     @DefaultHandler
     public Resolution view() {
@@ -149,7 +149,10 @@ public class ExportActionBean implements ActionBean {
                 query += " where pa_title like ? or title like ?";
                 String wildcard = "%" + locationName + "%";
                 locations = DB.qr().query(query, rsh, wildcard, wildcard);
-            } else {
+            } else if(project != null){
+                query += " where project = ?";
+                locations = DB.qr().query(query, rsh, project);
+            }else{
                 locations = DB.qr().query(query, rsh);
             }
 
@@ -469,5 +472,12 @@ Parkeren
         this.downloadlocation = downloadlocation;
     }
 
+    public String getProject() {
+        return project;
+    }
+
+    public void setProject(String project) {
+        this.project = project;
+    }
     //</editor-fold>
 }

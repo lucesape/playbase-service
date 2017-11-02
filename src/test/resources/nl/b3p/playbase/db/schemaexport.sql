@@ -143,7 +143,8 @@ CREATE TABLE playservice_locations (
     parking integer,
     geom clob,
     averagerating integer,
-    type clob
+    type clob,
+    project character varying(255)
 
 );
 

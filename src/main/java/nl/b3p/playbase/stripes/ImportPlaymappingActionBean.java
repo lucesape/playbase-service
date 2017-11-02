@@ -67,7 +67,10 @@ public class ImportPlaymappingActionBean implements ActionBean {
     @Validate
     private String file;
 
-    private final PlaymappingImporter processor = new PlaymappingImporter();
+    @Validate
+    private String project;
+    
+    private PlaymappingImporter processor;
 
     @DefaultHandler
     @DontValidate
@@ -77,6 +80,7 @@ public class ImportPlaymappingActionBean implements ActionBean {
 
     public Resolution importPM() throws NamingException, SQLException {
         ImportReport report;
+        processor = new PlaymappingImporter(project);
         processor.init();
         if (file.equalsIgnoreCase("Via API")) {
             report = processor.importJSONFromAPI(getUsername(), getPassword(), getApiurl());
@@ -189,6 +193,16 @@ public class ImportPlaymappingActionBean implements ActionBean {
     public void setFile(String file) {
         this.file = file;
     }
+    
+    public String getProject() {
+        return project;
+    }
+
+    public void setProject(String project) {
+        this.project = project;
+    }
+    
 
     // </editor-fold> 
+
 }

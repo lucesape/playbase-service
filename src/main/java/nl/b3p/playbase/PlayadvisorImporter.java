@@ -59,8 +59,8 @@ public class PlayadvisorImporter extends Importer {
 
     private Map<String, String> parkingMapping;
     
-    public PlayadvisorImporter() {
-        super();
+    public PlayadvisorImporter(String project) {
+        super(project);
         postfix = "_playadvisor";
         playadvisorColumnToPlaybase = new HashMap<>();
         playadvisorColumnToPlaybase.put(0, "pa_id");

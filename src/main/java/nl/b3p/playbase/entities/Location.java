@@ -43,6 +43,7 @@ public class Location {
     private String website;
     private String email;
     private String phone;
+    private String project;
     private Double longitude = null;
     private Double latitude = null;
     private String pm_guid;
@@ -262,6 +263,14 @@ public class Location {
 
     public void setPa_title(String pa_title) {
         this.pa_title = pa_title;
+    }
+
+    public String getProject() {
+        return project;
+    }
+
+    public void setProject(String project) {
+        this.project = project;
     }
     
 }

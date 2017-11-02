@@ -94,9 +94,11 @@ public abstract class Importer {
     protected Map<String, Integer> parkingTypes;
     
     public String postfix = "";
+    
+    private String project;
 
-    public Importer() {
-
+    public Importer(String project) {
+        this.project = project;
         ArrayListHandler rsh = new ArrayListHandler();
         try {
             assetTypes = new HashMap<>();
@@ -238,12 +240,14 @@ public abstract class Importer {
             sb.append("website,");
             sb.append("pa_id,");
             sb.append("pa_title,");
+            sb.append("project,");
             sb.append("pm_guid) ");
-            sb.append("VALUES( ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);");
+            sb.append("VALUES( ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);");
 
             savedLocation = DB.qr().insert(sb.toString(), locationHandler, location.getTitle(), location.getLatitude(), location.getLongitude(), geom, 
                     location.getAveragerating() != null ? location.getAveragerating() : 0, location.getPa_content(), location.getPm_content(), location.getMunicipality(), location.getCountry(),
-                   location.getStreet(), location.getPostalcode(), location.getParking(), location.getPhone(), location.getWebsite(), location.getPa_id(), location.getPa_title(), location.getPm_guid());
+                   location.getStreet(), location.getPostalcode(), location.getParking(), location.getPhone(), location.getWebsite(), location.getPa_id(), location.getPa_title(),
+                   project,location.getPm_guid());
             id = savedLocation.getId();
             report.increaseInserted(ImportType.LOCATION);
             List<Map<String, Object>> images = location.getImages();
@@ -271,12 +275,14 @@ public abstract class Importer {
             sb.append("website = ?,");
             sb.append("pa_id = ?,");
             sb.append("pa_title = ?,");
+            sb.append("project = ?,");
             sb.append("pm_guid = ?");
             sb.append("where id = ?;");
 
             DB.qr().update(sb.toString(), location.getTitle(), location.getLatitude(), location.getLongitude(), geom, 
                     location.getAveragerating() != null ? location.getAveragerating() : 0, location.getPa_content(),location.getPm_content(), location.getMunicipality(), location.getCountry(),
-                    location.getStreet(), location.getPostalcode(), location.getParking(), location.getPhone(), location.getWebsite(), location.getPa_id(), location.getPa_title(), location.getPm_guid(), id);
+                    location.getStreet(), location.getPostalcode(), location.getParking(), location.getPhone(), location.getWebsite(), 
+                    location.getPa_id(), location.getPa_title(), project, location.getPm_guid(), id);
             report.increaseUpdated(ImportType.LOCATION);
         }
         location.setId(id);
@@ -788,6 +794,16 @@ public abstract class Importer {
         }
         return stringResult;
     }
+    
+    public String getProject() {
+        return project;
+    }
+
+    public void setProject(String project) {
+        this.project = project;
+    }
+    
     // </editor-fold>
+
 
 }

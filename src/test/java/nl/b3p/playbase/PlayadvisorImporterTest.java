@@ -59,7 +59,7 @@ public class PlayadvisorImporterTest extends TestUtil {
 
     @Before
     public void beforeTest() {
-        instance = new PlayadvisorImporter();
+        instance = new PlayadvisorImporter("test");
     }
 
     /**

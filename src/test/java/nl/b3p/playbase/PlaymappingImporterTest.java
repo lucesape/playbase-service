@@ -54,7 +54,7 @@ public class PlaymappingImporterTest extends TestUtil {
 
     @Before
     public void beforeTest() {
-        instance = new PlaymappingImporter();
+        instance = new PlaymappingImporter("test");
         instance.init();
         report = new ImportReport();
     }

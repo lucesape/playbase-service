@@ -71,7 +71,7 @@ public class PlaybaseJob implements Job {
 
     private void importPlaymapping(CronJob job) {
 
-        PlaymappingImporter pi = new PlaymappingImporter();
+        PlaymappingImporter pi = new PlaymappingImporter(job.getProject());
 
         ImportReport locationReport = null;
         ImportReport assetsReport = null;
@@ -100,7 +100,7 @@ public class PlaybaseJob implements Job {
     }
 
     private void importPlayadvisor(CronJob job)  {
-        PlayadvisorImporter pi = new PlayadvisorImporter();
+        PlayadvisorImporter pi = new PlayadvisorImporter(job.getProject());
         ImportReport report = new ImportReport();
         // call trigger
         String res = pi.getResponse(null, null, "https://playadvisor.co/wp-cron.php?export_key=cJw6jqUHqkC5&export_id=40&action=trigger", report);

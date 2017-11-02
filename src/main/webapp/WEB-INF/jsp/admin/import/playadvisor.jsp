@@ -26,6 +26,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <stripes:form beanclass="nl.b3p.playbase.stripes.ImportPlayadvisorActionBean" class="form-horizontal">
             <stripes:submit name="importLocations" class="btn btn-primary">Importeer</stripes:submit>
             <stripes:submit name="cancel" class="btn btn-default">Annuleren</stripes:submit>
+              <div class="form-group">
+                    <label class="col-sm-2 control-label">Project</label>
+                    <div class="col-sm-10"><stripes:text class="form-control" value="groningen" name="project"/></div>
+                </div>
             <div class="form-group">
                 <label class="col-sm-2 control-label">Export speelplekken playadvisor</label>
                 <stripes:file name="csv"/>

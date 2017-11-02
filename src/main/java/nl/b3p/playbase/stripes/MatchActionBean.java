@@ -302,7 +302,7 @@ public class MatchActionBean implements ActionBean {
             Location playadvisorLoc = DB.qr().query("select * from " + DB.LOCATION_TABLE + "_playadvisor where id = ?", handler, playadvisorId);
             Location playmappingLoc = DB.qr().query("select * from " + DB.LOCATION_TABLE + " where id = ?", handler, playmappingId);
             
-            PlaymappingImporter importer = new PlaymappingImporter();
+            PlaymappingImporter importer = new PlaymappingImporter(null);
             
             Location toSave = null;
             if(method.equals("merge")){
@@ -314,6 +314,7 @@ public class MatchActionBean implements ActionBean {
                 toSave.setId(null);
                 playmappingLoc = playadvisorLoc;
             }
+            importer.setProject(toSave.getProject());
             Integer locationId = importer.saveLocation(toSave, new ImportReport());
             if(method.equals("add") || useImagesFromPlayadvisor){
                 transferImages(playadvisorLoc, locationId, importer);

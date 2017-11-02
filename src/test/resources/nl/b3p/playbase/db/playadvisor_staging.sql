@@ -26,6 +26,7 @@ CREATE TABLE playservice_locations_playadvisor
   geom clob,
   averagerating integer,
   type clob,
+  project character varying(255),
   CONSTRAINT playservice_locationsplayadvisor_pkey PRIMARY KEY (id),
   CONSTRAINT playservicelocationsplayadvisor_fk1 FOREIGN KEY (parking)
       REFERENCES playservice_parking_list (id) MATCH SIMPLE
