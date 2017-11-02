@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.NamingException;
@@ -37,13 +38,13 @@ import net.sourceforge.stripes.validation.EnumeratedTypeConverter;
 import net.sourceforge.stripes.validation.SimpleError;
 import net.sourceforge.stripes.validation.Validate;
 import net.sourceforge.stripes.validation.ValidateNestedProperties;
-import nl.b3p.mail.Mailer;
 import nl.b3p.playbase.cron.CronListener;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.CronJob;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
@@ -118,6 +119,21 @@ public class CronActionBean implements ActionBean {
             context.getValidationErrors().add("cronjob", new SimpleError("Error running:", ex.getLocalizedMessage()));
         }
         return nieuw();
+    }
+    
+    public Resolution downloadString(){
+        ResultSetHandler h = new MapHandler();
+        try {
+            Map o  = (Map)DB.qr().query("SELECT importedstring from " + DB.CRONJOB_TABLE + " WHERE id = ?", h, cronjob.getId());
+            
+            StreamingResolution res = new StreamingResolution("application/json",(String)o.get("importedstring"));
+            res.setFilename(cronjob.getType_().toString() + "-" + cronjob.getProject() + cronjob.getId() );
+            res.setAttachment(true);
+            return res;
+        } catch (NamingException | SQLException ex) {
+            log.error("Cannot retrieve string",ex);
+            return view();
+        }
     }
 
     public Resolution save() {

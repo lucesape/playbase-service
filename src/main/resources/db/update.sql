@@ -20,3 +20,8 @@ ALTER TABLE public.cronjob
 
 ALTER TABLE public.cronjob
   ADD CONSTRAINT prim_key_cronjob PRIMARY KEY (id);
+
+ALTER TABLE public.playservice_location_equipment_agecategories
+  DROP CONSTRAINT playservicelocationequipmentagecategories_fk2;
+ALTER TABLE public.playservice_location_equipment_agecategories
+  ADD CONSTRAINT playservicelocationequipmentagecategories_fk2 FOREIGN KEY (location_equipment) REFERENCES public.playservice_location_equipment (id) ON UPDATE NO ACTION ON DELETE CASCADE;

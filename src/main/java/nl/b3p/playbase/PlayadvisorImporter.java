@@ -189,7 +189,7 @@ public class PlayadvisorImporter extends Importer {
 
         try {
             if (((String) locationMap.get(FACILITIES)).length() > 0) {
-                saveFacilities(location, (String) locationMap.get(FACILITIES), !locationAlreadyMerged);
+                saveFacilities(location, (String) locationMap.get(FACILITIES), locationAlreadyMerged);
             }
         } catch (IllegalArgumentException ex) {
             report.addError(ex.getLocalizedMessage() + ". Location is saved, but facilities are not.", ImportType.LOCATION);
@@ -302,7 +302,7 @@ public class PlayadvisorImporter extends Importer {
         String parking = (String) lM.get("parking");
         l.setParking(parkingTypes.get(parkingMapping.get(parking)));
         String agecats = (String) lM.get(AGECATEGORIES);
-        String[] agecategories = agecats.split("\\|");
+        String[] agecategories = agecats.split(",");
         List<Integer> ids = new ArrayList<>();
         for (String agecategory : agecategories) {
             if (agecategory.length() > 0) {

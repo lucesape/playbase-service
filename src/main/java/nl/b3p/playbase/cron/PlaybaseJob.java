@@ -16,19 +16,26 @@
  */
 package nl.b3p.playbase.cron;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.NamingException;
+import nl.b3p.commons.csv.CsvFormatException;
 import nl.b3p.mail.Mailer;
 import nl.b3p.playbase.ImportReport;
 import nl.b3p.playbase.ImportReport.ImportType;
+import nl.b3p.playbase.PlayadvisorImporter;
 import nl.b3p.playbase.PlaymappingImporter;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.CronJob;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -81,7 +88,7 @@ public class PlaybaseJob implements Job {
             if (locationReport != null && assetsReport != null) {
                 logString = "Location: " + locationReport.toLog() + System.lineSeparator() + "Assets: " + assetsReport.toLog();
                 importedString = "Location: " + locationReport.getImportedstring().get(ImportType.LOCATION) + System.lineSeparator() + "Assets: " + assetsReport.getImportedstring().get(ImportType.ASSET);
-            }else{
+            } else {
                 logString = "Kon niet importeren. Zie logfile.";
             }
             savecronjob(job, logString, importedString);
@@ -92,8 +99,43 @@ public class PlaybaseJob implements Job {
 
     }
 
-    private void importPlayadvisor(CronJob job) {
-        throw new UnsupportedOperationException("Automagically importing playdvisor not yet implemented");
+    private void importPlayadvisor(CronJob job)  {
+        PlayadvisorImporter pi = new PlayadvisorImporter();
+        ImportReport report = new ImportReport();
+        // call trigger
+        String res = pi.getResponse(null, null, "https://playadvisor.co/wp-cron.php?export_key=cJw6jqUHqkC5&export_id=40&action=trigger", report);
+        // call processing until finished
+
+        String message = "";
+        do {
+            try {
+                res = pi.getResponse(null, null, "https://playadvisor.co/wp-cron.php?export_key=cJw6jqUHqkC5&export_id=40&action=processing", report);
+                JSONObject result = new JSONObject(res);
+                message = result.getString("message");
+                Thread.sleep(10000);
+            } catch (InterruptedException ex) {
+                log.error("I can get no sleep.", ex);
+            }
+        } while (!message.contains("complete"));
+        // download file 
+        res = pi.getResponse(null, null, "https://playadvisor.co/wp-cron.php?export_hash=769d892bbafcb055&export_id=40&action=get_data", report);
+        
+        try {
+            InputStream is = new ByteArrayInputStream( res.getBytes( "UTF-8" ) );
+            pi.importStream(is, report);
+        } catch (UnsupportedEncodingException ex) {
+            log.error("Cannot import playadvisor csv",ex);
+        } catch (IOException | CsvFormatException ex) {
+            log.error("Cannot import playadvisor csv",ex);
+        }
+        String logmessage = report.toLog();
+        
+        try {
+            savecronjob(job, logmessage, res);
+            sendMail(job, logmessage);
+        } catch (NamingException | SQLException ex) {
+            log.error("Cannot save cronjob",ex);
+        }
     }
 
     private void savecronjob(CronJob cronjob, String logString, String importedString) throws NamingException, SQLException {
@@ -108,7 +150,7 @@ public class PlaybaseJob implements Job {
 
         DB.qr().update(sb.toString(), logString, importedString, new Timestamp(new java.util.Date().getTime()), cronjob.getId());
     }
-    
+
     private void sendMail(CronJob cronjob, String logString) {
         if (cronjob.getMailaddress() != null) {
             String subject = "Playbase cron status: " + cronjob.getType_().toString() + " voor project " + cronjob.getProject();
@@ -121,7 +163,7 @@ public class PlaybaseJob implements Job {
             try {
                 Mailer.sendMail("Playbase", "support@b3partners.nl", cronjob.getMailaddress(), subject, content.toString());
             } catch (Exception ex) {
-                log.error("Cannot send mail:",ex);
+                log.error("Cannot send mail:", ex);
             }
         }
     }

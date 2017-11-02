@@ -69,7 +69,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     <tr><td><stripes:submit name="save" class="btn btn-primary">Opslaan</stripes:submit></td>
                         <td><stripes:submit name="nieuw" class="btn btn-default">Nieuw</stripes:submit></td>
                         <td><c:if test="${not empty actionBean.cronjob.id}"><stripes:submit name="removeCron" class="btn btn-danger">Verwijder</stripes:submit>
-                       <stripes:submit name="runNow" class="btn btn-warning">Voer nu uit</stripes:submit></c:if></td>
+                       <stripes:submit name="runNow" class="btn btn-warning">Voer nu uit</stripes:submit>
+                        <stripes:submit name="downloadString" class="btn btn-default">Download</stripes:submit></c:if></td>
                     </tr>
                     <tr>
                         <td colspan="3">Log: <stripes:textarea cols="80" disabled="true" rows="30" name="cronjob.log"/></td>
