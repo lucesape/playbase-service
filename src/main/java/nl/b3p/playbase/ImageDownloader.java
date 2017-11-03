@@ -132,10 +132,14 @@ public class ImageDownloader {
         @Override
         public Object call() throws Exception {
             status = ACTIVE;
-            if (url == null || url.length() == 0) {
+            if (url == null || url.length() == 0 ) {
                 return this;
             }
 
+            if(file.exists()){
+                return this;
+            }
+            
             try {
                 loadImage(url);
                 setMessage("");
