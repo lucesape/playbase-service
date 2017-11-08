@@ -159,7 +159,7 @@ public class CronActionBean implements ActionBean {
                 sb.append("exporthash,");
                 sb.append("mailaddress,");
                 sb.append("cronexpressie) ");
-                sb.append("VALUES(  ?,?,?,?,?,?);");
+                sb.append("VALUES(  ?,?,?,?,?,?,?,?);");
 
                 cronjob = DB.qr().insert(sb.toString(), cronHandler, cronjob.getType_().name(), cronjob.getUsername(), cronjob.getPassword(), cronjob.getProject(),
                         cronjob.getBaseurl(), cronjob.getExporthash(), cronjob.getMailaddress(), cronjob.getCronexpressie());
