@@ -22,8 +22,6 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.naming.NamingException;
 import nl.b3p.commons.csv.CsvFormatException;
 import nl.b3p.mail.Mailer;
@@ -64,6 +62,8 @@ public class PlaybaseJob implements Job {
             case IMPORT_PLAYMAPPING:
                 importPlaymapping(cj);
                 break;
+            case EXPORT_PLAYADVISOR:
+                exportPlayadvisor(cj);
             default:
                 break;
         }
@@ -103,13 +103,13 @@ public class PlaybaseJob implements Job {
         PlayadvisorImporter pi = new PlayadvisorImporter(job.getProject());
         ImportReport report = new ImportReport();
         // call trigger
-        String res = pi.getResponse(null, null, "https://playadvisor.co/wp-cron.php?export_key=cJw6jqUHqkC5&export_id=40&action=trigger", report);
+        String res = pi.getResponse(null, null, job.getBaseurl() +"/wp-cron.php?export_key=" + job.getPassword() + "&export_id=" + job.getUsername() +"&action=trigger", report);
         // call processing until finished
 
         String message = "";
         do {
             try {
-                res = pi.getResponse(null, null, "https://playadvisor.co/wp-cron.php?export_key=cJw6jqUHqkC5&export_id=40&action=processing", report);
+                res = pi.getResponse(null, null, job.getBaseurl() +"/wp-cron.php?export_key=" + job.getPassword() + "&export_id=" + job.getUsername() +"&action=processing", report);
                 JSONObject result = new JSONObject(res);
                 message = result.getString("message");
                 Thread.sleep(10000);
@@ -118,7 +118,45 @@ public class PlaybaseJob implements Job {
             }
         } while (!message.contains("complete"));
         // download file 
-        res = pi.getResponse(null, null, "https://playadvisor.co/wp-cron.php?export_hash=769d892bbafcb055&export_id=40&action=get_data", report);
+        res = pi.getResponse(null, null, job.getBaseurl() +"/wp-cron.php?export_hash=" + job.getExporthash() + "&export_id=" + job.getUsername() +"&action=get_data", report);
+        
+        try {
+            InputStream is = new ByteArrayInputStream( res.getBytes( "UTF-8" ) );
+            pi.importStream(is, report);
+        } catch (UnsupportedEncodingException ex) {
+            log.error("Cannot import playadvisor csv",ex);
+        } catch (IOException | CsvFormatException ex) {
+            log.error("Cannot import playadvisor csv",ex);
+        }
+        String logmessage = report.toLog();
+        
+        try {
+            savecronjob(job, logmessage, res);
+            sendMail(job, logmessage);
+        } catch (NamingException | SQLException ex) {
+            log.error("Cannot save cronjob",ex);
+        }
+    }
+    private void exportPlayadvisor(CronJob job)  {
+        PlayadvisorImporter pi = new PlayadvisorImporter(job.getProject());
+        ImportReport report = new ImportReport();
+        // call trigger
+        //http://playadvisor.b3p.nl/wp-cron.php?import_key=Vw&import_id=193&action=trigger
+        String res = pi.getResponse(null, null, job.getBaseurl() +"/wp-cron.php?import_id=" + job.getUsername() + "&import_key=" + job.getPassword() +"&action=trigger", report);
+        // call processing until finished
+
+        String message = "";
+        do {
+            try {
+                res = pi.getResponse(null, null, job.getBaseurl() +"/wp-cron.php?import_key=" + job.getPassword() + "&import_id=" + job.getUsername() +"&action=processing", report);
+                JSONObject result = new JSONObject(res);
+                message = result.getString("message");
+                Thread.sleep(10000);
+            } catch (InterruptedException ex) {
+                log.error("I can get no sleep.", ex);
+            }
+        } while (!message.contains("complete"));
+        // download file 
         
         try {
             InputStream is = new ByteArrayInputStream( res.getBytes( "UTF-8" ) );

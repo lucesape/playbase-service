@@ -7,6 +7,8 @@ CREATE TABLE public.cronjob
    password text, 
    project text, 
    log text, 
+   exporthash text, 
+   baseurl text, 
    importedstring text,
    mailaddress text,
    lastrun timestamp without time zone
@@ -32,3 +34,12 @@ ALTER TABLE public.playservice_locations
 
 ALTER TABLE public.playservice_locations_playadvisor
   ADD COLUMN project character varying(255);
+
+
+
+ALTER TABLE public.cronjob
+  ADD COLUMN exporthash text;
+
+
+ALTER TABLE public.cronjob
+  ADD COLUMN baseurl text;

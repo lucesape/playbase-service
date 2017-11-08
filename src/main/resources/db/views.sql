@@ -49,6 +49,10 @@ ALTER TABLE public.v_equipment_rd
 
 -- DROP VIEW public.v_locations_rd;
 
+-- View: public.v_locations_rd
+
+-- DROP VIEW public.v_locations_rd;
+
 CREATE OR REPLACE VIEW public.v_locations_rd AS 
  SELECT pl.id,
     pl.title,
@@ -122,6 +126,7 @@ CREATE OR REPLACE VIEW public.v_locations_rd AS
 
 ALTER TABLE public.v_locations_rd
   OWNER TO playbase;
+
 
 
 

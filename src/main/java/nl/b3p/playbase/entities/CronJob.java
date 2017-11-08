@@ -30,6 +30,8 @@ public class CronJob {
     private String username;
     private String password;
     private String project;
+    private String exporthash;
+    private String baseurl;
     private Date lastrun;
     private String log;
     private String importedstring;
@@ -116,4 +118,22 @@ public class CronJob {
     public void setMailaddress(String mailaddress) {
         this.mailaddress = mailaddress;
     }
+
+    public String getExporthash() {
+        return exporthash;
+    }
+
+    public void setExporthash(String exporthash) {
+        this.exporthash = exporthash;
+    }
+
+    public String getBaseurl() {
+        return baseurl;
+    }
+
+    public void setBaseurl(String baseurl) {
+        this.baseurl = baseurl;
+    }
+    
+    
 }
