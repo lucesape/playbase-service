@@ -87,7 +87,6 @@ public class ExportActionBean implements ActionBean {
     private Integer [] excl = {58,60,61,93,22,7,56,64,177,81,82,125,87,88,89,90,92,178,111,110,109,108,127,15,23,31,32,83,171,156,155,69,68,59,152,145,144,143,141,140,139,120,119,118,117,116,115};
     private List<Integer> excludedAssetTypes = Arrays.asList(excl);
 
-    private ImageDownloader downloader;
 
     @Validate
     private String locationName;
@@ -102,8 +101,6 @@ public class ExportActionBean implements ActionBean {
     }
 
     public Resolution export() throws IOException {
-        downloader = new ImageDownloader(downloadlocation);
-        downloader.run();
         final File f = File.createTempFile("locations_export", null);
         FileOutputStream fop = new FileOutputStream(f);
         final CsvOutputStream out = new CsvOutputStream(new OutputStreamWriter(fop), '|', false);
@@ -123,7 +120,6 @@ public class ExportActionBean implements ActionBean {
         }
         out.flush();
         String filename = "Speeltuinen.csv";
-        downloader.stop();
         return new StreamingResolution("text/csv") {
             @Override
             public void stream(HttpServletResponse response) throws Exception {
@@ -379,7 +375,6 @@ Parkeren
             if (imageName.contains("GetImage.ashx")) {
                 imageName = "Image" + id + "-" + index + ".jpg";
             }
-            downloadImage(url, imageName);
             urls += imageName;
             captions += valueOrEmptyString(image[1]);
             ids += valueOrEmptyString(image[2]);
@@ -388,10 +383,6 @@ Parkeren
         record.add(urls);
         record.add(captions);
         record.add(ids);
-    }
-
-    private void downloadImage(String url, String filename) {
-        downloader.add(url, filename);
     }
 
     private Object valueOrEmptyString(Object value) {

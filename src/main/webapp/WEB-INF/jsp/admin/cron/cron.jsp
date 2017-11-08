@@ -64,7 +64,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     <tr><td>Cron expressie </td><td><stripes:text name="cronjob.cronexpressie"/></td></tr>
                     <tr><td>User/[import|export] id</td><td><stripes:text name="cronjob.username"/></td></tr>
                     <tr><td>Password/[import|export] key </td><td><stripes:text name="cronjob.password"/></td></tr>
-                    <tr><td>export Hash </td><td><stripes:text name="cronjob.exporthash"/></td></tr>
+                    <tr><td>export Hash /download location </td><td><stripes:text name="cronjob.exporthash"/></td></tr>
                     <tr><td>Base url </td><td><stripes:text name="cronjob.baseurl"/></td></tr>
                     <tr><td>Project</td><td><stripes:text name="cronjob.project"/></td></tr>
                     <tr><td>Mail adres</td><td><stripes:text name="cronjob.mailaddress"/></td></tr>

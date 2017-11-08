@@ -22,15 +22,20 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.naming.NamingException;
 import nl.b3p.commons.csv.CsvFormatException;
 import nl.b3p.mail.Mailer;
+import nl.b3p.playbase.ImageDownloader;
 import nl.b3p.playbase.ImportReport;
 import nl.b3p.playbase.ImportReport.ImportType;
 import nl.b3p.playbase.PlayadvisorImporter;
 import nl.b3p.playbase.PlaymappingImporter;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.CronJob;
+import org.apache.commons.dbutils.handlers.ArrayListHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
@@ -46,6 +51,7 @@ import org.quartz.JobExecutionException;
 public class PlaybaseJob implements Job {
 
     private static final Log log = LogFactory.getLog(PlaybaseJob.class);
+    private ImageDownloader downloader;
 
     @Override
     public void execute(JobExecutionContext jec) throws JobExecutionException {
@@ -138,13 +144,21 @@ public class PlaybaseJob implements Job {
         }
     }
     private void exportPlayadvisor(CronJob job)  {
+        
+        downloader = new ImageDownloader(job.getExporthash());
+        downloader.run();
+        getAllImagesForJob(job);
+        try {
+            downloader.stop();
+        } catch (IOException ex) {
+            log.error("Cannot stop downloader",ex);
+        }
         PlayadvisorImporter pi = new PlayadvisorImporter(job.getProject());
         ImportReport report = new ImportReport();
         // call trigger
-        //http://playadvisor.b3p.nl/wp-cron.php?import_key=Vw&import_id=193&action=trigger
         String res = pi.getResponse(null, null, job.getBaseurl() +"/wp-cron.php?import_id=" + job.getUsername() + "&import_key=" + job.getPassword() +"&action=trigger", report);
+        
         // call processing until finished
-
         String message = "";
         do {
             try {
@@ -158,14 +172,6 @@ public class PlaybaseJob implements Job {
         } while (!message.contains("complete"));
         // download file 
         
-        try {
-            InputStream is = new ByteArrayInputStream( res.getBytes( "UTF-8" ) );
-            pi.importStream(is, report);
-        } catch (UnsupportedEncodingException ex) {
-            log.error("Cannot import playadvisor csv",ex);
-        } catch (IOException | CsvFormatException ex) {
-            log.error("Cannot import playadvisor csv",ex);
-        }
         String logmessage = report.toLog();
         
         try {
@@ -174,6 +180,51 @@ public class PlaybaseJob implements Job {
         } catch (NamingException | SQLException ex) {
             log.error("Cannot save cronjob",ex);
         }
+    }
+    
+    private void getAllImagesForJob(CronJob job) {
+        try {
+            String query = "SELECT id from " + DB.LOCATION_TABLE;
+            
+            ArrayListHandler rsh = new ArrayListHandler();
+            query += " where project = ?";
+            List<Object[]> locations = DB.qr().query(query, rsh, job.getProject());
+            for (Object[] location : locations) {
+                Integer id = (Integer)location[0];
+                retrieveImages(id);
+            }
+        } catch (NamingException | SQLException ex) {
+            log.error("Cannot get locations for cronjob",ex);
+        }
+
+
+    }
+     protected void retrieveImages(Integer id) throws NamingException, SQLException {
+        ArrayListHandler rsh = new ArrayListHandler();
+
+        List<Object[]> images = DB.qr().query("SELECT url, caption,pm_guid from " + DB.IMAGES_TABLE + " WHERE location = ? order by equipment desc, lastupdated desc", rsh, id);
+
+        int index = 0;
+        for (Object[] image : images) {
+            String url = (String) valueOrEmptyString(image[0]);
+            if (url.isEmpty()) {
+                continue;
+            }
+            String imageName = url.substring(url.lastIndexOf("/") + 1);
+            if (imageName.contains("GetImage.ashx")) {
+                imageName = "Image" + id + "-" + index + ".jpg";
+            }
+            downloadImage(url, imageName);
+            index++;
+        }
+    }
+    
+    private void downloadImage(String url, String filename) {
+        downloader.add(url, filename);
+    }
+    
+    private Object valueOrEmptyString(Object value) {
+        return value == null ? "" : value;
     }
 
     private void savecronjob(CronJob cronjob, String logString, String importedString) throws NamingException, SQLException {
