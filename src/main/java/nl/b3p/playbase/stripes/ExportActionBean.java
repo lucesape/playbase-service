@@ -245,7 +245,7 @@ Parkeren
         List<Object[]> m = DB.qr().query("select installeddate from " + DB.ASSETS_TABLE + " where  location = " + id, rsh);
         int numNew = 0;
         Calendar c = Calendar.getInstance();
-        c.add(Calendar.YEAR, -1);
+        c.add(Calendar.YEAR, -2);
         Date mustBeAfter = c.getTime();
         for (Object[] asset : m) {
             String d = (String) asset[0];
@@ -262,7 +262,7 @@ Parkeren
             }
         }
         double ratio = (double) numNew / m.size();
-        Boolean isNew = ratio > 0.5;
+        Boolean isNew = ratio > 0.3;
         record.add(isNew.toString());
     }
 
