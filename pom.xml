@@ -10,6 +10,12 @@
     <name>playbase-service</name>
     <url>https://github.com/b3partners/playbase-service</url>
     
+    <scm>
+        <connection>scm:git:git@github.com:B3Partners/playbase-service.git</connection>
+        <developerConnection>scm:git:git@github.com:B3Partners/playbase-service.git</developerConnection>
+        <url>https://github.com/B3Partners/playbase-service</url>
+        <tag>HEAD</tag>
+    </scm>
     <properties>
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -17,7 +23,26 @@
         <geotools.version>17.2</geotools.version>
         <apache.httpcomponents.version>4.5.3</apache.httpcomponents.version>
     </properties>
-    
+    <distributionManagement>
+        <repository>
+            <id>repo.b3p.nl</id>
+            <name>B3Partners releases repository</name>
+            <url>http://repo.b3p.nl/nexus/content/repositories/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>repo.b3p.nl</id>
+            <name>B3Partners snapshots repository</name>
+            <url>http://repo.b3p.nl/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+    <licenses>
+        <license>
+            <distribution>repo</distribution>
+            <name>GNU Affero General Public License v3.0</name>
+            <comments>For any parts of the Flamingo codebase</comments>
+            <url>https://raw.githubusercontent.com/flamingo-geocms/flamingo/master/LICENSE.txt</url>
+        </license>
+    </licenses>
     <dependencies>   
         <dependency>
             <groupId>org.powermock</groupId>
@@ -315,4 +340,12 @@
         </plugins>
     </build>
 
+    <developers>
+        <developer>
+            <name>Meine Toonen</name>
+            <email>meinetoonen@b3partners.nl</email>
+            <organization>B3Partners B.V.</organization>
+            <organizationUrl>http://www.b3partners.nl</organizationUrl>
+        </developer>      
+    </developers>
 </project>
