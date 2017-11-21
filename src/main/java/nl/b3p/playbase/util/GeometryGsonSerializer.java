@@ -31,10 +31,10 @@ public class GeometryGsonSerializer implements JsonSerializer<Geometry> {
 
     /**
      *
-     * @param src
-     * @param typeOfSrc
-     * @param context
-     * @return
+     * @param src Source geometry
+     * @param typeOfSrc Type of geometry
+     * @param context context 
+     * @return JSON element of the geometry
      */
     @Override
     public JsonElement serialize(Geometry src, Type typeOfSrc, JsonSerializationContext context) {

@@ -61,6 +61,7 @@ public class CsvInputStream {
 
     /** Maakt een nieuwe CsvInputStream, default separator ',' en checkColumnCount
      * false.
+     * @param input The reader to the csv file to be parsed
      */
     public CsvInputStream(Reader input) {
         this.input = new LineNumberReader(input);
@@ -70,7 +71,9 @@ public class CsvInputStream {
      * een String array. Indien er geen record meer is retourneert deze methode
      * null.
      *
-     * @throws CsvFormatExcpetion Indien het csv bestand ongeldig is, of indien
+     * @return The list of the current record
+     * @throws java.io.IOException when there is an IO error
+     * @throws nl.b3p.commons.csv.CsvFormatException CsvFormatExcpetion Indien het csv bestand ongeldig is, of indien
      * checkColumnCount enabled en het record niet evenveel kolommen heeft als
      * het eerste record.
      */
