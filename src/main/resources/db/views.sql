@@ -77,13 +77,13 @@ CREATE OR REPLACE VIEW public.v_locations_rd AS
     st_transform(st_geomfromtext(((('POINT('::text || pl.longitude) || ' '::text) || pl.latitude) || ')'::text, 4326), 28992) AS geom,
     ((( SELECT sum(
                 CASE
-                    WHEN date_part('days'::text, now() - to_date(NULLIF(ple.installeddate::text, ''::text), 'YYYY-MM-DD'::text)::timestamp with time zone) < 365::double precision THEN 1
+                    WHEN date_part('days'::text, now() - to_date(NULLIF(ple.installeddate::text, ''::text), 'YYYY-MM-DD'::text)::timestamp with time zone) < 730::double precision THEN 1
                     ELSE 0
                 END) AS sum
            FROM playservice_location_equipment ple
           WHERE ple.location = pl.id))::double precision / (( SELECT count(*) AS count
            FROM playservice_location_equipment ple
-          WHERE ple.location = pl.id))::double precision) > 0.5::double precision AS newasset,
+          WHERE ple.location = pl.id))::double precision) > 0.3::double precision AS newasset,
     pl.averagerating,
     ( SELECT playservice_images.url
            FROM playservice_images

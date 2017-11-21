@@ -179,7 +179,7 @@ public class CronActionBean implements ActionBean {
                 sb.append(" where id = ?");
 
                 DB.qr().update(sb.toString(), cronjob.getType_().name(), cronjob.getUsername(), cronjob.getPassword(), cronjob.getProject(),
-                        cronjob.getBaseurl(), cronjob.getExporthash(), cronjob.getMailaddress(), cronjob.getCronexpressie(), cronjob.getId());
+                       cronjob.getMailaddress(),  cronjob.getBaseurl(), cronjob.getExporthash(), cronjob.getCronexpressie(), cronjob.getId());
                 CronListener.rescheduleJob(cronjob);
             }
         } catch (NamingException | SQLException ex) {

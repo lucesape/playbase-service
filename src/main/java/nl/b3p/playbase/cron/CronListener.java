@@ -76,7 +76,7 @@ public class CronListener implements ServletContextListener {
         }
 
         ResultSetHandler<List<CronJob>> handler = new BeanListHandler(CronJob.class);
-        String sql = "select id,cronexpressie,type_,username,password,project,log,lastrun,baseurl, exporthash from " + DB.CRONJOB_TABLE;
+        String sql = "select id,cronexpressie,type_,username,password,project,lastrun,baseurl,exporthash from " + DB.CRONJOB_TABLE;
         try {
             List<CronJob> jobs = DB.qr().query(sql, handler);
             for (CronJob jobEntity : jobs) {
