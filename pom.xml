@@ -336,7 +336,17 @@
                     </formats>
                     <check />
                 </configuration>
-            </plugin>   
+            </plugin>  
+            <!--
+                To check for plugin updates use the following command:
+                mvn -U org.codehaus.mojo:versions-maven-plugin:2.4:display-plugin-updates -T1 > plugin-updates.log
+                and check the output for any available updates
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.3</version>
+            </plugin> 
         </plugins>
     </build>
 
