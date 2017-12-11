@@ -86,7 +86,8 @@ CREATE TABLE playservice_documents (
     caption character varying(255),
     location  integer not null,
     equipment integer,
-    pm_guid character varying(255)
+    pm_guid character varying(255),
+    pa_id character varying(255)
 );
 
 --
@@ -161,7 +162,8 @@ CREATE TABLE playservice_images (
     caption character varying(255),
     location  integer not null,
     equipment integer,
-    pm_guid character varying(255)
+    pm_guid character varying(255),
+    pa_id character varying(255)
 );
 
 
