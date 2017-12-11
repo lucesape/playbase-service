@@ -251,7 +251,7 @@ public abstract class Importer {
             id = savedLocation.getId();
             report.increaseInserted(ImportType.LOCATION);
             List<Map<String, Object>> images = location.getImages();
-            saveImagesAndWords(images, null, savedLocation.getId(), DB.IMAGES_TABLE + postfix, true);
+            saveImagesAndWords(images, null, savedLocation.getId(), DB.IMAGES_TABLE + postfix, true, savedLocation);
         } else {
             id = getLocationId(location);
 
@@ -284,6 +284,8 @@ public abstract class Importer {
                     location.getStreet(), location.getPostalcode(), location.getParking(), location.getPhone(), location.getWebsite(), 
                     location.getPa_id(), location.getPa_title(), project, location.getPm_guid(), id);
             report.increaseUpdated(ImportType.LOCATION);
+            List<Map<String,Object>> images = location.getImages();
+            saveImagesAndWords(images, null, id, DB.IMAGES_TABLE + postfix, true,  location);
         }
         location.setId(id);
         return id;
@@ -525,8 +527,8 @@ public abstract class Importer {
 
         Integer locationId = asset.getLocation();
 
-        saveImagesAndWords(asset.getImages(), id, locationId, DB.IMAGES_TABLE + postfix, true);
-        saveImagesAndWords(asset.getDocuments(), id, locationId, DB.ASSETS_DOCUMENTS_TABLE + postfix, true);
+        saveImagesAndWords(asset.getImages(), id, locationId, DB.IMAGES_TABLE + postfix, true, null);
+        saveImagesAndWords(asset.getDocuments(), id, locationId, DB.ASSETS_DOCUMENTS_TABLE + postfix, true, null);
     }
 
     public void saveAssetsAgeCategories(Asset asset, Integer assetId) throws NamingException, SQLException {
@@ -672,9 +674,13 @@ public abstract class Importer {
         return id;
     }
 
-    public void saveImagesAndWords(List<Map<String, Object>> images, Integer assetId, Integer locationId, String table, boolean removeBeforeAdding) throws NamingException, SQLException {
+    public void saveImagesAndWords(List<Map<String, Object>> images, Integer assetId, Integer locationId, String table, boolean removeBeforeAdding,  Location l) throws NamingException, SQLException {
         if(removeBeforeAdding){
-            DB.qr().update("DELETE FROM " + table + " WHERE equipment = " + assetId);
+            if(assetId != null){
+                DB.qr().update("DELETE FROM " + table + " WHERE equipment = " + assetId);
+            }else if (l != null && l.getPa_id() != null && !l.getPa_id().isEmpty()){
+                DB.qr().update("DELETE FROM " + table + " WHERE pa_id = '" + l.getPa_id() + "'");
+            }
         }
         if (images != null) {
             for (Map<String, Object> image : images) {
@@ -688,10 +694,11 @@ public abstract class Importer {
                 sb.append("location,");
                 sb.append("equipment,");
                 sb.append("pm_guid,");
+                sb.append("pa_id,");
                 sb.append("lastupdated)");
-                sb.append("VALUES(?,?,?,?,?,?);");
+                sb.append("VALUES(?,?,?,?,?,?,?);");
                 java.sql.Date sqldate = image.containsKey("LastUpdated") && !image.get("LastUpdated").equals("") ? new java.sql.Date( ((Date)image.get("LastUpdated")).getTime()) : null;
-                DB.qr().insert(sb.toString(), new ScalarHandler<>(), image.get("Description"), image.get("URI"), locationId, assetId, image.get("ID"), sqldate);
+                DB.qr().insert(sb.toString(), new ScalarHandler<>(), image.get("Description"), image.get("URI"), locationId, assetId, image.get("ID"), image.get("pa_id"),sqldate);
             }
         }
     }

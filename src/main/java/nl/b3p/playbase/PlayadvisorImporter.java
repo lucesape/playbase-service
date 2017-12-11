@@ -162,6 +162,7 @@ public class PlayadvisorImporter extends Importer {
         boolean locationAlreadyMerged = existingLocation != null;
         boolean locationAlreadyExists = false; // alreadymerged is for playadvisor locations which are already merge into the playmapping table. alreadyexists are for playadvisor locations not yet merged (ie. exist in playadvisor_locations_playadvisor table)
         if(locationAlreadyMerged){
+            existingLocation.setImages(location.getImages());
             MatchActionBean.mergeLocations(location, existingLocation);
             location = existingLocation;
             postfix = "";
@@ -294,7 +295,7 @@ public class PlayadvisorImporter extends Importer {
             }
             dbvalues.put(col, value);
         }
-        List<Map<String, Object>> images = parseImages(imageUrls, imageDescriptions);
+        List<Map<String, Object>> images = parseImages(imageUrls, imageDescriptions, (String)dbvalues.get("pa_id"));
         dbvalues.put("images", images);
 
         return dbvalues;
@@ -392,7 +393,7 @@ public class PlayadvisorImporter extends Importer {
         return assets;
     }
 
-    private List<Map<String, Object>> parseImages(String[] imageUrls, String[] imageDescriptions) {
+    private List<Map<String, Object>> parseImages(String[] imageUrls, String[] imageDescriptions, String pa_id) {
         List<Map<String, Object>> images = new ArrayList<>();
         Set<String> urls = new HashSet<>();
         for (int i = 0; i < imageUrls.length; i++) {
@@ -403,17 +404,18 @@ public class PlayadvisorImporter extends Importer {
                 urls.add(imageUrl);
             }
             String description = imageDescriptions.length == imageUrls.length ? imageDescriptions[i] : null;
-            Map<String, Object> image = parseImage(imageUrl, description);
+            Map<String, Object> image = parseImage(imageUrl, description, pa_id);
             images.add(image);
 
         }
         return images;
     }
 
-    private Map<String, Object> parseImage(String imageUrl, String imageDescription) {
+    private Map<String, Object> parseImage(String imageUrl, String imageDescription, String pa_id) {
         Map<String, Object> image = new HashMap<>();
         image.put("Description", imageDescription);
         image.put("URI", imageUrl);
+        image.put("pa_id", pa_id);
 
         return image;
     }

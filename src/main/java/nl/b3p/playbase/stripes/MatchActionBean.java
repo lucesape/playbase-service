@@ -374,8 +374,8 @@ public class MatchActionBean implements ActionBean {
     
     protected void transferImages(Location playadvisor, Integer playmapping, PlaymappingImporter importer) throws NamingException, SQLException {
         //), image.get("Description"), image.get("URI"), locationId, assetId, image.get("ID"));
-        List<Map<String,Object>> paImages = DB.qr().query("select caption as \"Description\", url as \"URI\", id as \"ID\" from " + DB.IMAGES_TABLE + "_playadvisor where location = ?", new MapListHandler(), playadvisorId);
-        importer.saveImagesAndWords(paImages, null, playmapping, DB.IMAGES_TABLE, false);
+        List<Map<String,Object>> paImages = DB.qr().query("select caption as \"Description\", url as \"URI\" from " + DB.IMAGES_TABLE + "_playadvisor where location = ?", new MapListHandler(), playadvisorId);
+        importer.saveImagesAndWords(paImages, null, playmapping, DB.IMAGES_TABLE, false, null);
         DB.qr().update("delete from " + DB.IMAGES_TABLE + "_playadvisor where location = ?", playadvisorId);
     }
 

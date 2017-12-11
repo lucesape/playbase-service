@@ -43,3 +43,27 @@ ALTER TABLE public.cronjob
 
 ALTER TABLE public.cronjob
   ADD COLUMN baseurl text;
+
+
+ALTER TABLE public.playservice_images
+  ADD COLUMN pa_id character varying(255);
+
+
+
+ALTER TABLE public.playservice_images_playadvisor
+  ADD COLUMN pa_id character varying(255);
+
+
+
+ALTER TABLE public.playservice_documents
+  ADD COLUMN pa_id character varying(255);
+
+
+
+ALTER TABLE public.playservice_documents_playadvisor
+  ADD COLUMN pa_id character varying(255);
+
+
+
+update playservice_images set pm_guid = null where location in (select pl.id from playservice_images pi inner join playservice_locations pl on pi.location  = pl.id where pl.pa_id is not null and pl.pm_guid is null) 
+update playservice_images as pi set pa_id = (select pl.pa_id from playservice_locations pl where pl.id = pi.location ) where location in (select pl.id from playservice_images pi inner join playservice_locations pl on pi.location  = pl.id where pl.pa_id is not null and pl.pm_guid is null) 
