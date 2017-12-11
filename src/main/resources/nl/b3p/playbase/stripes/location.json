@@ -1,33 +1,33 @@
 [{
-    "$id": "4",
-    "AddressLine1": "Beltmolen",
-    "Area": "Sectie 1 Noord",
-    "AssetCount": 10,
-    "ChildLocations": [],
-    "City": "Berkel Enshot",
-    "Documents": [],
-    "ID": "ab5912be-5588-4108-9b46-7d93b125a267",
-    "Images": [
-        {
-            "$id": "5",
-            "Description": "",
-            "ID": "70d0c2b7-a91d-4406-bd2d-e6159d58c3d2",
-            "LastUpdated": "2016-03-02T13:44:16.35",
-            "URI": "http://www.playmapping.com/GetImage.ashx?g=70d0c2b7-a91d-4406-bd2d-e6159d58c3d2&w=350&h=350"
-        },
-        {
-            "$id": "6",
-            "Description": "",
-            "ID": "bc50ad1e-9d3d-4ac1-9b6d-fab24281a08e",
-            "LastUpdated": "2016-03-02T13:44:10.4",
-            "URI": "http://www.playmapping.com/GetImage.ashx?g=bc50ad1e-9d3d-4ac1-9b6d-fab24281a08e&w=350&h=350"
-        }
-    ],
-    "LastUpdated": "2016-03-03T07:05:26.923",
-    "Lat": "51,59194",
-    "Lng": "5,137373",
-    "Name": "Beltmolen",
-    "PostCode": "",
-    "Ref": "",
-    "Suburb": "Berkel"
-}]
+        "$id": "3",
+        "AddressLine1": "Engelberterbadweg 54\r\n9723 EN Groningen\r\n\r\nVoorzitter\r\n050-5416259\r\nt.a.v. Dhr.R.van Delden\r\n\r\nBeheerder\r\n050-5416259\r\nOlaf Lambeck",
+        "Area": "",
+        "AssetCount": 31,
+        "ChildLocations": [],
+        "City": "Groningen",
+        "Documents": [],
+        "ID": "3ddcc249-8eb3-48b1-900b-464e8134081d",
+        "Images": [
+            {
+                "$id": "4",
+                "Description": "",
+                "ID": "531e07e0-e011-49bb-a01f-3033d7ce5074",
+                "LastUpdated": "2010-07-06T18:19:13.077",
+                "URI": "http://www.playmapping.com/GetImage.ashx?g=531e07e0-e011-49bb-a01f-3033d7ce5074&w=350&h=350"
+            },
+            {
+                "$id": "5",
+                "Description": "",
+                "ID": "e7a10ac5-33d0-46f4-be57-ec289fff16ab",
+                "LastUpdated": "2010-07-06T18:24:08.393",
+                "URI": "http://www.playmapping.com/GetImage.ashx?g=e7a10ac5-33d0-46f4-be57-ec289fff16ab&w=350&h=350"
+            }
+        ],
+        "LastUpdated": "2017-05-24T00:36:45.947",
+        "Lat": "53,20668",
+        "Lng": "6,647141",
+        "Name": "Camping Engelbert",
+        "PostCode": "OOST",
+        "Ref": "54219",
+        "Suburb": "Engelbert"
+    }]

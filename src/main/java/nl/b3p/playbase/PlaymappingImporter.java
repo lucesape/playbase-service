@@ -31,6 +31,7 @@ import nl.b3p.playbase.ImportReport.ImportType;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.Asset;
 import nl.b3p.playbase.entities.Location;
+import nl.b3p.playbase.stripes.MatchActionBean;
 import org.apache.commons.dbutils.handlers.ArrayListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.logging.Log;
@@ -108,9 +109,39 @@ public class PlaymappingImporter extends Importer {
         List<Location> childLocations = parseChildLocations(temp);
         
         for (Location childLocation : childLocations) {
+            childLocation = mergeLocation(childLocation);
             saveLocation(childLocation, report);
         }
     }
+    
+    private Location mergeLocation(Location loc) throws SQLException, NamingException{
+        Location merged = getMergedLocation(loc);
+        if(merged != null){
+            loc = MatchActionBean.mergeLocations(merged, loc);
+        }
+        
+        return loc;
+    }
+    
+    public Location getMergedLocation(Location newLocation) throws NamingException, SQLException {
+        Location loc;
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("select * from ");
+
+        sb.append(DB.LOCATION_TABLE);
+        if (newLocation.getId() != null) {
+            sb.append(" where id = '");
+            sb.append(newLocation.getId());
+        } else {
+            sb.append(" where pm_guid = '");
+            sb.append(newLocation.getPm_guid());
+        }
+        sb.append("';");
+        loc = DB.qr().query(sb.toString(), locationHandler);
+        return loc;
+    }
+
 
     // <editor-fold desc="Assets" defaultstate="collapsed">
     protected List<Asset> parseAssets(String assetsString, Map<Integer,Set<Integer>> assetTypes) throws NamingException, SQLException {
