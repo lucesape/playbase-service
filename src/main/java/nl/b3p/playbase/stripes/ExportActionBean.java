@@ -53,6 +53,7 @@ import nl.b3p.loader.util.DbUtilsGeometryColumnConverter;
 import nl.b3p.playbase.ImageDownloader;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.Asset;
+import nl.b3p.playbase.entities.CronJob;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ArrayListHandler;
@@ -100,7 +101,10 @@ public class ExportActionBean implements ActionBean {
         return new ForwardResolution(JSP);
     }
 
-    public Resolution export() throws IOException {
+    public Resolution export() throws IOException, SQLException, NamingException {
+        ImageDownloader downloader = new ImageDownloader(downloadlocation);
+        downloader.run();
+    
         final File f = File.createTempFile("locations_export", null);
         FileOutputStream fop = new FileOutputStream(f);
         final CsvOutputStream out = new CsvOutputStream(new OutputStreamWriter(fop), '|', false);
@@ -114,12 +118,18 @@ public class ExportActionBean implements ActionBean {
         out.writeRecord(header);
         List<List<String>> records = getRecords();
         for (List<String> record : records) {
+            retrieveImages(Integer.parseInt(record.get(0)), downloader);
             String[] ar = new String[0];
             ar = record.toArray(ar);
             out.writeRecord(ar);
         }
         out.flush();
         String filename = "Speeltuinen.csv";
+            try {
+            downloader.stop();
+        } catch (IOException ex) {
+            log.error("Cannot stop downloader", ex);
+        }
         return new StreamingResolution("text/csv") {
             @Override
             public void stream(HttpServletResponse response) throws Exception {
@@ -131,6 +141,47 @@ public class ExportActionBean implements ActionBean {
 
     }
 
+    private void getAllImagesForJob(String project, ImageDownloader downloader) {
+        try {
+            String query = "SELECT id from " + DB.LOCATION_TABLE;
+            
+            ArrayListHandler rsh = new ArrayListHandler();
+            query += " where project = ?";
+            List<Object[]> locations = DB.qr().query(query, rsh, project);
+            for (Object[] location : locations) {
+                Integer id = (Integer)location[0];
+                retrieveImages(id, downloader);
+            }
+        } catch (NamingException | SQLException ex) {
+            log.error("Cannot get locations for cronjob",ex);
+        }
+
+
+    }
+     protected void retrieveImages(Integer id, ImageDownloader downloader) throws NamingException, SQLException {
+        ArrayListHandler rsh = new ArrayListHandler();
+
+        List<Object[]> images = DB.qr().query("SELECT url, caption,pm_guid from " + DB.IMAGES_TABLE + " WHERE location = ? order by equipment desc, lastupdated desc", rsh, id);
+
+        int index = 0;
+        for (Object[] image : images) {
+            String url = (String) valueOrEmptyString(image[0]);
+            if (url.isEmpty()) {
+                continue;
+            }
+            String imageName = url.substring(url.lastIndexOf("/") + 1);
+            if (imageName.contains("GetImage.ashx")) {
+                imageName = "Image" + id + "-" + index + ".jpg";
+            }
+            downloadImage(url, imageName, downloader);
+            index++;
+        }
+    }
+    
+    private void downloadImage(String url, String filename, ImageDownloader downloader ) {
+        downloader.add(url, filename);
+    }
+    
     ///	 (landcode + 9 cijfers)	Afbeeldingen	Categorie	Leeftijd	Speeltoestellen	Faciliteiten	
     //Toegankelijkheid	Parkeren
     private List<List<String>> getRecords() {
