@@ -684,23 +684,35 @@ public abstract class Importer {
         }
         if (images != null) {
             for (Map<String, Object> image : images) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("INSERT ");
-                sb.append("INTO ");
-                sb.append(table);
-                sb.append("(");
-                sb.append("caption,");
-                sb.append("url,");
-                sb.append("location,");
-                sb.append("equipment,");
-                sb.append("pm_guid,");
-                sb.append("pa_id,");
-                sb.append("lastupdated)");
-                sb.append("VALUES(?,?,?,?,?,?,?);");
-                java.sql.Date sqldate = image.containsKey("LastUpdated") && !image.get("LastUpdated").equals("") ? new java.sql.Date( ((Date)image.get("LastUpdated")).getTime()) : null;
-                DB.qr().insert(sb.toString(), new ScalarHandler<>(), image.get("Description"), image.get("URI"), locationId, assetId, image.get("ID"), image.get("pa_id"),sqldate);
+                if(!doesImageExist(image, locationId, table)){
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("INSERT ");
+                    sb.append("INTO ");
+                    sb.append(table);
+                    sb.append("(");
+                    sb.append("caption,");
+                    sb.append("url,");
+                    sb.append("location,");
+                    sb.append("equipment,");
+                    sb.append("pm_guid,");
+                    sb.append("pa_id,");
+                    sb.append("lastupdated)");
+                    sb.append("VALUES(?,?,?,?,?,?,?);");
+                    java.sql.Date sqldate = image.containsKey("LastUpdated") && !image.get("LastUpdated").equals("") ? new java.sql.Date(((Date) image.get("LastUpdated")).getTime()) : null;
+                    DB.qr().insert(sb.toString(), new ScalarHandler<>(), image.get("Description"), image.get("URI"), locationId, assetId, image.get("ID"), image.get("pa_id"), sqldate);
+                }
             }
         }
+    }
+    
+    private boolean doesImageExist(Map<String, Object> image, Integer locationId, String table) throws SQLException, NamingException{
+        ArrayListHandler rsh = new ArrayListHandler();
+        StringBuilder sb = new StringBuilder();
+        sb.append("Select * from ");
+        sb.append(table);
+        sb.append(" where location = ? and url = ?;");
+        List<Object[]> o = DB.qr().query(sb.toString(), rsh, locationId, image.get("URI"));
+        return o.size() > 0;
     }
     
     public String getPostfix() {

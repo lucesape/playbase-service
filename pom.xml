@@ -4,7 +4,7 @@
 
     <groupId>nl.b3p</groupId>
     <artifactId>playbase-service</artifactId>
-    <version>1.4-SNAPSHOT</version>
+    <version>1.5-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <name>playbase-service</name>
