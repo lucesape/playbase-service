@@ -102,8 +102,8 @@ public class ExportActionBean implements ActionBean {
     }
 
     public Resolution export() throws IOException, SQLException, NamingException {
-        ImageDownloader downloader = new ImageDownloader(downloadlocation);
-        downloader.run();
+       /* ImageDownloader downloader = new ImageDownloader(downloadlocation);
+        downloader.run();*/
     
         final File f = File.createTempFile("locations_export", null);
         FileOutputStream fop = new FileOutputStream(f);
@@ -118,18 +118,18 @@ public class ExportActionBean implements ActionBean {
         out.writeRecord(header);
         List<List<String>> records = getRecords();
         for (List<String> record : records) {
-            retrieveImages(Integer.parseInt(record.get(0)), downloader);
+            retrieveImages(Integer.parseInt(record.get(0)));
             String[] ar = new String[0];
             ar = record.toArray(ar);
             out.writeRecord(ar);
         }
         out.flush();
         String filename = "Speeltuinen.csv";
-            try {
+       /*     try {
             downloader.stop();
         } catch (IOException ex) {
             log.error("Cannot stop downloader", ex);
-        }
+        }*/
         return new StreamingResolution("text/csv") {
             @Override
             public void stream(HttpServletResponse response) throws Exception {
@@ -150,7 +150,7 @@ public class ExportActionBean implements ActionBean {
             List<Object[]> locations = DB.qr().query(query, rsh, project);
             for (Object[] location : locations) {
                 Integer id = (Integer)location[0];
-                retrieveImages(id, downloader);
+                retrieveImages(id);
             }
         } catch (NamingException | SQLException ex) {
             log.error("Cannot get locations for cronjob",ex);
@@ -158,7 +158,7 @@ public class ExportActionBean implements ActionBean {
 
 
     }
-     protected void retrieveImages(Integer id, ImageDownloader downloader) throws NamingException, SQLException {
+     protected void retrieveImages(Integer id) throws NamingException, SQLException {
         ArrayListHandler rsh = new ArrayListHandler();
 
         List<Object[]> images = DB.qr().query("SELECT url, caption,pm_guid from " + DB.IMAGES_TABLE + " WHERE location = ? order by equipment desc, lastupdated desc", rsh, id);
@@ -173,15 +173,14 @@ public class ExportActionBean implements ActionBean {
             if (imageName.contains("GetImage.ashx")) {
                 imageName = "Image" + id + "-" + index + ".jpg";
             }
-            downloadImage(url, imageName, downloader);
+           //downloadImage(url, imageName);
             index++;
         }
     }
     
-    private void downloadImage(String url, String filename, ImageDownloader downloader ) {
+  /*  private void downloadImage(String url, String filename, ImageDownloader downloader ) {
         downloader.add(url, filename);
-    }
-    
+    }*/
     ///	 (landcode + 9 cijfers)	Afbeeldingen	Categorie	Leeftijd	Speeltoestellen	Faciliteiten	
     //Toegankelijkheid	Parkeren
     private List<List<String>> getRecords() {

@@ -772,7 +772,7 @@ public abstract class Importer {
             }
 
         }
-
+        log.debug("Creating httpclient");
         HttpClient hc = hcb.build();
 
         HttpGet request = new HttpGet(apiurl);
@@ -782,20 +782,28 @@ public abstract class Importer {
         String stringResult = null;
         HttpResponse response = null;
         try {
+            
+            log.debug("Executing request");
             response = hc.execute(request, httpContext);
             int statusCode = response.getStatusLine().getStatusCode();
-
+            
+            log.debug("Request finished with status " + statusCode);
             HttpEntity entity = response.getEntity();
             if (statusCode != 200) {
-                report.addError("Could not retrieve JSON. Status " + statusCode + ". Reason given: " + response.getStatusLine().getReasonPhrase(), ImportType.GENERAL);
+                String statusLine = response.getStatusLine().getReasonPhrase();
+
+                log.debug("Error: " + statusLine);
+                report.addError("Could not retrieve JSON. Status " + statusCode + ". Reason given: " + statusLine, ImportType.GENERAL);
             } else {
                 //InputStream is = entity.getContent();
                 stringResult = EntityUtils.toString(entity);
+                log.debug("Result: " + stringResult);
             }
         } catch (IOException ex) {
             log.debug("Exception False: ", ex);
             report.addError("Could not retrieve JSON." + ex.getLocalizedMessage(), ImportType.GENERAL);
         } finally {
+            log.debug("Closing http client");
             if (hc instanceof CloseableHttpClient) {
                 try {
                     ((CloseableHttpClient) hc).close();

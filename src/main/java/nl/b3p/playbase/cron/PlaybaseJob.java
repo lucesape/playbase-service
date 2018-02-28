@@ -157,7 +157,7 @@ public class PlaybaseJob implements Job {
         ImportReport report = new ImportReport();
         // call trigger
         String res = pi.getResponse(null, null, job.getBaseurl() +"/wp-cron.php?import_id=" + job.getUsername() + "&import_key=" + job.getPassword() +"&action=trigger", report);
-        
+        log.info("Triggering cronjob on wordpress...");
         // call processing until finished
         String message = "";
         do {
@@ -165,13 +165,14 @@ public class PlaybaseJob implements Job {
                 res = pi.getResponse(null, null, job.getBaseurl() +"/wp-cron.php?import_key=" + job.getPassword() + "&import_id=" + job.getUsername() +"&action=processing", report);
                 JSONObject result = new JSONObject(res);
                 message = result.getString("message");
+                log.info("Response message: " + result.toString());
                 Thread.sleep(10000);
             } catch (InterruptedException ex) {
                 log.error("I can get no sleep.", ex);
             }
         } while (!message.contains("complete"));
         // download file 
-        
+        log.info("Triggering cronjob on wordpress completed");
         String logmessage = report.toLog();
         
         try {
@@ -183,6 +184,7 @@ public class PlaybaseJob implements Job {
     }
     
     private void getAllImagesForJob(CronJob job) {
+        log.info("Getting images for job");
         try {
             String query = "SELECT id from " + DB.LOCATION_TABLE;
             
@@ -196,7 +198,7 @@ public class PlaybaseJob implements Job {
         } catch (NamingException | SQLException ex) {
             log.error("Cannot get locations for cronjob",ex);
         }
-
+        log.info("All images submitted");
 
     }
      protected void retrieveImages(Integer id) throws NamingException, SQLException {
