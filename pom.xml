@@ -4,7 +4,7 @@
 
     <groupId>nl.b3p</groupId>
     <artifactId>playbase-service</artifactId>
-    <version>1.5-Dtag=v1.5</version>
+    <version>1.6-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <name>playbase-service</name>
@@ -14,7 +14,7 @@
         <connection>scm:git:git@github.com:B3Partners/playbase-service.git</connection>
         <developerConnection>scm:git:git@github.com:B3Partners/playbase-service.git</developerConnection>
         <url>https://github.com/B3Partners/playbase-service.git</url>
-        <tag>v1.5</tag>
+        <tag>HEAD</tag>
     </scm>
     <properties>
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
