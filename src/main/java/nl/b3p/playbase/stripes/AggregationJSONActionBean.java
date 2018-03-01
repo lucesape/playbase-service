@@ -37,7 +37,7 @@ import org.postgresql.util.PGobject;
 
 /**
  * Export van JSON files voor gebruik in dashboard
- * 
+ *
  *
  * @author Chris van Lith
  */
@@ -48,24 +48,23 @@ public class AggregationJSONActionBean implements ActionBean {
     private ActionBeanContext context;
 
     private static final Log log = LogFactory.getLog(AggregationJSONActionBean.class);
-    
+
     private static final String JSP = "/WEB-INF/jsp/admin/jsonclient.jsp";
     private static final String SPELEN = "spelen";
     private static final String BOMEN = "bomen";
-    
 
-    @Validate(required=true)
+    @Validate(required = true)
     private String cqlfilter = "location_guid = '001d51fb-40b3-4ed1-afb3-1b1336e02e43'";
-    @Validate(required=true)
+    @Validate(required = true)
     private String description = "testrun";
-    
+
     @ValidationMethod()
     public void validateLocations(ValidationErrors errors) {
 //        if(!"Houten".equals(locationValue)) {
 //            errors.add("locationValue", new SimpleError(("Geen geldige location ingevuld!")));
 //        }
     }
-    
+
     @Override
     public ActionBeanContext getContext() {
         return context;
@@ -76,12 +75,11 @@ public class AggregationJSONActionBean implements ActionBean {
         this.context = context;
     }
 
-
     public String getCqlfilter() {
         return cqlfilter;
     }
 
-    public void setCqlfilter (String cqlfilter) {
+    public void setCqlfilter(String cqlfilter) {
         this.cqlfilter = cqlfilter;
     }
 
@@ -92,7 +90,7 @@ public class AggregationJSONActionBean implements ActionBean {
     public void setDescription(String description) {
         this.description = description;
     }
-    
+
     @DefaultHandler
     @DontValidate
     public Resolution edit() throws Exception {
@@ -100,47 +98,47 @@ public class AggregationJSONActionBean implements ActionBean {
     }
 
     public Resolution spelen() throws NamingException, SQLException {
-        return writeAggregatie (SPELEN);
-    }
-    
-    public Resolution bomen() throws NamingException, SQLException {
-        return writeAggregatie (BOMEN);
+        return writeAggregatie(SPELEN);
     }
 
-    private Resolution writeAggregatie (String aggregatie) {
+    public Resolution bomen() throws NamingException, SQLException {
+        return writeAggregatie(BOMEN);
+    }
+
+    private Resolution writeAggregatie(String aggregatie) {
         JSONObject result = new JSONObject();
         try {
-            
-            List<Map<String,Object>> rows = null;
-       switch (aggregatie) {
-            case SPELEN:
-                rows = getSpelenAggregatie();                
-                break;
-            case BOMEN:
-                rows = getBomenAggregatie();                
-                break;
-            default:
-                throw new UnsupportedOperationException();
-        }
-            
+
+            List<Map<String, Object>> rows = null;
+            switch (aggregatie) {
+                case SPELEN:
+                    rows = getSpelenAggregatie();
+                    break;
+                case BOMEN:
+                    rows = getBomenAggregatie();
+                    break;
+                default:
+                    throw new UnsupportedOperationException();
+            }
+
             result = rowsToGeoJSONFeatureCollection(rows);
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.error("Error getting " + aggregatie, e);
-            result.put("error", "Fout ophalen "+ aggregatie+ ": " 
+            result.put("error", "Fout ophalen " + aggregatie + ": "
                     + e.getClass() + ": " + e.getMessage());
 
         }
         context.getResponse().addHeader("Access-Control-Allow-Origin", "*");
         String name = aggregatie + "_" + getDescription() + ".json";
-        StreamingResolution res =  new StreamingResolution("application/json", result.toString(4));
+        StreamingResolution res = new StreamingResolution("application/json", result.toString(4));
         res.setFilename(name);
         res.setAttachment(true);
-        return res;        
+        return res;
     }
-    
-    private List<Map<String,Object>> getSpelenAggregatie() throws NamingException, SQLException {
-        
-         StringBuilder sb = new StringBuilder();
+
+    private List<Map<String, Object>> getSpelenAggregatie() throws NamingException, SQLException {
+
+        StringBuilder sb = new StringBuilder();
 
         sb.append("SELECT ");
         sb.append("'Feature' AS type,");
@@ -161,14 +159,14 @@ public class AggregationJSONActionBean implements ActionBean {
         sb.append(spelenVervangjaarSubselect(assetsTable)).append(",");
         sb.append(spelenEndoflifeyearSubselect(assetsTable)).append(",");
         sb.append(spelenLeveranciersSubselect(assetsTable));
-        
+
         // einde subselects
         sb.append(") AS l )) AS properties ");
-        
-        List<Map<String,Object>> rows = DB.qr().query(sb.toString(), new MapListHandler());
+
+        List<Map<String, Object>> rows = DB.qr().query(sb.toString(), new MapListHandler());
         return rows;
     }
-        
+
     private String spelenBudgetSubselect(String assetsTable) {
         StringBuilder sb = new StringBuilder();
         sb.append("( ");
@@ -210,7 +208,7 @@ public class AggregationJSONActionBean implements ActionBean {
         sb.append("             foo ) AS budgetd ) AS budget ");
         return sb.toString();
     }
-    
+
     private String spelenGroepaantalSubselect(String assetsTable) {
         StringBuilder sb = new StringBuilder();
         sb.append("(  ");
@@ -232,7 +230,7 @@ public class AggregationJSONActionBean implements ActionBean {
         sb.append("                groep ) AS groepaantald ) AS groepaantal ");
         return sb.toString();
     }
- 
+
     private String spelenInstalledyearSubselect(String assetsTable) {
         StringBuilder sb = new StringBuilder();
         sb.append("(  ");
@@ -252,7 +250,7 @@ public class AggregationJSONActionBean implements ActionBean {
         sb.append("        installedyear ) AS installedyeard ) AS installedyear ");
         return sb.toString();
     }
-    
+
     private String spelenVervangjaarSubselect(String assetsTable) {
         StringBuilder sb = new StringBuilder();
         sb.append("(  ");
@@ -334,8 +332,8 @@ public class AggregationJSONActionBean implements ActionBean {
         sb.append("                 endoflifeyear ");
         sb.append("             ORDER BY  ");
         sb.append("                 endoflifeyear ) AS endoflifeyeard ) AS endoflifeyear ");
-    
-       return sb.toString();
+
+        return sb.toString();
     }
 
     private String spelenLeveranciersSubselect(String assetsTable) {
@@ -355,9 +353,9 @@ public class AggregationJSONActionBean implements ActionBean {
         sb.append("                  manufacturer ) wd ) AS leveranciers ");
         return sb.toString();
     }
-    
-    private List<Map<String,Object>> getBomenAggregatie() throws NamingException, SQLException {
-        
+
+    private List<Map<String, Object>> getBomenAggregatie() throws NamingException, SQLException {
+
         StringBuilder sb = new StringBuilder();
 
         sb.append("SELECT ");
@@ -379,11 +377,11 @@ public class AggregationJSONActionBean implements ActionBean {
 
         // einde subselects
         sb.append(") AS l )) AS properties ");
-        
-        List<Map<String,Object>> rows = DB.qr().query(sb.toString(), new MapListHandler());
+
+        List<Map<String, Object>> rows = DB.qr().query(sb.toString(), new MapListHandler());
         return rows;
     }
-                  
+
     private String bomenBomenaantalSubselect(String assetsTable) {
         StringBuilder sb = new StringBuilder();
         sb.append(" (SELECT COUNT(a.boomid) ");
@@ -507,7 +505,7 @@ public class AggregationJSONActionBean implements ActionBean {
         sb.append("             boomhoogte) AS boomhoogted ) AS boomhoogte ");
         return sb.toString();
     }
-    
+
     private JSONObject rowsToGeoJSONFeatureCollection(List<Map<String, Object>> rows) {
         JSONObject fc = new JSONObject();
         JSONArray features = new JSONArray();
@@ -535,5 +533,5 @@ public class AggregationJSONActionBean implements ActionBean {
         }
         return fc;
     }
-    
+
 }
