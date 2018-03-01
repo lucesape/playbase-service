@@ -259,7 +259,7 @@ public class PlayadvisorImporter extends Importer {
         for (int i = 0; i < record.length; i++) {
             String val = record[i];
             String col = playadvisorColumnToPlaybase.get(i);
-            Object value = val;
+            Object value = sanitizeValue(val);
             if (col == null) {
                 continue;
             }
@@ -433,6 +433,15 @@ public class PlayadvisorImporter extends Importer {
         return c;
     }
 
+    private String sanitizeValue(String value){
+        String [] valuesToReplace = {"\u0083", "\u0082", "Ã","Â"};
+        String sanitized = value;
+        for (String replace : valuesToReplace) {
+            sanitized = sanitized.replaceAll(replace, "");
+        }
+        
+        return sanitized;
+    }
     
     // <editor-fold desc="Saving of string-concatenated multivalues" defaultstate="collapsed">
     protected void saveFacilities(Location location, String facilitiesString, boolean deleteFirst) throws NamingException, SQLException {

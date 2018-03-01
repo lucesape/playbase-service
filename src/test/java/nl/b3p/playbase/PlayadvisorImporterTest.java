@@ -21,23 +21,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.naming.NamingException;
 import nl.b3p.commons.csv.CsvFormatException;
 import nl.b3p.commons.csv.CsvInputStream;
-import nl.b3p.loader.util.DbUtilsGeometryColumnConverter;
 import nl.b3p.playbase.ImportReport.ImportType;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.db.TestUtil;
 import nl.b3p.playbase.entities.Location;
-import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.handlers.ArrayListHandler;
-import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -170,6 +164,36 @@ public class PlayadvisorImporterTest extends TestUtil {
         for (String key : input.keySet()) {
             assertNotNull(input.get(key));
         }
+    }
+    
+    
+    @Test
+    public void testImportMonkeyTownEncodingIssue() throws Exception {
+        InputStream in = PlaymappingImporterTest.class.getResourceAsStream("monkeytown_encodingissue.csv");
+        ImportReport report = new ImportReport();
+        instance.importStream(in, report);
+        in.close();
+        assertEquals(1, report.getNumberInserted(ImportType.LOCATION));
+        
+        Location l = DB.qr().query("select * from " + DB.LOCATION_TABLE + "_playadvisor where pa_id = 31846", handler);
+        assertNotNull(l);
+        String content  = l.getPa_content();
+        assertEquals(1218,content.length());
+    }
+    
+    @Test
+    public void testImportBeestenboelEncodingIssue() throws Exception {
+        ImportReport report;
+        try (InputStream in = PlaymappingImporterTest.class.getResourceAsStream("beestenboel_encodingissue.csv")) {
+            report = new ImportReport();
+            instance.importStream(in, report);
+        }
+        assertEquals(1, report.getNumberInserted(ImportType.LOCATION));
+        
+        Location l = DB.qr().query("select * from " + DB.LOCATION_TABLE + "_playadvisor where pa_id = 93746", handler);
+        assertNotNull(l);
+        String content  = l.getPa_content();
+        assertEquals(1794,content.length());
     }
 
     @Test
