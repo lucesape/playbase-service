@@ -698,7 +698,7 @@ public abstract class Importer {
                     sb.append("pa_id,");
                     sb.append("lastupdated)");
                     sb.append("VALUES(?,?,?,?,?,?,?);");
-                    java.sql.Date sqldate = image.containsKey("LastUpdated") && !image.get("LastUpdated").equals("") ? new java.sql.Date(((Date) image.get("LastUpdated")).getTime()) : null;
+                    java.sql.Date sqldate = image.containsKey("LastUpdated") && image.get("LastUpdated") != null && !image.get("LastUpdated").equals("") ? new java.sql.Date(((Date) image.get("LastUpdated")).getTime()) : null;
                     DB.qr().insert(sb.toString(), new ScalarHandler<>(), image.get("Description"), image.get("URI"), locationId, assetId, image.get("ID"), image.get("pa_id"), sqldate);
                 }
             }
