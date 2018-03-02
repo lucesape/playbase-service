@@ -115,9 +115,10 @@ public class PlaymappingImporter extends Importer {
     }
     
     private Location mergeLocation(Location loc) throws SQLException, NamingException{
-        Location merged = getMergedLocation(loc);
-        if(merged != null){
-            loc = MatchActionBean.mergeLocations(merged, loc);
+        Location dbLoc = getMergedLocation(loc);
+        if(dbLoc != null){
+            dbLoc.setMunicipality(loc.getMunicipality());
+            loc = MatchActionBean.mergeLocations(dbLoc, loc);
         }
         
         return loc;

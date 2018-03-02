@@ -53,12 +53,48 @@ function CronTable() {
         $('#button').click(function () {
             this.playbasetable.row('.selected').remove().draw(false);
         });
-
+        $('#cronjobtype').change(function(event){
+            var newvalue = event.target.value;
+            me.cronjobtypechanged(newvalue);
+        }).bind(this);
+        
+        if(type){
+            this.cronjobtypechanged(type);
+        }
     };
 
     this.playadvisorClicked = function (data) {
-        console.log("playadvisor clicked", data);
         window.location.href = url + "view?cronjobid=" + data.id;
     };
 
+    this.cronjobtypechanged = function (newvalue) {
+        if (newvalue === "IMPORT_PLAYADVISOR") {
+            $("#exporthash").show();
+            $("#exporthashspan").html("export_hash");
+            $("#baseurl").show();
+            $("#baseurlspan").html("Playadvisor URL");
+            $("#username").show();
+            $("#usernamespan").html("export_id");
+            $("#password").show();
+            $("#passwordspan").html("export_key");
+        } else if (newvalue === "IMPORT_PLAYMAPPING") {
+            $("#exporthash").hide();
+            $("#exporthashspan").html("");
+            $("#baseurl").hide();
+            $("#baseurlspan").html("");
+            $("#username").show();
+            $("#usernamespan").html("Playmapping username");
+            $("#password").show();
+            $("#passwordspan").html("Playmapping password");
+        } else if (newvalue === "EXPORT_PLAYADVISOR") {
+            $("#exporthash").show();
+            $("#exporthashspan").html("download locatie plaatjes");
+            $("#baseurl").show();
+            $("#baseurlspan").html("Playadvisor URL");
+            $("#username").show();
+            $("#usernamespan").html("import_id");
+            $("#password").show();
+            $("#passwordspan").html("import_key");
+        }
+    };
 }

@@ -19,9 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <stripes:layout-render name="/WEB-INF/jsp/templates/admin.jsp" pageTitle="Planner voor automagische taken" menuitem="planner">
     <stripes:layout-component name="head">
-        <script type="text/javascript">
-              var url = "${contextPath}/action/cron/";
-        </script>
         <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css" />
 
         <script type="text/javascript" src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.js"></script>
@@ -57,17 +54,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             <stripes:form beanclass="nl.b3p.playbase.stripes.CronActionBean" class="form-horizontal">
                 <table>
                     <stripes:hidden name="cronjob.id"/>
-                    <tr><td>Type</td><td> <stripes:select name="cronjob.type_">
+                    <tr><td>Type</td><td> <stripes:select name="cronjob.type_" id="cronjobtype">
                                 <stripes:option value="">Selecteer</stripes:option>
                                 <stripes:options-enumeration enum="nl.b3p.playbase.cron.CronType" />
                             </stripes:select></td></tr>
-                    <tr><td>Cron expressie </td><td><stripes:text name="cronjob.cronexpressie"/></td></tr>
-                    <tr><td>User/[import|export] id</td><td><stripes:text name="cronjob.username"/></td></tr>
-                    <tr><td>Password/[import|export] key </td><td><stripes:text name="cronjob.password"/></td></tr>
-                    <tr><td>export Hash /download location </td><td><stripes:text name="cronjob.exporthash"/></td></tr>
-                    <tr><td>Base url </td><td><stripes:text name="cronjob.baseurl"/></td></tr>
+                    <tr style="display: none;" ><td>Cron expressie </td><td><stripes:text name="cronjob.cronexpressie"/></td></tr>
+                    <tr style="display: none;" id="username"><td><span id="usernamespan">User/[import|export] id</span></td><td><stripes:text name="cronjob.username"/></td></tr>
+                    <tr style="display: none;" id="password"><td><span id="passwordspan">Password/[import|export] key</span></td><td><stripes:text name="cronjob.password"/></td></tr>
+                    <tr style="display: none;" id="exporthash"><td><span id="exporthashspan">export Hash /download location</span></td><td><stripes:text name="cronjob.exporthash"/></td></tr>
+                    <tr style="display: none;" id="baseurl"><td>Base url </td><td><stripes:text name="cronjob.baseurl"/></td></tr>
                     <tr><td>Project</td><td><stripes:text name="cronjob.project"/></td></tr>
-                    <tr><td>Mail adres</td><td><stripes:text name="cronjob.mailaddress"/></td></tr>
+                    <tr ><td>Mail adres</td><td><stripes:text name="cronjob.mailaddress"/></td></tr>
                     <tr><td><stripes:submit name="save" class="btn btn-primary">Opslaan</stripes:submit></td>
                         <td><stripes:submit name="nieuw" class="btn btn-default">Nieuw</stripes:submit></td>
                         <td><c:if test="${not empty actionBean.cronjob.id}"><stripes:submit name="removeCron" class="btn btn-danger">Verwijder</stripes:submit>
@@ -78,7 +75,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         <td colspan="3">Log: <stripes:textarea cols="80" disabled="true" rows="30" name="cronjob.log"/></td>
                     </tr>
                     </table>
-
+                    <script type="text/javascript">
+                          var url = "${contextPath}/action/cron/";
+                          var type = "${actionBean.cronjob.type_}";
+                    </script>
             </stripes:form>
         </div>
     </stripes:layout-component>
