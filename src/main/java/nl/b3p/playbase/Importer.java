@@ -666,6 +666,9 @@ public abstract class Importer {
     // <editor-fold desc="Helpers" defaultstate="collapsed">
     protected Integer getAssetType(String type) {
         Integer id = assetTypes.get(type);
+        if(id == null){
+            log.error("Cannot map >" + type + "< to a category");
+        }
         return id;
     }
 

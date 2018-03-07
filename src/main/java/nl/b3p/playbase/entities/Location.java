@@ -18,6 +18,7 @@ package nl.b3p.playbase.entities;
 
 import com.vividsolutions.jts.geom.Geometry;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -54,6 +55,8 @@ public class Location {
     private List<Map<String, Object>> images = new ArrayList<>();
     private List<Map<String, Object>> documents = new ArrayList<>();
     private Integer[] agecategories = new Integer[0];
+    private Date lastmodified;
+    private Date lastexported;
 
     public Integer getId() {
         return id;
@@ -271,6 +274,22 @@ public class Location {
 
     public void setProject(String project) {
         this.project = project;
+    }
+
+    public Date getLastmodified() {
+        return lastmodified;
+    }
+
+    public void setLastmodified(Date lastmodified) {
+        this.lastmodified = lastmodified;
+    }
+
+    public Date getLastexported() {
+        return lastexported;
+    }
+
+    public void setLastexported(Date lastexported) {
+        this.lastexported = lastexported;
     }
     
 }

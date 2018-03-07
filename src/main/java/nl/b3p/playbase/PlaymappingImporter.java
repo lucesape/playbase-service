@@ -118,7 +118,7 @@ public class PlaymappingImporter extends Importer {
     }
     
     private Location mergeLocation(Location loc) throws SQLException, NamingException{
-        Location dbLoc = getMergedLocation(loc);
+        Location dbLoc = getExistingLocation(loc);
         if(dbLoc != null){
             dbLoc.setMunicipality(loc.getMunicipality());
             loc = MatchActionBean.mergeLocations(dbLoc, loc);
@@ -127,7 +127,7 @@ public class PlaymappingImporter extends Importer {
         return loc;
     }
     
-    public Location getMergedLocation(Location newLocation) throws NamingException, SQLException {
+    public Location getExistingLocation(Location newLocation) throws NamingException, SQLException {
         Location loc;
 
         StringBuilder sb = new StringBuilder();
@@ -188,7 +188,11 @@ public class PlaymappingImporter extends Importer {
                 asset.setProductvariantid(productgroup.optString("ID"));
             }
         }
-        asset.setMaterial(assetJSON.optString("Material"));
+        
+        JSONObject material = assetJSON.optJSONObject("Material");
+        if(material != null){
+            asset.setMaterial(material.optString("Name"));
+        }
         asset.setInstalleddate(assetJSON.optString("InstalledDate"));
         asset.setEndoflifeyear(assetJSON.optInt("EndOfLifeYear"));
         asset.setHeight(assetJSON.optInt("Height"));

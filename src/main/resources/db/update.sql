@@ -67,3 +67,21 @@ ALTER TABLE public.playservice_documents_playadvisor
 
 update playservice_images set pm_guid = null where location in (select pl.id from playservice_images pi inner join playservice_locations pl on pi.location  = pl.id where pl.pa_id is not null and pl.pm_guid is null) 
 update playservice_images as pi set pa_id = (select pl.pa_id from playservice_locations pl where pl.id = pi.location ) where location in (select pl.id from playservice_images pi inner join playservice_locations pl on pi.location  = pl.id where pl.pa_id is not null and pl.pm_guid is null) 
+
+
+  ALTER TABLE public.playservice_locations
+  ADD COLUMN lastmodified timestamp without time zone;
+
+ALTER TABLE public.playservice_locations
+  ADD COLUMN lastexported timestamp without time zone;
+
+update playservice_locations set lastmodified =  date '02-01-1970' ;
+update playservice_locations set lastexported =  date '01-01-1970' ;
+
+
+update playmapping_type_group set catasset = 'Ondergrond/' || catasset where catasset ilike '%ondergrond%';
+update playmapping_type_group set catasset = 'Speeltoestellen/' || catasset where not catasset like 'Ondergrond/%';
+update playmapping_type_group set catasset = 'Speeltoestellen/Carrousel' where catasset = 'Speeltoestellen/Speeltoestellen/Carrousel';
+update playmapping_type_group set catasset = 'Faciliteiten/Zitgelegenheden/Bank' where catasset = 'Speeltoestellen/Zitgelegenheden/Bank';
+update playmapping_type_group set catasset = 'Faciliteiten' where catasset = 'Speeltoestellen/Faciliteiten';
+update playmapping_type_group set catasset = 'Faciliteiten/Kunstobjecten' where catasset = 'Speeltoestellen/Faciliteiten/Kunstobjecten';
