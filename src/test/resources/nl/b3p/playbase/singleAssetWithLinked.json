@@ -14,9 +14,70 @@
     "LastUpdated": "2017-01-18T03:54:40.177",
     "Lat": "51,58975",
     "Lng": "5,075628",
-    "LocationID": "553a7e7b-92c6-4c09-8e03-000e7580347f",
-    "LocationName": "Stiels speelelementen \\Puccinistraat 86",
-    "Manufacturer": "",
+    "Location": {
+        "$id": "2",
+        "AddressLine1": "Hanswijkdries",
+        "Area": "",
+        "AssetCount": 24,
+        "ChildLocations": [],
+        "City": "Mechelen",
+        "ContactEmail": "",
+        "ContactName": "",
+        "ContactPhone": "",
+        "Documents": [],
+        "ID": "553a7e7b-92c6-4c09-8e03-000e7580347f",
+        "Images": [
+            {
+                "$id": "3",
+                "Description": "",
+                "ID": "49af5a80-d35b-4415-847e-0175ec89fe8f",
+                "URI": "http://www.playmapping.com/GetImage.ashx?g=49af5a80-d35b-4415-847e-0175ec89fe8f&w=350&h=350"
+            },
+            {
+                "$id": "4",
+                "Description": "",
+                "ID": "0c263101-a6d4-4492-88a6-1b288557dde2",
+                "URI": "http://www.playmapping.com/GetImage.ashx?g=0c263101-a6d4-4492-88a6-1b288557dde2&w=350&h=350"
+            },
+            {
+                "$id": "5",
+                "Description": "",
+                "ID": "0cff634b-03fc-4319-8175-35b701255d16",
+                "URI": "http://www.playmapping.com/GetImage.ashx?g=0cff634b-03fc-4319-8175-35b701255d16&w=350&h=350"
+            },
+            {
+                "$id": "6",
+                "Description": "",
+                "ID": "9cba2f24-dd79-41ab-8901-38e498a45d82",
+                "URI": "http://www.playmapping.com/GetImage.ashx?g=9cba2f24-dd79-41ab-8901-38e498a45d82&w=350&h=350"
+            },
+            {
+                "$id": "7",
+                "Description": "",
+                "ID": "d7a20fe6-e63e-414d-81ab-dd02abc3e27a",
+                "URI": "http://www.playmapping.com/GetImage.ashx?g=d7a20fe6-e63e-414d-81ab-dd02abc3e27a&w=350&h=350"
+            },
+            {
+                "$id": "8",
+                "Description": "",
+                "ID": "0c20000c-24c8-4d9a-9259-f31af4d63922",
+                "URI": "http://www.playmapping.com/GetImage.ashx?g=0c20000c-24c8-4d9a-9259-f31af4d63922&w=350&h=350"
+            }
+        ],
+        "Lat": "51,01642",
+        "Lng": "4,49463",
+        "Name": "Stiels speelelementen \\Puccinistraat 86",
+        "Notes": "",
+        "ParentLocationID": "f51c5944-1ba8-4ab6-8115-6658da380fba",
+        "PostCode": "",
+        "Ref": "HAN",
+        "Suburb": "Arsenaal"
+    },
+    "Manufacturer": {
+        "$id": "7",
+        "ID": "a48b530d-419a-4b38-a00b-79495daaa0d7",
+        "Name": "Boerplay"
+    },
     "Material": "",
     "Name": "Huisje jantje beton",
     "PriceIndexation": -1.0,
@@ -69,9 +130,70 @@
             "Lat": "0",
             "LinkedAssets": [],
             "Lng": "0",
-            "LocationID": "553a7e7b-92c6-4c09-8e03-000e7580347f",
-            "LocationName": "Stiels speelelementen \\Puccinistraat 86",
-            "Manufacturer": "",
+            "Location": {
+                "$id": "2",
+                "AddressLine1": "Hanswijkdries",
+                "Area": "",
+                "AssetCount": 24,
+                "ChildLocations": [],
+                "City": "Mechelen",
+                "ContactEmail": "",
+                "ContactName": "",
+                "ContactPhone": "",
+                "Documents": [],
+                "ID": "553a7e7b-92c6-4c09-8e03-000e7580347f",
+                "Images": [
+                    {
+                        "$id": "3",
+                        "Description": "",
+                        "ID": "49af5a80-d35b-4415-847e-0175ec89fe8f",
+                        "URI": "http://www.playmapping.com/GetImage.ashx?g=49af5a80-d35b-4415-847e-0175ec89fe8f&w=350&h=350"
+                    },
+                    {
+                        "$id": "4",
+                        "Description": "",
+                        "ID": "0c263101-a6d4-4492-88a6-1b288557dde2",
+                        "URI": "http://www.playmapping.com/GetImage.ashx?g=0c263101-a6d4-4492-88a6-1b288557dde2&w=350&h=350"
+                    },
+                    {
+                        "$id": "5",
+                        "Description": "",
+                        "ID": "0cff634b-03fc-4319-8175-35b701255d16",
+                        "URI": "http://www.playmapping.com/GetImage.ashx?g=0cff634b-03fc-4319-8175-35b701255d16&w=350&h=350"
+                    },
+                    {
+                        "$id": "6",
+                        "Description": "",
+                        "ID": "9cba2f24-dd79-41ab-8901-38e498a45d82",
+                        "URI": "http://www.playmapping.com/GetImage.ashx?g=9cba2f24-dd79-41ab-8901-38e498a45d82&w=350&h=350"
+                    },
+                    {
+                        "$id": "7",
+                        "Description": "",
+                        "ID": "d7a20fe6-e63e-414d-81ab-dd02abc3e27a",
+                        "URI": "http://www.playmapping.com/GetImage.ashx?g=d7a20fe6-e63e-414d-81ab-dd02abc3e27a&w=350&h=350"
+                    },
+                    {
+                        "$id": "8",
+                        "Description": "",
+                        "ID": "0c20000c-24c8-4d9a-9259-f31af4d63922",
+                        "URI": "http://www.playmapping.com/GetImage.ashx?g=0c20000c-24c8-4d9a-9259-f31af4d63922&w=350&h=350"
+                    }
+                ],
+                "Lat": "51,01642",
+                "Lng": "4,49463",
+                "Name": "Stiels speelelementen \\Puccinistraat 86",
+                "Notes": "",
+                "ParentLocationID": "f51c5944-1ba8-4ab6-8115-6658da380fba",
+                "PostCode": "",
+                "Ref": "HAN",
+                "Suburb": "Arsenaal"
+            },
+            "Manufacturer": {
+                "$id": "7",
+                "ID": "a48b530d-419a-4b38-a00b-79495daaa0d7",
+                "Name": "Boerplay"
+            },
             "Material": "",
             "Name": "Huisje jantje beton Ondergrond",
             "PriceIndexation": -1.0,

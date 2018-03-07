@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -91,7 +92,7 @@ public class PlaymappingImporter extends Importer {
 
     }
 
-    public ImportReport processAssets(String assetsString, ImportReport report) throws NamingException, SQLException {
+    public ImportReport processAssets(JSONArray assetsString, ImportReport report) throws NamingException, SQLException {
         Map<Integer,Set<Integer>> assetTypes = new HashMap<>();
         List<Asset> assets = parseAssets(assetsString, assetTypes);
         for (Asset asset : assets) {
@@ -105,13 +106,15 @@ public class PlaymappingImporter extends Importer {
         return report;
     }
 
-    public void processLocations(String temp, ImportReport report) throws NamingException, SQLException {
+    public List<String> processLocations(String temp, ImportReport report) throws NamingException, SQLException {
         List<Location> childLocations = parseChildLocations(temp);
-        
+        List<String> pm_guids = new ArrayList<>();
         for (Location childLocation : childLocations) {
             childLocation = mergeLocation(childLocation);
+            pm_guids.add(childLocation.getPm_guid());
             saveLocation(childLocation, report);
         }
+        return pm_guids;
     }
     
     private Location mergeLocation(Location loc) throws SQLException, NamingException{
@@ -145,15 +148,16 @@ public class PlaymappingImporter extends Importer {
 
 
     // <editor-fold desc="Assets" defaultstate="collapsed">
-    protected List<Asset> parseAssets(String assetsString, Map<Integer,Set<Integer>> assetTypes) throws NamingException, SQLException {
+    protected List<Asset> parseAssets(JSONArray assetsArray, Map<Integer,Set<Integer>> assetTypes) throws NamingException, SQLException {
         List<Asset> assets = new ArrayList<>();
-        JSONArray assetsArray = new JSONArray(assetsString);
+     //   JSONArray assetsArray = new JSONArray(assetsString);
 
         for (int i = 0; i < assetsArray.length(); i++) {
             JSONObject asset = assetsArray.getJSONObject(i);
-            Integer locationId = getLocationId(asset.getString("LocationID"));
+            JSONObject location = asset.getJSONObject("Location");
+            Integer locationId = getLocationId(location.getString("ID"));
             assets.add(parseAsset(asset, locationId, assetTypes));
-            String linkedAssets = asset.getJSONArray("LinkedAssets").toString();
+            JSONArray linkedAssets = asset.getJSONArray("LinkedAssets");
             assets.addAll(parseAssets(linkedAssets,assetTypes));
         }
         return assets;
@@ -164,15 +168,29 @@ public class PlaymappingImporter extends Importer {
         asset.setPm_guid(assetJSON.optString("ID"));
         asset.setLocation(locationId);
         asset.setName(assetJSON.optString("Name").replaceAll("\'", "\'\'"));
-        asset.setType_(getAssetType(assetJSON.optString("AssetType")));
-        asset.setManufacturer( assetJSON.optString("Manufacturer"));
-        asset.setProduct(assetJSON.optString("Product"));
-        asset.setSerialnumber(assetJSON.optString("SerialNumber"));
+        JSONObject assetType = assetJSON.optJSONObject("AssetType");
+        if(assetType != null){
+            asset.setType_(getAssetType(assetType.optString("FullName")));
+        }
+        
+        JSONObject manufacturer = assetJSON.optJSONObject("Manufacturer");
+        if(manufacturer != null){
+            asset.setManufacturer( manufacturer.optString("Name"));
+        }
+        
+        JSONObject product = assetJSON.optJSONObject("Product");
+        if(product != null){
+            asset.setProduct(product.optString("ProductNumber"));
+            asset.setSerialnumber(product.optString("SerialNumber"));
+            asset.setProductid(product.optString("ID"));
+            JSONObject productgroup = product.optJSONObject("ProductGroup");
+            if(productgroup != null){
+                asset.setProductvariantid(productgroup.optString("ID"));
+            }
+        }
         asset.setMaterial(assetJSON.optString("Material"));
         asset.setInstalleddate(assetJSON.optString("InstalledDate"));
         asset.setEndoflifeyear(assetJSON.optInt("EndOfLifeYear"));
-        asset.setProductid(assetJSON.optString("ProductID"));
-        asset.setProductvariantid(assetJSON.optString("ProductVariantID"));
         asset.setHeight(assetJSON.optInt("Height"));
         asset.setDepth(assetJSON.optInt("Depth"));
         asset.setWidth(assetJSON.optInt("Width"));
@@ -318,7 +336,8 @@ public class PlaymappingImporter extends Importer {
                 processLocations(stringResult, report);
                 type = ImportType.LOCATION;
             } else if (apiurl.contains("Asset")) {
-                processAssets(stringResult, report);
+                JSONArray res = new JSONArray(stringResult);
+                processAssets(res, report);
                 type = ImportType.ASSET;
             } else {
                 throw new IllegalArgumentException("Wrong url selected");
@@ -326,12 +345,33 @@ public class PlaymappingImporter extends Importer {
             report.setImportedstring(type, stringResult);
         }
     }
-    
-    public ImportReport importJSONFromAPI(String username, String password, String apiurl) throws SQLException, NamingException {
-        ImportReport report = new ImportReport();
-        String stringResult = getResponse(username, password, apiurl, report);
-        importString(stringResult, apiurl, report);
+
+    public ImportReport importJSONAssetsFromAPI(String username, String password, String apiurl, List<String> pm_guids,ImportReport report) throws SQLException, NamingException {
+        JSONArray results = new JSONArray();
+        for (String pm_guid : pm_guids) {
+            String url = apiurl + pm_guid;
+            String stringResult = getResponse(username, password, url, report);
+            JSONArray result = new JSONArray(stringResult);
+            
+            for (Iterator<Object> iterator = result.iterator(); iterator.hasNext();) {
+                Object next = iterator.next();
+                results.put(next);
+            }
+        }
+        
+
+        processAssets(results, report);
+        ImportType type = ImportType.ASSET;
+        report.setImportedstring(type, results.toString());
         return report;
+    }
+    
+    public List<String> importJSONLocationsFromAPI(String username, String password, String apiurl,ImportReport report) throws SQLException, NamingException {
+        String stringResult = getResponse(username, password, apiurl, report);
+        List<String> locationIds = processLocations(stringResult, report);
+        ImportType type = ImportType.LOCATION;
+        report.setImportedstring(type, stringResult);
+        return locationIds;
     }
 
 }

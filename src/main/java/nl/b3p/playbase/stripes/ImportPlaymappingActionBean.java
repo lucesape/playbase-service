@@ -19,6 +19,7 @@ package nl.b3p.playbase.stripes;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Set;
 import javax.naming.NamingException;
 import net.sourceforge.stripes.action.ActionBean;
@@ -79,18 +80,22 @@ public class ImportPlaymappingActionBean implements ActionBean {
     }
 
     public Resolution importPM() throws NamingException, SQLException {
-        ImportReport report;
+        ImportReport report = new ImportReport();
         processor = new PlaymappingImporter(project);
         processor.init();
         if (file.equalsIgnoreCase("Via API")) {
-            report = processor.importJSONFromAPI(getUsername(), getPassword(), getApiurl());
+            
+            if (getApiurl().contains("Location")) {
+                processor.importJSONLocationsFromAPI(getUsername(), getPassword(), getApiurl(), report);
+            }else{
+                processor.importJSONAssetsFromAPI(getUsername(), getPassword(), getApiurl(), new ArrayList<>(), report);
+            }
         } else {
 
             try {
                 InputStream in = ImportPlaymappingActionBean.class.getResourceAsStream(file);
                 String theString = IOUtils.toString(in, "UTF-8");
                 in.close();
-                report = new ImportReport();
                 processor.importString(theString, apiurl, report);
 
             } catch (IOException ex) {

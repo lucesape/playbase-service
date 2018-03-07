@@ -164,7 +164,7 @@ public class MatchActionBean implements ActionBean {
 
                     for (Iterator<Location> iterator = playmappingLocs.iterator(); iterator.hasNext();) {
                         Location pmLoc = iterator.next();
-                        JSONObject pm = calculateScore(playadvisorLoc, pmLoc, l, crs);
+                        JSONObject pm = calculateScore(playadvisorLoc, pmLoc, l, crs, useDistance);
                         double score = pm.getDouble("score");
                         String distanceString = pm.getString("distance");
                         Double distance = distanceString.equals("-") ? 100 : Double.parseDouble(pm.getString("distance"));
@@ -233,7 +233,7 @@ public class MatchActionBean implements ActionBean {
             Location playadvisorLoc = DB.qr().query("select * from " + DB.LOCATION_TABLE + "_playadvisor where id = ?", handler, playadvisorId);
             if (playadvisorLoc != null) {
 
-                List<JSONObject> locations = getPlaymappingData(playadvisorLoc, geometryConverter);
+                List<JSONObject> locations = getPlaymappingData(playadvisorLoc, geometryConverter, true);
                 result.put("data", new JSONArray(locations));
             } else {
                 result.put("message", "playadvisor location not found.");
@@ -250,7 +250,7 @@ public class MatchActionBean implements ActionBean {
         return res;
     }
     
-    private List<JSONObject> getPlaymappingData(Location playadvisorLoc, GeometryJdbcConverter geometryConverter) throws FactoryException, NamingException, SQLException {
+    private List<JSONObject> getPlaymappingData(Location playadvisorLoc, GeometryJdbcConverter geometryConverter, boolean useDistance) throws FactoryException, NamingException, SQLException {
         ResultSetHandler<List<Location>> listHandler = new BeanListHandler(Location.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
         CoordinateReferenceSystem crs = CRS.decode("EPSG:4326");
 
@@ -259,13 +259,13 @@ public class MatchActionBean implements ActionBean {
         List<Location> locs = DB.qr().query("select * from " + DB.LOCATION_TABLE + " where pa_id is null", listHandler);
         List<JSONObject> locations = new ArrayList<>();
         for (Location loc : locs) {
-            JSONObject obj = calculateScore(playadvisorLoc, loc, l, crs);
+            JSONObject obj = calculateScore(playadvisorLoc, loc, l, crs, useDistance);
             locations.add(obj);
         }
         return locations;
     }
     
-    private JSONObject calculateScore(Location playadvisorLoc, Location playmappingLoc,  NormalizedLevenshtein l,CoordinateReferenceSystem crs) {
+    private JSONObject calculateScore(Location playadvisorLoc, Location playmappingLoc,  NormalizedLevenshtein l,CoordinateReferenceSystem crs, boolean useDistance) {
         JSONObject obj = new JSONObject(gson.toJson(playmappingLoc, Location.class));
         Geometry end = playmappingLoc.getGeom();
         double distanceScore = 3;

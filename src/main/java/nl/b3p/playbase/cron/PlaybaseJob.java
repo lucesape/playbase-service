@@ -79,14 +79,13 @@ public class PlaybaseJob implements Job {
 
         PlaymappingImporter pi = new PlaymappingImporter(job.getProject());
 
-        ImportReport locationReport = null;
-        ImportReport assetsReport = null;
+        ImportReport locationReport = new ImportReport();
+        ImportReport assetsReport = new ImportReport();
         String logString;
         String importedString = null;
         try {
-            locationReport = pi.importJSONFromAPI(job.getUsername(), job.getPassword(), "https://api.playmapping.com/CustomerLocation/GetAll"); // import/update locations
-            assetsReport = pi.importJSONFromAPI(job.getUsername(), job.getPassword(), "https://api.playmapping.com/CustomerAsset/GetAll"); // import/update locations
-
+            List<String> pm_guids = pi.importJSONLocationsFromAPI(job.getUsername(), job.getPassword(), "https://api.playmapping.com/CustomerLocation/GetAll",locationReport);//tJSONFromAPI(job.getUsername(), job.getPassword(), "https://api.playmapping.com/CustomerLocation/GetAll"); // import/update locations
+            assetsReport = pi.importJSONAssetsFromAPI(job.getUsername(), job.getPassword(), "https://api.playmapping.com/CustomerAsset/GetByLocationId/",pm_guids,assetsReport);//NFromAPI(job.getUsername(), job.getPassword(), "https://api.playmapping.com/CustomerAsset/GetAll"); // import/update locations
         } catch (SQLException | NamingException ex) {
             log.error("Cannot import playmapping: ", ex);
         }

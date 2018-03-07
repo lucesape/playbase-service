@@ -58,7 +58,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                                 <stripes:option value="">Selecteer</stripes:option>
                                 <stripes:options-enumeration enum="nl.b3p.playbase.cron.CronType" />
                             </stripes:select></td></tr>
-                    <tr style="display: none;" ><td>Cron expressie </td><td><stripes:text name="cronjob.cronexpressie"/></td></tr>
+                    <tr><td>Cron expressie </td><td><stripes:text name="cronjob.cronexpressie"/></td></tr>
                     <tr style="display: none;" id="username"><td><span id="usernamespan">User/[import|export] id</span></td><td><stripes:text name="cronjob.username"/></td></tr>
                     <tr style="display: none;" id="password"><td><span id="passwordspan">Password/[import|export] key</span></td><td><stripes:text name="cronjob.password"/></td></tr>
                     <tr style="display: none;" id="exporthash"><td><span id="exporthashspan">export Hash /download location</span></td><td><stripes:text name="cronjob.exporthash"/></td></tr>
