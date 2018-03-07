@@ -124,7 +124,7 @@ public class PlaymappingImporterTest extends TestUtil {
         assertEquals("Boerplay", map.getManufacturer());
         assertEquals("SPT.230.038", map.getProduct());
         assertEquals("", map.getSerialnumber());
-        assertEquals("", map.getMaterial());
+        assertEquals(null, map.getMaterial());
         assertEquals("", map.getInstalleddate());
         assertEquals(-1, (int)map.getEndoflifeyear());
         assertEquals("5fa2189b-bb75-4545-8f0e-140d4ce3b5ab", map.getProductid());
