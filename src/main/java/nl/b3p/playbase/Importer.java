@@ -557,6 +557,9 @@ public abstract class Importer {
 
     protected Integer getAssetId(Asset asset) {
         try {
+            if (asset.getId() != null) {
+                return asset.getId();
+            }
             Asset o;
             if (asset.getPm_guid() == null) {
                 if(asset.getLocation() == null || asset.getEquipment() == null){

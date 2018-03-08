@@ -375,6 +375,9 @@ public class PlayadvisorImporter extends Importer {
         }
         // Save new assets
         for (String asset : paAssets) {
+            if(asset.isEmpty()){
+                continue;
+            }
             Asset ass = new Asset();
             ass.setName(asset);
             ass.setPa_guid(location.getPa_id());
