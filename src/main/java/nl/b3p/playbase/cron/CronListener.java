@@ -65,7 +65,7 @@ public class CronListener implements ServletContextListener {
 
         Properties props = new Properties();
         props.put("org.quartz.scheduler.instanceName", "MonitoringScheduler");
-        props.put("org.quartz.threadPool.threadCount", "1");
+        props.put("org.quartz.threadPool.threadCount", "10");
         props.put("org.quartz.scheduler.interruptJobsOnShutdownWithWait", "true");
         // Job store for monitoring does not need to be persistent
         props.put("org.quartz.jobStore.class", "org.quartz.simpl.RAMJobStore");

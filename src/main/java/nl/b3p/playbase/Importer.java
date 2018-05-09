@@ -670,7 +670,7 @@ public abstract class Importer {
     protected Integer getAssetType(String type) {
         Integer id = assetTypes.get(type);
         if(id == null){
-            log.error("Cannot map >" + type + "< to a category");
+            log.debug("Cannot map >" + type + "< to a category");
         }
         return id;
     }

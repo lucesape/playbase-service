@@ -122,8 +122,8 @@ public class PlaybaseJob implements Job {
                 log.error("I can get no sleep.", ex);
             }
         } while (!message.contains("complete"));
-        // download file 
-        res = pi.getResponse(null, null, job.getBaseurl() +"/wp-cron.php?export_hash=" + job.getExporthash() + "&export_id=" + job.getUsername() +"&action=get_data", report);
+        // download file
+        res = pi.getResponse(null, null, job.getBaseurl() +"/wp-cron.php?security_token=" + job.getExporthash() + "&export_id=" + job.getUsername() +"&action=get_data", report);
         
         try {
             InputStream is = new ByteArrayInputStream( res.getBytes( "UTF-8" ) );
