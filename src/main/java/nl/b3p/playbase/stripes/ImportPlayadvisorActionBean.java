@@ -16,9 +16,10 @@
  */
 package nl.b3p.playbase.stripes;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Set;
+import javax.naming.NamingException;
 import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
 import net.sourceforge.stripes.action.DefaultHandler;
@@ -29,9 +30,10 @@ import net.sourceforge.stripes.action.SimpleMessage;
 import net.sourceforge.stripes.action.StrictBinding;
 import net.sourceforge.stripes.action.UrlBinding;
 import net.sourceforge.stripes.validation.Validate;
-import nl.b3p.commons.csv.CsvFormatException;
 import nl.b3p.playbase.ImportReport;
 import nl.b3p.playbase.PlayadvisorImporter;
+import nl.b3p.playbase.PlayadvisorImporter_old;
+import nl.b3p.playbase.db.DB;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -47,7 +49,7 @@ public class ImportPlayadvisorActionBean implements ActionBean {
     private ActionBeanContext context;
     private static final String JSP = "/WEB-INF/jsp/admin/import/playadvisor.jsp";
 
-    private PlayadvisorImporter processor;
+    private PlayadvisorImporter_old processor;
 
     @Validate
     private FileBean csv;
@@ -110,26 +112,12 @@ public class ImportPlayadvisorActionBean implements ActionBean {
     }
     
     public Resolution importLocations() {
-        try {
+        try (Connection con = DB.getConnection()) {
             ImportReport report = new ImportReport();
-            processor = new PlayadvisorImporter(project);
-            if (csv != null) {
-                processor.importStream(csv.getInputStream(), report);
-            }
-            if (file != null) {
-                try {
-                    InputStream in = ImportPlayadvisorActionBean.class.getResourceAsStream(file);
-                    processor.importStream(in, report);
-                    in.close();
-                } catch (IOException ex) {
-                    log.error(ex);
-                    return new ForwardResolution(JSP);
-                }
-            }
-            if(comments != null){
-                processor.importComments(comments.getInputStream(), report);
-            }
-            
+           
+            PlayadvisorImporter imp = new PlayadvisorImporter(project);
+            //imp.initialLoad( cronjob, report, con);
+              
             context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberInserted(ImportReport.ImportType.ASSET) + " " + ImportReport.ImportType.ASSET.toString() + " weggeschreven."));
             context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberInserted(ImportReport.ImportType.LOCATION) + " " + ImportReport.ImportType.LOCATION.toString() + " weggeschreven."));
             context.getMessages().add(new SimpleMessage("Er zijn " + report.getNumberInserted(ImportReport.ImportType.COMMENT) + " " + ImportReport.ImportType.COMMENT.toString() + " weggeschreven."));
@@ -149,8 +137,26 @@ public class ImportPlayadvisorActionBean implements ActionBean {
                     }
                 }
             }
-        } catch (IOException | CsvFormatException ex) {
-            log.error("Cannot import playadvisor csv: ", ex);
+            /*processor = new PlayadvisorImporter_old(project);
+            if (csv != null) {
+                processor.importStream(csv.getInputStream(), report);
+            }
+            if (file != null) {
+                try {
+                    InputStream in = ImportPlayadvisorActionBean.class.getResourceAsStream(file);
+                    processor.importStream(in, report);
+                    in.close();
+                } catch (IOException ex) {
+                    log.error(ex);
+                    return new ForwardResolution(JSP);
+                }
+            }
+            if(comments != null){
+                processor.importComments(comments.getInputStream(), report);
+            }
+          */
+        } catch (SQLException | NamingException ex) {
+            log.error("Cannot import playadvisor REST API: ", ex);
         }
         return new ForwardResolution(JSP);
     }

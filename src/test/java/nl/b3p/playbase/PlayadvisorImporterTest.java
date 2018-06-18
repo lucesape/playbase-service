@@ -45,7 +45,7 @@ import org.junit.Test;
  */
 public class PlayadvisorImporterTest extends TestUtil {
 
-    private PlayadvisorImporter instance;
+    private PlayadvisorImporter_old instance;
 
     public PlayadvisorImporterTest() {
         this.useDB = true;
@@ -53,7 +53,7 @@ public class PlayadvisorImporterTest extends TestUtil {
 
     @Before
     public void beforeTest() {
-        instance = new PlayadvisorImporter("test");
+        instance = new PlayadvisorImporter_old("test");
     }
 
     /**

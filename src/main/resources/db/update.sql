@@ -85,3 +85,7 @@ ALTER TABLE public.playservice_locations
 
 update playservice_locations set lastmodified =  date '02-01-1970' ;
 update playservice_locations set lastexported =  date '01-01-1970' ;
+
+
+
+ALTER TABLE public.cronjob RENAME exporthash  TO authkey;

@@ -34,10 +34,10 @@ import org.junit.Test;
 public class ProblemCases extends TestUtil{
     
     
-    private PlayadvisorImporter paInstance;
+    private PlayadvisorImporter_old paInstance;
 
     public ProblemCases() {
-        paInstance = new PlayadvisorImporter("test");
+        paInstance = new PlayadvisorImporter_old("test");
     }
     
     @Test(expected = IllegalArgumentException.class)

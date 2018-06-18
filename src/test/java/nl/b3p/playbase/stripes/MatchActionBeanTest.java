@@ -24,7 +24,7 @@ import java.util.List;
 import javax.naming.NamingException;
 import nl.b3p.commons.csv.CsvFormatException;
 import nl.b3p.playbase.ImportReport;
-import nl.b3p.playbase.PlayadvisorImporter;
+import nl.b3p.playbase.PlayadvisorImporter_old;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.db.TestUtil;
 import nl.b3p.playbase.entities.Location;
@@ -311,7 +311,7 @@ public class MatchActionBeanTest extends TestUtil{
         String updateString = "93744,\"Speeltuin tAssendorp\",\"<p class=\"\"MsoNormal\"\">Speeltuin Assendorp is Ambassadeur Samen Spelen van de NSGKSpeeltuinbende. Dit betekent dat alle kinderen, met én zonder handicap, hier heerlijk samen kunnen spelen en dat despeeltuin allerlei activiteiten ontplooit om het samen spelen te bevorderen.</p> <p class=\"\"MsoNormal\"\">De speeltuin heeft een goed aangepast toilet met stevigeverschoontafel. Er is een ruime kantine waar bij nat weer geschuild kan worden.Er loopt een goed berijdbaar én zichtbaar pad door de hele speeltuin. Er is éénin- uitgang, op strategische plekken staan bankjes. Natuurlijk zijn demedewerkers heel gastvrij en daardoor voelt iedereen zich welkom.</p> <p class=\"\"MsoNormal\"\">Samenspeeltoppers zijn het springkussen, de spannendewilgentunnel, het kasteel van de zwarte panter met haar kruip door sluipdoor enstrategisch uitzicht<a name=\"\"_GoBack\"\"></a>, de heerlijke schommels en nog veelmeer.</p> Maandag t/m vrijdag: 14.00u - 17.30u Zaterdag: 14.00u - 17.00u Zon- en feestdagen: gesloten\",,2016-04-21,speelplek,http://playadvisor.b3p.nl/speelplek/openbare-speeltuin/speeltuin-assendorp/,http://playadvisor.b3p.nl/wp-content/uploads/2016/04/001-2950.jpg,001.jpg,,,,,\"Speeltuinen>Openbare speeltuin\",Nederland,Zwolle,,,,,\"Inclusive playground|Invalidentoilet|Samenspeelplek\",,0,6.1101436,52.5003761,\"a:1:{i:0;a:2:{s:13:\"\"attachment_id\"\";i:93665;s:3:\"\"url\"\";s:68:\"\"//playadvisor.co/wp-content/uploads/2016/04/speeltuinassendorp-0.jpg\"\";}}\",,,,,,publish,279,speeltuin-assendorp,,,0,0,0,open,open,,";
         
                 
-        PlayadvisorImporter painstance = new PlayadvisorImporter("test");
+        PlayadvisorImporter_old painstance = new PlayadvisorImporter_old("test");
 
         painstance.importStream(new ByteArrayInputStream(updateString.getBytes(StandardCharsets.UTF_8)), new ImportReport());
         

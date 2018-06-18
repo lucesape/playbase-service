@@ -29,7 +29,9 @@ public enum CronType {
     @SerializedName("Playmapping import")
     IMPORT_PLAYMAPPING("Playmapping import"),
     @SerializedName("Playadvisor export")
-    EXPORT_PLAYADVISOR("Playadvisor export");
+    EXPORT_PLAYADVISOR("Playadvisor export"),
+    @SerializedName("Playadvisor_playmapping")
+    PLAYMAPPING_PLAYADVISOR("Playmapping en playadvisor");
     
     private String type;
     

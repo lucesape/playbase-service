@@ -16,11 +16,13 @@
  */
 package nl.b3p.playbase.entities;
 
+import com.google.gson.Gson;
 import com.vividsolutions.jts.geom.Geometry;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.json.JSONObject;
 
 /**
  *
@@ -89,8 +91,6 @@ public class Location {
     public void setPm_content(String pm_content) {
         this.pm_content = pm_content;
     }
-
-    
 
     public String getSummary() {
         return summary;
@@ -291,5 +291,44 @@ public class Location {
     public void setLastexported(Date lastexported) {
         this.lastexported = lastexported;
     }
-    
+
+    public JSONObject toPlayadvisorJSON() {
+        JSONObject obj = new JSONObject();
+
+        /*
+        uitzoeken
+        
+        obj.put("Regio", );
+        obj.put("newPlayGround", );
+                obj.put("Toegankelijkheid", );
+                 */
+         /*
+                1-n:
+
+        obj.put("Categorien," );
+                obj.put("Assets", );
+        obj.put("Faciliteiten", );
+        obj.put("Images", );
+        obj.put("Leeftijdscategorie", );
+        obj.put("Parkeren", parking);
+         */
+        obj.put("Plaats", municipality);
+        obj.put("Content", pa_content);
+        obj.put("Longitude", longitude);
+
+        obj.put("Email", email);
+
+        obj.put("Website", website);
+        obj.put("Telefoon", phone);
+        obj.put("Land", country);
+        obj.put("PlayadvisorID", pa_id);
+        obj.put("Titel", pa_title);
+        obj.put("PlaybaseID", id);
+        obj.put("Latitude", latitude);
+        obj.put("Straat", street);
+        obj.put("Samenvatting", summary);
+
+        return obj;
+    }
+
 }

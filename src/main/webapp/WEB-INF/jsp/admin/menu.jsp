@@ -24,5 +24,9 @@
     <li${menuitem == 'planner' ? ' class="active"' : ''}>
         <stripes:link beanclass="nl.b3p.playbase.stripes.CronActionBean">Planner</stripes:link>
     </li>
+    
+        <li${menuitem == 'pushplayadvisor' ? ' class="active"' : ''}>
+        <stripes:link beanclass="nl.b3p.playbase.stripes.PlayadvisorActionBean" event="updateLocation">Push</stripes:link>
+    </li>
   
 </ul>

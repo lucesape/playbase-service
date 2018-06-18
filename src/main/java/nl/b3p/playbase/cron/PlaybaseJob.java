@@ -16,29 +16,20 @@
  */
 package nl.b3p.playbase.cron;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.naming.NamingException;
-import nl.b3p.commons.csv.CsvFormatException;
 import nl.b3p.mail.Mailer;
 import nl.b3p.playbase.ImageDownloader;
 import nl.b3p.playbase.ImportReport;
 import nl.b3p.playbase.ImportReport.ImportType;
-import nl.b3p.playbase.PlayadvisorImporter;
 import nl.b3p.playbase.PlaymappingImporter;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.CronJob;
 import org.apache.commons.dbutils.handlers.ArrayListHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONObject;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -75,7 +66,7 @@ public class PlaybaseJob implements Job {
         }
     }
 
-    private void importPlaymapping(CronJob job) {
+    public void importPlaymapping(CronJob job) {
 
         PlaymappingImporter pi = new PlaymappingImporter(job.getProject());
 
@@ -103,83 +94,10 @@ public class PlaybaseJob implements Job {
         }
 
     }
-
-    private void importPlayadvisor(CronJob job)  {
-        PlayadvisorImporter pi = new PlayadvisorImporter(job.getProject());
-        ImportReport report = new ImportReport();
-        // call trigger
-        String res = pi.getResponse(null, null, job.getBaseurl() +"/wp-cron.php?export_key=" + job.getPassword() + "&export_id=" + job.getUsername() +"&action=trigger", report);
-        // call processing until finished
-
-        String message = "";
-        do {
-            try {
-                res = pi.getResponse(null, null, job.getBaseurl() +"/wp-cron.php?export_key=" + job.getPassword() + "&export_id=" + job.getUsername() +"&action=processing", report);
-                JSONObject result = new JSONObject(res);
-                message = result.getString("message");
-                Thread.sleep(10000);
-            } catch (InterruptedException ex) {
-                log.error("I can get no sleep.", ex);
-            }
-        } while (!message.contains("complete"));
-        // download file
-        res = pi.getResponse(null, null, job.getBaseurl() +"/wp-cron.php?security_token=" + job.getExporthash() + "&export_id=" + job.getUsername() +"&action=get_data", report);
-        
-        try {
-            InputStream is = new ByteArrayInputStream( res.getBytes( "UTF-8" ) );
-            pi.importStream(is, report);
-        } catch (UnsupportedEncodingException ex) {
-            log.error("Cannot import playadvisor csv",ex);
-        } catch (IOException | CsvFormatException ex) {
-            log.error("Cannot import playadvisor csv",ex);
-        }
-        String logmessage = report.toLog();
-        
-        try {
-            savecronjob(job, logmessage, res);
-            sendMail(job, logmessage);
-        } catch (NamingException | SQLException ex) {
-            log.error("Cannot save cronjob",ex);
-        }
+    
+    public void importPlayadvisor(CronJob job)  {
     }
-    private void exportPlayadvisor(CronJob job)  {
-        
-        downloader = new ImageDownloader(job.getExporthash());
-        downloader.run();
-        getAllImagesForJob(job);
-        try {
-            downloader.stop();
-        } catch (IOException ex) {
-            log.error("Cannot stop downloader",ex);
-        }
-        PlayadvisorImporter pi = new PlayadvisorImporter(job.getProject());
-        ImportReport report = new ImportReport();
-        // call trigger
-        String res = pi.getResponse(null, null, job.getBaseurl() +"/wp-cron.php?import_id=" + job.getUsername() + "&import_key=" + job.getPassword() +"&action=trigger", report);
-        log.info("Triggering cronjob on wordpress...");
-        // call processing until finished
-        String message = "";
-        do {
-            try {
-                res = pi.getResponse(null, null, job.getBaseurl() +"/wp-cron.php?import_key=" + job.getPassword() + "&import_id=" + job.getUsername() +"&action=processing", report);
-                JSONObject result = new JSONObject(res);
-                message = result.getString("message");
-                log.info("Response message: " + result.toString());
-                Thread.sleep(10000);
-            } catch (InterruptedException ex) {
-                log.error("I can get no sleep.", ex);
-            }
-        } while (!message.contains("complete"));
-        // download file 
-        log.info("Triggering cronjob on wordpress completed");
-        String logmessage = report.toLog();
-        
-        try {
-            savecronjob(job, logmessage, res);
-            sendMail(job, logmessage);
-        } catch (NamingException | SQLException ex) {
-            log.error("Cannot save cronjob",ex);
-        }
+    public void exportPlayadvisor(CronJob job)  {
     }
     
     private void getAllImagesForJob(CronJob job) {
