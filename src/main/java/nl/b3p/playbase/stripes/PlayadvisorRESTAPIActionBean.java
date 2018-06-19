@@ -20,18 +20,14 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.naming.NamingException;
 import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
-import net.sourceforge.stripes.action.Before;
 import net.sourceforge.stripes.action.ForwardResolution;
 import net.sourceforge.stripes.action.JsonResolution;
 import net.sourceforge.stripes.action.Resolution;
 import net.sourceforge.stripes.action.RestActionBean;
 import net.sourceforge.stripes.action.UrlBinding;
-import net.sourceforge.stripes.controller.LifecycleStage;
 import net.sourceforge.stripes.validation.SimpleError;
 import net.sourceforge.stripes.validation.Validate;
 import nl.b3p.loader.jdbc.GeometryJdbcConverter;
@@ -58,13 +54,13 @@ import org.json.JSONObject;
  */
 @RestActionBean
 @UrlBinding("/rest/playadvisor/{location}")
-public class PlayadvisorActionBean implements ActionBean {
+public class PlayadvisorRESTAPIActionBean implements ActionBean {
 
-    private static final Log log = LogFactory.getLog(PlayadvisorActionBean.class);
+    private static final Log log = LogFactory.getLog(PlayadvisorRESTAPIActionBean.class);
 
     private static final String JSP = "/WEB-INF/jsp/admin/playadvisor/view.jsp";
     protected ResultSetHandler<Location> locationHandler;
-    // Below is needed for all action beans.
+    
     private ActionBeanContext context;
 
     @Validate
