@@ -56,7 +56,7 @@ public class DB {
     
     public static final String COMMENT_TABLE = "playservice_comment";
     
-    public static final String CRONJOB_TABLE = "cronjob";
+    public static final String PROJECT_TABLE = "project";
 
     public static final DataSource getDataSource(String jndiName) throws NamingException {
         InitialContext cxt = new InitialContext();

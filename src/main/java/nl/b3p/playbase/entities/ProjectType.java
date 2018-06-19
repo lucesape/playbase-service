@@ -14,27 +14,35 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.b3p.playbase.stripes;
+package nl.b3p.playbase.entities;
 
-import org.junit.Before;
-
+import com.google.gson.annotations.SerializedName;
 
 /**
  *
- * @author meine
+ * @author Meine Toonen
  */
-public class ImportPlaymappingActionBeanTest {
+public enum ProjectType {
     
+    @SerializedName("Playadvisor import")
+    IMPORT_PLAYADVISOR("Playadvisor import"), 
+    @SerializedName("Playmapping import")
+    IMPORT_PLAYMAPPING("Playmapping import"),
+    @SerializedName("Playadvisor en playmapping")
+    PLAYMAPPING_PLAYADVISOR("Playmapping en playadvisor");
     
-    private ImportPlaymappingActionBean instance;
-    public ImportPlaymappingActionBeanTest() {
+    private String type;
     
+    ProjectType(String type) {
+        this.type = type;
     }
     
-    @Before
-    public void init(){
-        instance = new ImportPlaymappingActionBean();
+    @Override
+    public String toString(){
+        return type;
     }
     
-
+    public boolean equals(String s){
+        return false;
+    }
 }

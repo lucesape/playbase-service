@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package nl.b3p.playbase.cron;
+package nl.b3p.playbase.entities;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -22,20 +22,16 @@ import com.google.gson.annotations.SerializedName;
  *
  * @author Meine Toonen
  */
-public enum CronType {
+public enum ProjectStatus {
     
-    @SerializedName("Playadvisor import")
-    IMPORT_PLAYADVISOR("Playadvisor import"), 
-    @SerializedName("Playmapping import")
-    IMPORT_PLAYMAPPING("Playmapping import"),
-    @SerializedName("Playadvisor export")
-    EXPORT_PLAYADVISOR("Playadvisor export"),
-    @SerializedName("Playadvisor_playmapping")
-    PLAYMAPPING_PLAYADVISOR("Playmapping en playadvisor");
+    @SerializedName("Gepubliceerd")
+    PUBLISHED("Gepubliceerd"),
+    @SerializedName("In behandeling")
+    UNDER_REVIEW("In behandeling");
     
     private String type;
     
-    CronType(String type) {
+    ProjectStatus(String type) {
         this.type = type;
     }
     

@@ -16,16 +16,7 @@
  */
 package nl.b3p.playbase;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import nl.b3p.commons.csv.CsvFormatException;
-import nl.b3p.commons.csv.CsvInputStream;
 import nl.b3p.playbase.db.TestUtil;
-import nl.b3p.playbase.entities.Location;
-import org.junit.Test;
 
 /**
  *
@@ -34,13 +25,13 @@ import org.junit.Test;
 public class ProblemCases extends TestUtil{
     
     
-    private PlayadvisorImporter_old paInstance;
+    private PlayadvisorImporter paInstance;
 
     public ProblemCases() {
-        paInstance = new PlayadvisorImporter_old("test");
+        paInstance = new PlayadvisorImporter("test");
     }
     
-    @Test(expected = IllegalArgumentException.class)
+   /* @Test(expected = IllegalArgumentException.class)
     public void testSterrenburg() throws IOException, CsvFormatException{
         String i = "104414,\"Speeltuin Sterrenburg\",\"De speelplek ligt in de wijk Sterrenburg 1 in de gemeente Dordrecht\",51.78818,2016-06-13,speelplek,http://playadvisor.b3p.nl/speelplek/openbare-speeltuin/speeltuin-sterrenburg/,,,,,,,\"Speeltuinen>Openbare speeltuin\",,Dordrecht,,,Combinatietoestel|Wip,,,,0,4.68491,51.78818,a:0:{},,,,,,publish,256,speeltuin-sterrenburg,,,0,0,0,open,open,,";
         
@@ -51,5 +42,5 @@ public class ProblemCases extends TestUtil{
         Map<String, Object> input = paInstance.parseRecord(s);
         Location l = paInstance.parseMap(input);
 
-    }
+    }*/
 }

@@ -16,6 +16,7 @@
  */
 package nl.b3p.playbase.cron;
 
+import nl.b3p.playbase.entities.ProjectType;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
@@ -26,7 +27,7 @@ import nl.b3p.playbase.ImportReport;
 import nl.b3p.playbase.ImportReport.ImportType;
 import nl.b3p.playbase.PlaymappingImporter;
 import nl.b3p.playbase.db.DB;
-import nl.b3p.playbase.entities.CronJob;
+import nl.b3p.playbase.entities.Project;
 import org.apache.commons.dbutils.handlers.ArrayListHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,9 +49,9 @@ public class PlaybaseJob implements Job {
     public void execute(JobExecutionContext jec) throws JobExecutionException {
 
         JobDataMap jdm = jec.getJobDetail().getJobDataMap();
-        CronJob cj = (CronJob) jdm.get(CronListener.QUARTZ_JOB_DATA_MAP_ENTITY_KEY);
+        Project cj = (Project) jdm.get(CronListener.QUARTZ_JOB_DATA_MAP_ENTITY_KEY);
         log.info("Executing playbasejob " + cj.getId() + ". Type is " + cj.getType_().toString());
-        CronType ct = cj.getType_();
+        ProjectType ct = cj.getType_();
 
         switch (ct) {
             case IMPORT_PLAYADVISOR:
@@ -59,16 +60,14 @@ public class PlaybaseJob implements Job {
             case IMPORT_PLAYMAPPING:
                 importPlaymapping(cj);
                 break;
-            case EXPORT_PLAYADVISOR:
-                exportPlayadvisor(cj);
             default:
                 break;
         }
     }
 
-    public void importPlaymapping(CronJob job) {
+    public void importPlaymapping(Project job) {
 
-        PlaymappingImporter pi = new PlaymappingImporter(job.getProject());
+        PlaymappingImporter pi = new PlaymappingImporter(job.getName());
 
         ImportReport locationReport = new ImportReport();
         ImportReport assetsReport = new ImportReport();
@@ -95,19 +94,19 @@ public class PlaybaseJob implements Job {
 
     }
     
-    public void importPlayadvisor(CronJob job)  {
+    public void importPlayadvisor(Project job)  {
     }
-    public void exportPlayadvisor(CronJob job)  {
+    public void exportPlayadvisor(Project job)  {
     }
     
-    private void getAllImagesForJob(CronJob job) {
+    private void getAllImagesForJob(Project job) {
         log.info("Getting images for job");
         try {
             String query = "SELECT id from " + DB.LOCATION_TABLE;
             
             ArrayListHandler rsh = new ArrayListHandler();
             query += " where project = ?";
-            List<Object[]> locations = DB.qr().query(query, rsh, job.getProject());
+            List<Object[]> locations = DB.qr().query(query, rsh, job.getName());
             for (Object[] location : locations) {
                 Integer id = (Integer)location[0];
                 retrieveImages(id);
@@ -146,10 +145,10 @@ public class PlaybaseJob implements Job {
         return value == null ? "" : value;
     }
 
-    private void savecronjob(CronJob cronjob, String logString, String importedString) throws NamingException, SQLException {
+    private void savecronjob(Project cronjob, String logString, String importedString) throws NamingException, SQLException {
         StringBuilder sb = new StringBuilder();
         sb.append("update ");
-        sb.append(DB.CRONJOB_TABLE);
+        sb.append(DB.PROJECT_TABLE);
         sb.append(" set ");
         sb.append("log = ?,");
         sb.append("importedstring = ?,");
@@ -159,9 +158,9 @@ public class PlaybaseJob implements Job {
         DB.qr().update(sb.toString(), logString, importedString, new Timestamp(new java.util.Date().getTime()), cronjob.getId());
     }
 
-    private void sendMail(CronJob cronjob, String logString) {
+    private void sendMail(Project cronjob, String logString) {
         if (cronjob.getMailaddress() != null) {
-            String subject = "Playbase cron status: " + cronjob.getType_().toString() + " voor project " + cronjob.getProject();
+            String subject = "Playbase cron status: " + cronjob.getType_().toString() + " voor project " + cronjob.getName();
             StringBuilder content = new StringBuilder();
             content.append("Status rapport ").append(cronjob.getId());
             content.append(System.lineSeparator());

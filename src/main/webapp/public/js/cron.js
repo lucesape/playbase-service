@@ -31,11 +31,10 @@ function CronTable() {
              "serverSide": true,*/
             "ajax": url + "tabledata",
             "columns": [
-                {"data": "project"},
+                {"data": "name"},
                 {"data": "type_"},
                 {"data": "cronexpressie"},
-                {"data": "lastrun"},
-                {"data": "next_fire_time"}
+                {"data": "status"}
             ]
         });
         var me = this;
@@ -64,7 +63,7 @@ function CronTable() {
     };
 
     this.playadvisorClicked = function (data) {
-        window.location.href = url + "view?cronjobid=" + data.id;
+        window.location.href = url + "view?projectid=" + data.id;
     };
 
     this.cronjobtypechanged = function (newvalue) {

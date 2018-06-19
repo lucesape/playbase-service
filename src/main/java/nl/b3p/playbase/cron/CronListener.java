@@ -25,7 +25,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import nl.b3p.playbase.db.DB;
-import nl.b3p.playbase.entities.CronJob;
+import nl.b3p.playbase.entities.Project;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.logging.Log;
@@ -75,11 +75,11 @@ public class CronListener implements ServletContextListener {
             log.error("Cannot create scheduler. ", ex);
         }
 
-        ResultSetHandler<List<CronJob>> handler = new BeanListHandler(CronJob.class);
-        String sql = "select id,cronexpressie,type_,username,password,project,lastrun,baseurl,exporthash from " + DB.CRONJOB_TABLE;
+        ResultSetHandler<List<Project>> handler = new BeanListHandler(Project.class);
+        String sql = "select id,cronexpressie,type_,username,password,name,lastrun,baseurl,exporthash from " + DB.PROJECT_TABLE;
         try {
-            List<CronJob> jobs = DB.qr().query(sql, handler);
-            for (CronJob jobEntity : jobs) {
+            List<Project> jobs = DB.qr().query(sql, handler);
+            for (Project jobEntity : jobs) {
                 try {
                     scheduleJob(jobEntity);
                 } catch (SchedulerException ex) {
@@ -93,7 +93,7 @@ public class CronListener implements ServletContextListener {
         }
     }
 
-    public static void runNow(CronJob job) throws SchedulerException {
+    public static void runNow(Project job) throws SchedulerException {
         //Create a new Job 
         JobKey jobKey = JobKey.jobKey(QUARTZ_JOB_NAME + job.getId(), QUARTZ_GROUP_NAME);
 
@@ -105,7 +105,7 @@ public class CronListener implements ServletContextListener {
         scheduler.triggerJob(jobKey);
     }
 
-    public static void scheduleJob(CronJob jobEntity) throws SchedulerException {
+    public static void scheduleJob(Project jobEntity) throws SchedulerException {
         if (CronExpression.isValidExpression(jobEntity.getCronexpressie())) {
 
             log.info("Scheduling job for expression " + jobEntity.getCronexpressie());
@@ -122,7 +122,7 @@ public class CronListener implements ServletContextListener {
         }
     }
 
-    public static void rescheduleJob(CronJob jobEntity) throws SchedulerException {
+    public static void rescheduleJob(Project jobEntity) throws SchedulerException {
         if (CronExpression.isValidExpression(jobEntity.getCronexpressie())) {
             log.info("Rescheduling job for expression " + jobEntity.getCronexpressie());
 
@@ -139,7 +139,7 @@ public class CronListener implements ServletContextListener {
         }
     }
 
-    public static void unscheduleJob(CronJob job) {
+    public static void unscheduleJob(Project job) {
         try {
             TriggerKey tk = new TriggerKey(QUARTZ_TRIGGER_NAME + job.getId(), QUARTZ_GROUP_NAME);
             scheduler.unscheduleJob(tk);
@@ -148,7 +148,7 @@ public class CronListener implements ServletContextListener {
         }
     }
 
-    public static Date getNextFireTime(CronJob job) {
+    public static Date getNextFireTime(Project job) {
         try {
             TriggerKey tk = new TriggerKey(QUARTZ_TRIGGER_NAME + job.getId(), QUARTZ_GROUP_NAME);
             Trigger t = scheduler.getTrigger(tk);
@@ -159,7 +159,7 @@ public class CronListener implements ServletContextListener {
         return null;
     }
 
-    private static JobDetail createJobDetail(CronJob jobEntity, boolean durable) {
+    private static JobDetail createJobDetail(Project jobEntity, boolean durable) {
         JobDetail job = JobBuilder.newJob(PlaybaseJob.class)
                 .withIdentity(QUARTZ_JOB_NAME + jobEntity.getId(), QUARTZ_GROUP_NAME)
                 .storeDurably(durable)
@@ -168,7 +168,7 @@ public class CronListener implements ServletContextListener {
         return job;
     }
     
-    private static JobDataMap createJobDataMap(CronJob job){
+    private static JobDataMap createJobDataMap(Project job){
         JobDataMap jdm = new JobDataMap();
         jdm.put(QUARTZ_JOB_DATA_MAP_ENTITY_KEY, job);
         return jdm;

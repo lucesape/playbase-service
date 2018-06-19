@@ -32,7 +32,7 @@ import nl.b3p.loader.jdbc.GeometryJdbcConverterFactory;
 import nl.b3p.loader.util.DbUtilsGeometryColumnConverter;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.Asset;
-import nl.b3p.playbase.entities.CronJob;
+import nl.b3p.playbase.entities.Project;
 import nl.b3p.playbase.entities.Location;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -64,7 +64,7 @@ public class PlayadvisorExporter {
         initLists();
     }
 
-    public void export(List<Location> locations, Connection con, CronJob job) {
+    public void export(List<Location> locations, Connection con, Project job) {
         for (Location location : locations) {
             try {
                 pushLocation(location, con, job);
@@ -75,11 +75,11 @@ public class PlayadvisorExporter {
 
     }
 
-    public void pushLocation(Location loc, Connection con, CronJob job) throws IOException, SQLException, NamingException {
+    public void pushLocation(Location loc, Connection con, Project job) throws IOException, SQLException, NamingException {
         pushLocation(createLocationJSON(loc, con), loc.getId(),job);
     }
 
-    public void pushLocation(JSONObject location, Integer id, CronJob job) throws IOException {
+    public void pushLocation(JSONObject location, Integer id, Project job) throws IOException {
         String url = job.getBaseurl() + "/wp-json/b3p/v1/playbase/" + id;
         HttpClient httpClient = HttpClientBuilder.create().build();
 

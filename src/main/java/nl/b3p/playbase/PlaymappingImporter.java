@@ -372,6 +372,9 @@ public class PlaymappingImporter extends Importer {
     
     public List<String> importJSONLocationsFromAPI(String username, String password, String apiurl,ImportReport report) throws SQLException, NamingException {
         String stringResult = getResponse(username, password, apiurl, report);
+        if(stringResult == null){
+            return null;
+        }
         List<String> locationIds = processLocations(stringResult, report);
         ImportType type = ImportType.LOCATION;
         report.setImportedstring(type, stringResult);

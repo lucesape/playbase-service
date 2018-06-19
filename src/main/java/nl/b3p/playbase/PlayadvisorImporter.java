@@ -24,7 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import javax.naming.NamingException;
 import nl.b3p.playbase.entities.Asset;
-import nl.b3p.playbase.entities.CronJob;
+import nl.b3p.playbase.entities.Project;
 import nl.b3p.playbase.entities.Location;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,7 +51,7 @@ public class PlayadvisorImporter extends Importer {
         postfix = "_playadvisor";
     }
 
-    public void initialLoad(CronJob job, ImportReport report, Connection con) throws NamingException, SQLException {
+    public void initialLoad(Project job, ImportReport report, Connection con) throws NamingException, SQLException {
         try {
             // haal alle speelplekken voro dit project/gemeente op
             // Sla alle playadvisor plekken op

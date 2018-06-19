@@ -24,10 +24,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <h1>Na initiele import</h1>
         <jsp:include page="/WEB-INF/jsp/common/messages.jsp"/>     
         <div>
-            <stripes:form beanclass="nl.b3p.playbase.stripes.CronActionBean"  class="form-horizontal">
+            <stripes:form beanclass="nl.b3p.playbase.stripes.ProjectActionBean"  class="form-horizontal">
               
                     <tr>
-                        <td colspan="3">Log: <stripes:textarea cols="80" disabled="true" rows="30" name="cronjob.log"/></td>
+                        <td colspan="3">Log: <stripes:textarea cols="80" disabled="true" rows="30" name="project.log"/></td>
                     </tr>
                     </table>
             </stripes:form>

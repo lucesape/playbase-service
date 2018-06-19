@@ -17,29 +17,26 @@
 package nl.b3p.playbase.entities;
 
 import java.util.Date;
-import nl.b3p.playbase.cron.CronType;
 
 /**
  *
  * @author Meine Toonen
  */
-public class CronJob {
+public class Project {
     private Integer id;
-    private CronType type_;
+    private ProjectType type_;
     private String cronexpressie;
     private String username;
     private String password;
-    private String project;
-    
+    private String name;
     private String authkey;
-    
     private String baseurl;
     private Date lastrun;
     private String log;
     private String importedstring;
     private String mailaddress;
+    private ProjectStatus status;
     
-
     public Integer getId() {
         return id;
     }
@@ -56,11 +53,11 @@ public class CronJob {
         this.cronexpressie = cronexpressie;
     }
 
-    public CronType getType_() {
+    public ProjectType getType_() {
         return type_;
     }
 
-    public void setType_(CronType type_) {
+    public void setType_(ProjectType type_) {
         this.type_ = type_;
     }
 
@@ -81,13 +78,14 @@ public class CronJob {
         this.password = password;
     }
 
-    public String getProject() {
-        return project;
+    public String getName() {
+        return name;
     }
 
-    public void setProject(String project) {
-        this.project = project;
+    public void setName(String name) {
+        this.name = name;
     }
+
 
     public Date getLastrun() {
         return lastrun;
@@ -136,5 +134,12 @@ public class CronJob {
     public void setAuthkey(String authkey) {
         this.authkey = authkey;
     }
-    
+
+    public ProjectStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ProjectStatus status) {
+        this.status = status;
+    }
 }

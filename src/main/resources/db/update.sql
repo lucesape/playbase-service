@@ -94,3 +94,12 @@ ALTER TABLE public.playservice_locations
   ADD COLUMN removedfromplayadvisor boolean;
 ALTER TABLE public.playservice_locations_playadvisor
   ADD COLUMN removedfromplayadvisor boolean;
+
+
+
+ALTER TABLE public.cronjob 
+  ADD COLUMN status character varying(255);
+
+ALTER TABLE public.cronjob
+  RENAME TO project;
+ALTER TABLE public.project RENAME project  TO name;

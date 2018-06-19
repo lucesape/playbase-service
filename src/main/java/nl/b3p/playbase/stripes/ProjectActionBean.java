@@ -41,10 +41,10 @@ import nl.b3p.playbase.ImportReport;
 import nl.b3p.playbase.PlayadvisorImporter;
 import nl.b3p.playbase.PlaymappingImporter;
 import nl.b3p.playbase.cron.CronListener;
-import nl.b3p.playbase.cron.CronType;
-import nl.b3p.playbase.cron.PlaybaseJob;
+import nl.b3p.playbase.entities.ProjectType;
 import nl.b3p.playbase.db.DB;
-import nl.b3p.playbase.entities.CronJob;
+import nl.b3p.playbase.entities.Project;
+import nl.b3p.playbase.entities.ProjectStatus;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
@@ -61,22 +61,22 @@ import org.quartz.SchedulerException;
  * @author Meine Toonen
  */
 @StrictBinding
-@UrlBinding("/action/cron/{$event}")
-public class CronActionBean implements ActionBean {
+@UrlBinding("/action/project/{$event}")
+public class ProjectActionBean implements ActionBean {
 
-    private ResultSetHandler<CronJob> cronHandler = new BeanHandler(CronJob.class);
-    private static final Log log = LogFactory.getLog(CronActionBean.class);
+    private ResultSetHandler<Project> cronHandler = new BeanHandler(Project.class);
+    private static final Log log = LogFactory.getLog(ProjectActionBean.class);
 
     private ActionBeanContext context;
-    private static final String JSP = "/WEB-INF/jsp/admin/cron/cron.jsp";
-    
-    private static final String WIZARD_NEW_JSP = "/WEB-INF/jsp/admin/cron/createNew.jsp";
-    private static final String WIZARD_AFTER_INITIAL_IMPORT = "/WEB-INF/jsp/admin/cron/afterInitialImport.jsp";
-    
+    private static final String JSP = "/WEB-INF/jsp/admin/project/view.jsp";
+
+    private static final String WIZARD_NEW_JSP = "/WEB-INF/jsp/admin/project/createNew.jsp";
+    private static final String WIZARD_AFTER_INITIAL_IMPORT = "/WEB-INF/jsp/admin/project/afterInitialImport.jsp";
+
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Validate
-    private Integer cronjobid;
+    private Integer projectid;
 
     @ValidateNestedProperties({
         @Validate(field = "cronexpressie"),
@@ -85,145 +85,157 @@ public class CronActionBean implements ActionBean {
         @Validate(field = "mailaddress"),
         @Validate(field = "authkey"),
         @Validate(field = "baseurl"),
-        @Validate(field = "project"),
+        @Validate(field = "name"),
         @Validate(field = "id"),
-        @Validate(field = "type_", converter = EnumeratedTypeConverter.class, required = true, on = "save")
+        @Validate(field = "type_", converter = EnumeratedTypeConverter.class, required = true, on = "save"),
+        @Validate(field = "status", converter = EnumeratedTypeConverter.class, required = true, on = "save")
     })
-    private CronJob cronjob = new CronJob();
+    private Project project = new Project();
 
     @DefaultHandler
     public Resolution view() {
-        if (cronjobid != null) {
+        if (projectid != null) {
             try {
-                cronjob = DB.qr().query("SELECT id,cronexpressie,type_,username,password,project,log,lastrun,mailaddress,baseurl,exporthash from " + DB.CRONJOB_TABLE + " WHERE id = ?", cronHandler, cronjobid);
+                project = DB.qr().query("SELECT id,cronexpressie,type_,username,password,name,log,lastrun,mailaddress,baseurl, status from " + DB.PROJECT_TABLE + " WHERE id = ?", cronHandler, projectid);
             } catch (NamingException | SQLException ex) {
                 log.error("Cannot load cronjob", ex);
             }
         }
         return new ForwardResolution(JSP);
     }
-    
-    public Resolution nieuw(){
-        cronjob = new CronJob();
-        cronjobid = null;
+
+    public Resolution nieuw() {
+        project = new Project();
+        projectid = null;
         return new ForwardResolution(WIZARD_NEW_JSP);
     }
-    
-    public Resolution removeCron(){
+
+    public Resolution removeCron() {
         try {
-            CronListener.unscheduleJob(cronjob);
-            DB.qr().query("delete from " + DB.CRONJOB_TABLE + " WHERE id = ?", cronHandler, cronjob.getId());
+            CronListener.unscheduleJob(project);
+            DB.qr().query("delete from " + DB.PROJECT_TABLE + " WHERE id = ?", cronHandler, project.getId());
         } catch (NamingException | SQLException ex) {
             log.error("Cannot delete cronjob", ex);
             context.getValidationErrors().add("cronjob", new SimpleError("Error deleting:", ex.getLocalizedMessage()));
         }
         return view();
     }
-    
-    public Resolution runNow(){
+
+    public Resolution runNow() {
         try {
-            CronListener.runNow(cronjob);
+            CronListener.runNow(project);
         } catch (SchedulerException ex) {
             log.error("Cannot run cronjob", ex);
             context.getValidationErrors().add("cronjob", new SimpleError("Error running:", ex.getLocalizedMessage()));
         }
         return view();
     }
-    
-    public Resolution downloadString(){
+
+    public Resolution downloadString() {
         ResultSetHandler h = new MapHandler();
         try {
-            Map o  = (Map)DB.qr().query("SELECT importedstring from " + DB.CRONJOB_TABLE + " WHERE id = ?", h, cronjob.getId());
-            
-            StreamingResolution res = new StreamingResolution("application/json",(String)o.get("importedstring"));
-            res.setFilename(cronjob.getType_().toString() + "-" + cronjob.getProject() + cronjob.getId() );
+            Map o = (Map) DB.qr().query("SELECT importedstring from " + DB.PROJECT_TABLE + " WHERE id = ?", h, project.getId());
+
+            StreamingResolution res = new StreamingResolution("application/json", (String) o.get("importedstring"));
+            res.setFilename(project.getType_().toString() + "-" + project.getName() + project.getId());
             res.setAttachment(true);
             return res;
         } catch (NamingException | SQLException ex) {
-            log.error("Cannot retrieve string",ex);
+            log.error("Cannot retrieve string", ex);
             return view();
         }
     }
-    
-    public Resolution saveNew(){
-        cronjob.setType_(CronType.PLAYMAPPING_PLAYADVISOR);
-        save();
+
+    public Resolution saveNew() {
+        project.setStatus(ProjectStatus.UNDER_REVIEW);
+        Resolution r = save();
+        if (context.getValidationErrors().size() > 0) {
+            return nieuw();
+        }
         String logString;
-        try(Connection con = DB.getConnection()){
+        try (Connection con = DB.getConnection()) {
             ImportReport report = new ImportReport();
-            PlayadvisorImporter paimporter = new PlayadvisorImporter(cronjob.getProject());
-            paimporter.initialLoad(cronjob, report, con);
-            logString = "Playadvisor:  "+ System.lineSeparator() + report.toLog();
+            PlayadvisorImporter paimporter = new PlayadvisorImporter(project.getName());
+            paimporter.initialLoad(project, report, con);
+            logString = "Playadvisor:  " + System.lineSeparator() + report.toLog();
         } catch (NamingException | SQLException ex) {
             log.error("Cannot do initial load for playadvisor", ex);
             context.getValidationErrors().add("cronjob", new SimpleError("Error saving:" + ex.getLocalizedMessage()));
-            logString = "Error for playadvisor: "+ System.lineSeparator();
+            logString = "Error for playadvisor: " + System.lineSeparator();
             logString += ex.getLocalizedMessage();
         }
-       
+
         try (Connection con = DB.getConnection()) {
-            PlaymappingImporter pi = new PlaymappingImporter(cronjob.getProject());
+            PlaymappingImporter pi = new PlaymappingImporter(project.getName());
             ImportReport locationReport = new ImportReport();
             ImportReport assetsReport = new ImportReport();
-            
-            List<String> pm_guids = pi.importJSONLocationsFromAPI(cronjob.getUsername(), cronjob.getPassword(), "https://api.playmapping.com/CustomerLocation/GetAll", locationReport);//tJSONFromAPI(job.getUsername(), job.getPassword(), "https://api.playmapping.com/CustomerLocation/GetAll"); // import/update locations
-            assetsReport = pi.importJSONAssetsFromAPI(cronjob.getUsername(), cronjob.getPassword(), "https://api.playmapping.com/CustomerAsset/GetByLocationId/", pm_guids, assetsReport);//NFromAPI(job.getUsername(), job.getPassword(), "https://api.playmapping.com/CustomerAsset/GetAll"); // import/update locations
+
+            List<String> pm_guids = pi.importJSONLocationsFromAPI(project.getUsername(), project.getPassword(), "https://api.playmapping.com/CustomerLocation/GetAll", locationReport);//tJSONFromAPI(job.getUsername(), job.getPassword(), "https://api.playmapping.com/CustomerLocation/GetAll"); // import/update locations
+            if (pm_guids != null) {
+                assetsReport = pi.importJSONAssetsFromAPI(project.getUsername(), project.getPassword(), "https://api.playmapping.com/CustomerAsset/GetByLocationId/", pm_guids, assetsReport);
+            } else {
+                logString += "Playmapping: " + locationReport.getErrors(ImportReport.ImportType.GENERAL);
+            }
 
             logString += "Playmapping: " + System.lineSeparator() + " Location: " + locationReport.toLog() + System.lineSeparator() + "Assets: " + assetsReport.toLog();
 
         } catch (NamingException | SQLException ex) {
             log.error("Cannot do initial load for playadvisor", ex);
             context.getValidationErrors().add("cronjob", new SimpleError("Error saving:" + ex.getLocalizedMessage()));
-            logString = "Error for playmapping: "+ System.lineSeparator();
+            logString = "Error for playmapping: " + System.lineSeparator();
             logString += ex.getLocalizedMessage();
         }
-        
-        cronjob.setLog(logString);
-        
+
+        project.setLog(logString);
+
         return new ForwardResolution(WIZARD_AFTER_INITIAL_IMPORT);
     }
 
     public Resolution save() {
 
-        if (!CronExpression.isValidExpression(cronjob.getCronexpressie())) {
+        if (project.getCronexpressie() == null || !CronExpression.isValidExpression(project.getCronexpressie())) {
             context.getValidationErrors().add("cronjob.cronexpressie", new SimpleError("Cronexpressie niet correct"));
             return view();
         }
-        try (Connection con = DB.getConnection()){
+        try (Connection con = DB.getConnection()) {
             StringBuilder sb = new StringBuilder();
-            if (cronjob.getId() == null) {
+            if (project.getId() == null) {
                 sb.append("INSERT ");
                 sb.append("INTO ");
-                sb.append(DB.CRONJOB_TABLE);
+                sb.append(DB.PROJECT_TABLE);
                 sb.append("(");
                 sb.append("username,");
                 sb.append("password,");
-                sb.append("project,");
+                sb.append("name,");
+                sb.append("type_,");
                 sb.append("baseurl,");
                 sb.append("authkey,");
                 sb.append("mailaddress,");
+                sb.append("status,");
                 sb.append("cronexpressie) ");
-                sb.append("VALUES(  ?,?,?,?,?,?,?);");
+                sb.append("VALUES(  ?,?,?,?,?,?,?,?,?);");
 
-                cronjob = DB.qr().insert(con, sb.toString(), cronHandler, cronjob.getUsername(), cronjob.getPassword(), cronjob.getProject(),
-                        cronjob.getBaseurl(), cronjob.getAuthkey(), cronjob.getMailaddress(), cronjob.getCronexpressie());
-                CronListener.scheduleJob(cronjob);
+                project = DB.qr().insert(con, sb.toString(), cronHandler, project.getUsername(), project.getPassword(), project.getName(), project.getType_().name(),
+                        project.getBaseurl(), project.getAuthkey(), project.getMailaddress(), project.getStatus().name(), project.getCronexpressie());
+                CronListener.scheduleJob(project);
             } else {
                 sb.append("update ");
-                sb.append(DB.CRONJOB_TABLE);
+                sb.append(DB.PROJECT_TABLE);
                 sb.append(" set ");
                 sb.append("username = ?,");
                 sb.append("password = ?,");
-                sb.append("project = ?,");
+                sb.append("name = ?,");
                 sb.append("mailaddress= ?,");
                 sb.append("baseurl= ?,");
                 sb.append("authkey= ?,");
+                sb.append("status= ?,");
+                sb.append("type_= ?,");
                 sb.append("cronexpressie = ?");
                 sb.append(" where id = ?");
 
-                DB.qr().update(con,sb.toString(), cronjob.getUsername(), cronjob.getPassword(), cronjob.getProject(),
-                       cronjob.getMailaddress(),  cronjob.getBaseurl(), cronjob.getAuthkey(), cronjob.getCronexpressie(), cronjob.getId());
-                CronListener.rescheduleJob(cronjob);
+                DB.qr().update(con, sb.toString(), project.getUsername(), project.getPassword(), project.getName(),
+                        project.getMailaddress(), project.getBaseurl(), project.getAuthkey(), project.getStatus().name(), project.getType_().name(), project.getCronexpressie(), project.getId());
+                CronListener.rescheduleJob(project);
             }
         } catch (NamingException | SQLException | SchedulerException ex) {
             log.error("Cannot save cronjob", ex);
@@ -241,16 +253,17 @@ public class CronActionBean implements ActionBean {
 
         try {
 
-            ResultSetHandler<List<CronJob>> handler = new BeanListHandler(CronJob.class);
-            String sql = "select id,cronexpressie,type_,username,password,project,log,lastrun from " + DB.CRONJOB_TABLE;
-            List<CronJob> jobs = DB.qr().query(sql, handler);
+            ResultSetHandler<List<Project>> handler = new BeanListHandler(Project.class);
+            String sql = "select id,cronexpressie,type_,username,password,name,log,lastrun, status from " + DB.PROJECT_TABLE;
+            List<Project> jobs = DB.qr().query(sql, handler);
             JSONArray ar = new JSONArray();
-            for (CronJob job : jobs) {
-                JSONObject obj = new JSONObject(gson.toJson(job, CronJob.class));
+            for (Project job : jobs) {
+                JSONObject obj = new JSONObject(gson.toJson(job, Project.class));
                 Date d = CronListener.getNextFireTime(job);
-                String formattedDate = d !=  null ? sdf.format(d) : "";
-                obj.put("next_fire_time",formattedDate);
+                String formattedDate = d != null ? sdf.format(d) : "";
+                obj.put("next_fire_time", formattedDate);
                 obj.put("lastrun", obj.optString("lastrun", " - "));
+                obj.put("type_", obj.optString("type_", " - "));
                 ar.put(obj);
             }
             result.put("data", ar);
@@ -277,20 +290,20 @@ public class CronActionBean implements ActionBean {
         this.context = context;
     }
 
-    public CronJob getCronjob() {
-        return cronjob;
+    public Project getProject() {
+        return project;
     }
 
-    public void setCronjob(CronJob cronjob) {
-        this.cronjob = cronjob;
+    public void setProject(Project project) {
+        this.project = project;
     }
 
-    public Integer getCronjobid() {
-        return cronjobid;
+    public Integer getProjectid() {
+        return projectid;
     }
 
-    public void setCronjobid(Integer cronjobid) {
-        this.cronjobid = cronjobid;
+    public void setProjectid(Integer projectid) {
+        this.projectid = projectid;
     }
     // </editor-fold>
 
