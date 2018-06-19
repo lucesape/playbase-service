@@ -26,14 +26,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.naming.NamingException;
 import nl.b3p.loader.jdbc.GeometryJdbcConverter;
 import nl.b3p.loader.jdbc.GeometryJdbcConverterFactory;
 import nl.b3p.loader.util.DbUtilsGeometryColumnConverter;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.Asset;
+import nl.b3p.playbase.entities.CronJob;
 import nl.b3p.playbase.entities.Location;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -65,10 +64,10 @@ public class PlayadvisorExporter {
         initLists();
     }
 
-    public void export(List<Location> locations, Connection con) {
+    public void export(List<Location> locations, Connection con, CronJob job) {
         for (Location location : locations) {
             try {
-                pushLocation(location, con);
+                pushLocation(location, con, job);
             } catch (IOException | SQLException | NamingException ex) {
                 log.error("Error exporting to export", ex);
             }
@@ -76,18 +75,18 @@ public class PlayadvisorExporter {
 
     }
 
-    public void pushLocation(Location loc, Connection con) throws IOException, SQLException, NamingException {
-        pushLocation(createLocationJSON(loc, con), loc.getId());
+    public void pushLocation(Location loc, Connection con, CronJob job) throws IOException, SQLException, NamingException {
+        pushLocation(createLocationJSON(loc, con), loc.getId(),job);
     }
 
-    public void pushLocation(JSONObject location, Integer id) throws IOException {
-        String url = "http://playadvisor.b3p.nl/wp-json/b3p/v1/playbase/" + id;
+    public void pushLocation(JSONObject location, Integer id, CronJob job) throws IOException {
+        String url = job.getBaseurl() + "/wp-json/b3p/v1/playbase/" + id;
         HttpClient httpClient = HttpClientBuilder.create().build();
 
         HttpPost request = new HttpPost(url);
         StringEntity params = new StringEntity(location.toString(), ContentType.APPLICATION_JSON);
         request.addHeader("content-type", "application/json");
-        request.addHeader("Authorization", "Basic bWVpbmV0b29uZW46MFdINCBBY1lCIGRETVogaW1aWSB4WEdiIDRGd0c=");
+        request.addHeader("Authorization", "Basic " + job.getAuthkey());
         request.setEntity(params);
         HttpResponse response = httpClient.execute(request);
         StatusLine sl = response.getStatusLine();

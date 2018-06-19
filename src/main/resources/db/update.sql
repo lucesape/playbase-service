@@ -89,3 +89,8 @@ update playservice_locations set lastexported =  date '01-01-1970' ;
 
 
 ALTER TABLE public.cronjob RENAME exporthash  TO authkey;
+
+ALTER TABLE public.playservice_locations
+  ADD COLUMN removedfromplayadvisor boolean;
+ALTER TABLE public.playservice_locations_playadvisor
+  ADD COLUMN removedfromplayadvisor boolean;

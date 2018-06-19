@@ -19,29 +19,38 @@ package nl.b3p.playbase.stripes;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.NamingException;
 import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
+import net.sourceforge.stripes.action.Before;
 import net.sourceforge.stripes.action.ForwardResolution;
 import net.sourceforge.stripes.action.JsonResolution;
-import net.sourceforge.stripes.action.POST;
 import net.sourceforge.stripes.action.Resolution;
 import net.sourceforge.stripes.action.RestActionBean;
 import net.sourceforge.stripes.action.UrlBinding;
+import net.sourceforge.stripes.controller.LifecycleStage;
+import net.sourceforge.stripes.validation.SimpleError;
 import net.sourceforge.stripes.validation.Validate;
 import nl.b3p.loader.jdbc.GeometryJdbcConverter;
 import nl.b3p.loader.jdbc.GeometryJdbcConverterFactory;
 import nl.b3p.loader.util.DbUtilsGeometryColumnConverter;
-import nl.b3p.playbase.PlayadvisorExporter;
+import nl.b3p.playbase.ImportReport;
+import nl.b3p.playbase.Importer;
+import nl.b3p.playbase.PlayadvisorImporter;
+import nl.b3p.playbase.PlaymappingImporter;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.Location;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  *
@@ -81,15 +90,69 @@ public class PlayadvisorActionBean implements ActionBean {
     }
 
     // </editor-fold>
-
-    public Resolution post() {
-
-        return new JsonResolution(1);
-    }
-    
-    public Resolution delete(){
-        return new JsonResolution(1);
         
+    public Resolution post() {
+        String logString = "";
+        try (Connection con = DB.getConnection()) {
+            ImportReport report = new ImportReport();
+            String locationString =  IOUtils.toString(context.getRequest().getInputStream(), "UTF-8");
+            PlayadvisorImporter paimporter = new PlayadvisorImporter(null);
+            
+            JSONArray ar = new JSONArray();
+            ar.put(new JSONObject (locationString));
+            
+            List<Location> loc = paimporter.processLocations(ar.toString(), report, con);
+            logString = "Playadvisor:  " + System.lineSeparator() + report.toLog();
+        } catch (NamingException | SQLException | IOException ex) {
+            log.error("Cannot do initial load for playadvisor", ex);
+            context.getValidationErrors().add("cronjob", new SimpleError("Error saving:" + ex.getLocalizedMessage()));
+            logString = "Error for playadvisor: " + System.lineSeparator();
+            logString += ex.getLocalizedMessage();
+        }
+        return new JsonResolution(logString);
+    }
+
+    
+    public Resolution delete() {
+        if (location != null) {
+            try (Connection con = DB.getConnection()) {
+                GeometryJdbcConverter geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(con);
+                locationHandler = new BeanHandler(Location.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
+                Location loc;
+
+                StringBuilder sb = new StringBuilder();
+                sb.append("select * from ");
+
+                sb.append(DB.LOCATION_TABLE);
+                sb.append(" where id = '");
+                sb.append(location);
+
+                sb.append("';");
+                loc = DB.qr().query(con, sb.toString(), locationHandler);
+                if (loc != null) {
+                    loc.setRemovedfromplayadvisor(true);
+
+                    Importer imp = new PlaymappingImporter(loc.getProject());
+                    ImportReport report = new ImportReport();
+                    imp.saveLocation(loc, report);
+                    List<String> errors = report.getErrors();
+                    if (errors.isEmpty()) {
+                        return new JsonResolution("Success");
+
+                    } else {
+                        return new JsonResolution(report.getAllErrors());
+                    }
+                }else{
+                        return new JsonResolution("Error: invalid id given");
+                    
+                }
+
+            } catch (NamingException | SQLException ex) {
+                log.error("Error updating locations", ex);
+                return new JsonResolution(ex);
+            }
+        }
+        return new JsonResolution("No location given.");
     }
 
     public Resolution updateLocation() {
@@ -109,9 +172,9 @@ public class PlayadvisorActionBean implements ActionBean {
                 sb.append("';");
                 loc = DB.qr().query(sb.toString(), locationHandler);
 
-                PlayadvisorExporter pe = new PlayadvisorExporter();
-                pe.pushLocation(loc,con);
-            } catch (NamingException | SQLException | IOException ex) {
+                /*  PlayadvisorExporter pe = new PlayadvisorExporter();
+                pe.pushLocation(loc,con);*/
+            } catch (NamingException | SQLException ex) {
                 log.error("Error updating locations", ex);
             }
         }

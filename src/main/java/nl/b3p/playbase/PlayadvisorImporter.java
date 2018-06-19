@@ -85,17 +85,39 @@ public class PlayadvisorImporter extends Importer {
         }
     }
 
-    protected List<Location> processLocations(String locs, ImportReport report, Connection con) throws NamingException, SQLException {
+    public List<Location> processLocations(String locs, ImportReport report, Connection con) throws NamingException, SQLException {
         List<Location> locations = new ArrayList<>();
         JSONArray ar = new JSONArray(locs);
         for (Iterator<Object> iterator = ar.iterator(); iterator.hasNext();) {
             JSONObject obj = (JSONObject) iterator.next();
+            boolean hasProject = this.getProject() != null;
+            String prevpostfix = postfix;
             Location l = parseLocation(obj);
+            
+            if (!hasProject) {
+                this.setProject(l.getMunicipality().toLowerCase());
+            }
+            if( isProjectReady(this.getProject())){
+                postfix = "";
+            }
+            
             processLocation(l, obj, report, con);
             locations.add(l);
+            
+            if (!hasProject) {
+                this.setProject(null);
+            }
+            
+            if(postfix.isEmpty()){
+                postfix = prevpostfix;
+            }
 
         }
         return locations;
+    }
+    
+    private boolean isProjectReady(String project){
+        return true;
     }
 
     protected void processLocation(Location location, JSONObject obj, ImportReport report, Connection con) throws NamingException, SQLException {
@@ -160,7 +182,7 @@ public class PlayadvisorImporter extends Importer {
     protected List<Asset> parseAssets(Location location, JSONArray assetsArray, ImportReport report, boolean merged, Connection con) throws NamingException, SQLException {
 
         List<Asset> assets = new ArrayList<>();
-      /*     if(merged){
+        /*     if(merged){
                // Get possible previously saved assets
                List<String> nieuwList = new ArrayList<>();
                List<Asset> prevAssets = DB.qr().query(con,"SELECT * FROM " + DB.ASSETS_TABLE + " WHERE location = ?", assListHandler, location.getId());

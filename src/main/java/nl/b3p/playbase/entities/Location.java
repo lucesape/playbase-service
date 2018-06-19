@@ -59,7 +59,8 @@ public class Location {
     private Integer[] agecategories = new Integer[0];
     private Date lastmodified;
     private Date lastexported;
-
+    private Boolean removedfromplayadvisor;
+    
     public Integer getId() {
         return id;
     }
@@ -290,6 +291,14 @@ public class Location {
 
     public void setLastexported(Date lastexported) {
         this.lastexported = lastexported;
+    }
+
+    public Boolean getRemovedfromplayadvisor() {
+        return removedfromplayadvisor;
+    }
+
+    public void setRemovedfromplayadvisor(Boolean removedfromplayadvisor) {
+        this.removedfromplayadvisor = removedfromplayadvisor;
     }
 
     public JSONObject toPlayadvisorJSON() {
