@@ -64,7 +64,7 @@ import org.quartz.SchedulerException;
 @UrlBinding("/action/project/{$event}")
 public class ProjectActionBean implements ActionBean {
 
-    private ResultSetHandler<Project> cronHandler = new BeanHandler(Project.class);
+    private ResultSetHandler<Project> projectHandler = new BeanHandler(Project.class);
     private static final Log log = LogFactory.getLog(ProjectActionBean.class);
 
     private ActionBeanContext context;
@@ -96,7 +96,7 @@ public class ProjectActionBean implements ActionBean {
     public Resolution view() {
         if (projectid != null) {
             try {
-                project = DB.qr().query("SELECT id,cronexpressie,type_,username,password,name,log,lastrun,mailaddress,baseurl, status from " + DB.PROJECT_TABLE + " WHERE id = ?", cronHandler, projectid);
+                project = DB.qr().query("SELECT id,cronexpressie,type_,username,password,name,log,lastrun,mailaddress,baseurl, status from " + DB.PROJECT_TABLE + " WHERE id = ?", projectHandler, projectid);
             } catch (NamingException | SQLException ex) {
                 log.error("Cannot load cronjob", ex);
             }
@@ -113,7 +113,7 @@ public class ProjectActionBean implements ActionBean {
     public Resolution removeCron() {
         try {
             CronListener.unscheduleJob(project);
-            DB.qr().query("delete from " + DB.PROJECT_TABLE + " WHERE id = ?", cronHandler, project.getId());
+            DB.qr().query("delete from " + DB.PROJECT_TABLE + " WHERE id = ?", projectHandler, project.getId());
         } catch (NamingException | SQLException ex) {
             log.error("Cannot delete cronjob", ex);
             context.getValidationErrors().add("cronjob", new SimpleError("Error deleting:", ex.getLocalizedMessage()));
@@ -155,7 +155,7 @@ public class ProjectActionBean implements ActionBean {
         String logString;
         try (Connection con = DB.getConnection()) {
             ImportReport report = new ImportReport();
-            PlayadvisorImporter paimporter = new PlayadvisorImporter(project.getName());
+            PlayadvisorImporter paimporter = new PlayadvisorImporter(project);
             paimporter.initialLoad(project, report, con);
             logString = "Playadvisor:  " + System.lineSeparator() + report.toLog();
         } catch (NamingException | SQLException ex) {
@@ -166,7 +166,7 @@ public class ProjectActionBean implements ActionBean {
         }
 
         try (Connection con = DB.getConnection()) {
-            PlaymappingImporter pi = new PlaymappingImporter(project.getName());
+            PlaymappingImporter pi = new PlaymappingImporter(project);
             ImportReport locationReport = new ImportReport();
             ImportReport assetsReport = new ImportReport();
 
@@ -215,7 +215,7 @@ public class ProjectActionBean implements ActionBean {
                 sb.append("cronexpressie) ");
                 sb.append("VALUES(  ?,?,?,?,?,?,?,?,?);");
 
-                project = DB.qr().insert(con, sb.toString(), cronHandler, project.getUsername(), project.getPassword(), project.getName(), project.getType_().name(),
+                project = DB.qr().insert(con, sb.toString(), projectHandler, project.getUsername(), project.getPassword(), project.getName(), project.getType_().name(),
                         project.getBaseurl(), project.getAuthkey(), project.getMailaddress(), project.getStatus().name(), project.getCronexpressie());
                 CronListener.scheduleJob(project);
             } else {

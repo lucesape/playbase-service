@@ -36,7 +36,15 @@ public class Project {
     private String importedstring;
     private String mailaddress;
     private ProjectStatus status;
+
+    public Project() {
+    }
+
     
+    public Project(String name) {
+        this.name = name;
+    }
+
     public Integer getId() {
         return id;
     }

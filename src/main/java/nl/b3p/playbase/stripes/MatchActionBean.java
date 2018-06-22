@@ -49,6 +49,7 @@ import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.Asset;
 import nl.b3p.playbase.entities.Comment;
 import nl.b3p.playbase.entities.Location;
+import nl.b3p.playbase.entities.Project;
 import nl.b3p.playbase.util.GeometryGsonSerializer;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -313,8 +314,11 @@ public class MatchActionBean implements ActionBean {
                 toSave.setTitle(toSave.getPa_title());
                 toSave.setId(null);
                 playmappingLoc = playadvisorLoc;
+            }else{
+                throw new IllegalArgumentException("Location to save is null.");
             }
-            importer.setProject(toSave.getProject());
+            Project p = new Project(toSave.getProject());
+            importer.setProject(p);
             Integer locationId = importer.saveLocation(toSave, new ImportReport());
             if(method.equals("add") || useImagesFromPlayadvisor){
                 transferImages(playadvisorLoc, locationId, importer);

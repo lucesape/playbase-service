@@ -19,8 +19,6 @@ package nl.b3p.playbase;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +29,7 @@ import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.db.TestUtil;
 import nl.b3p.playbase.entities.Asset;
 import nl.b3p.playbase.entities.Location;
+import nl.b3p.playbase.entities.Project;
 import org.apache.commons.dbutils.handlers.ArrayListHandler;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
@@ -55,7 +54,7 @@ public class PlaymappingImporterTest extends TestUtil {
 
     @Before
     public void beforeTest() {
-        instance = new PlaymappingImporter("test");
+        instance = new PlaymappingImporter(new Project("test"));
         instance.init();
         report = new ImportReport();
     }

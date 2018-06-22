@@ -39,6 +39,7 @@ import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.Asset;
 import nl.b3p.playbase.entities.Comment;
 import nl.b3p.playbase.entities.Location;
+import nl.b3p.playbase.entities.Project;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ArrayListHandler;
@@ -95,9 +96,9 @@ public abstract class Importer {
     
     public String postfix = "";
     
-    private String project;
+    private Project project;
 
-    public Importer(String project) {
+    public Importer(Project project) {
         this.project = project;
         ArrayListHandler rsh = new ArrayListHandler();
         try {
@@ -242,13 +243,14 @@ public abstract class Importer {
             sb.append("pa_title,");
             sb.append("project,");
             sb.append("removedfromplayadvisor,");
+            sb.append("removedfromplaymapping,");
             sb.append("pm_guid) ");
-            sb.append("VALUES( ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);");
+            sb.append("VALUES( ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);");
 
             savedLocation = DB.qr().insert(sb.toString(), locationHandler, location.getTitle(), location.getLatitude(), location.getLongitude(), geom, 
                     location.getAveragerating() != null ? location.getAveragerating() : 0, location.getPa_content(), location.getPm_content(), location.getMunicipality(), location.getCountry(),
                    location.getStreet(), location.getPostalcode(), location.getParking(), location.getPhone(), location.getWebsite(), location.getPa_id(), location.getPa_title(),
-                   project,location.getRemovedfromplayadvisor(),location.getPm_guid());
+                   project,location.getRemovedfromplayadvisor(),location.getRemovedfromplaymapping(),location.getPm_guid());
             id = savedLocation.getId();
             report.increaseInserted(ImportType.LOCATION);
             List<Map<String, Object>> images = location.getImages();
@@ -278,13 +280,14 @@ public abstract class Importer {
             sb.append("pa_title = ?,");
             sb.append("project = ?,");
             sb.append("removedfromplayadvisor = ?,");
+            sb.append("removedfromplaymapping = ?,");
             sb.append("pm_guid = ?");
             sb.append("where id = ?;");
 
             DB.qr().update(sb.toString(), location.getTitle(), location.getLatitude(), location.getLongitude(), geom, 
                     location.getAveragerating() != null ? location.getAveragerating() : 0, location.getPa_content(),location.getPm_content(), location.getMunicipality(), location.getCountry(),
                     location.getStreet(), location.getPostalcode(), location.getParking(), location.getPhone(), location.getWebsite(), 
-                    location.getPa_id(), location.getPa_title(), project, location.getRemovedfromplayadvisor(), location.getPm_guid(), id);
+                    location.getPa_id(), location.getPa_title(), project, location.getRemovedfromplayadvisor(),location.getRemovedfromplaymapping(), location.getPm_guid(), id);
             report.increaseUpdated(ImportType.LOCATION);
             List<Map<String,Object>> images = location.getImages();
             saveImagesAndWords(images, null, id, DB.IMAGES_TABLE + postfix, true,  location);
@@ -829,16 +832,15 @@ public abstract class Importer {
         }
         return stringResult;
     }
-    
-    public String getProject() {
+
+    public Project getProject() {
         return project;
     }
 
-    public void setProject(String project) {
+    public void setProject(Project project) {
         this.project = project;
     }
     
     // </editor-fold>
-
 
 }

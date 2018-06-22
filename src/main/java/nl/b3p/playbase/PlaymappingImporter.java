@@ -32,6 +32,7 @@ import nl.b3p.playbase.ImportReport.ImportType;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.Asset;
 import nl.b3p.playbase.entities.Location;
+import nl.b3p.playbase.entities.Project;
 import nl.b3p.playbase.stripes.MatchActionBean;
 import org.apache.commons.dbutils.handlers.ArrayListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
@@ -48,7 +49,7 @@ public class PlaymappingImporter extends Importer {
 
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     private Map<String, List<Integer>> agecategories;
-    public PlaymappingImporter(String project) {
+    public PlaymappingImporter(Project project) {
         super(project);
         ArrayListHandler rsh = new ArrayListHandler();
         try {

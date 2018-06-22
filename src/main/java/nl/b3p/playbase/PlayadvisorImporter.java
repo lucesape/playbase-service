@@ -23,9 +23,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import javax.naming.NamingException;
+import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.Asset;
 import nl.b3p.playbase.entities.Project;
 import nl.b3p.playbase.entities.Location;
+import nl.b3p.playbase.entities.ProjectStatus;
+import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
@@ -45,8 +50,9 @@ import org.json.JSONObject;
 public class PlayadvisorImporter extends Importer {
 
     private static final Log log = LogFactory.getLog(PlayadvisorImporter.class);
+    private final ResultSetHandler<Project> projectHandler = new BeanHandler(Project.class);
 
-    public PlayadvisorImporter(String project) {
+    public PlayadvisorImporter(Project project) {
         super(project);
         postfix = "_playadvisor";
     }
@@ -89,35 +95,51 @@ public class PlayadvisorImporter extends Importer {
         List<Location> locations = new ArrayList<>();
         JSONArray ar = new JSONArray(locs);
         for (Iterator<Object> iterator = ar.iterator(); iterator.hasNext();) {
+
             JSONObject obj = (JSONObject) iterator.next();
             boolean hasProject = this.getProject() != null;
             String prevpostfix = postfix;
             Location l = parseLocation(obj);
-            
-            if (!hasProject) {
-                this.setProject(l.getMunicipality().toLowerCase());
-            }
-            if( isProjectReady(this.getProject())){
-                postfix = "";
-            }
-            
-            processLocation(l, obj, report, con);
-            locations.add(l);
-            
-            if (!hasProject) {
-                this.setProject(null);
-            }
-            
-            if(postfix.isEmpty()){
-                postfix = prevpostfix;
+            try {
+                if (!hasProject) {
+                    this.setProject(new Project(l.getMunicipality().toLowerCase()));
+                }
+                if (isProjectReady(this.getProject(), con)) {
+                    postfix = "";
+                }
+
+                processLocation(l, obj, report, con);
+                locations.add(l);
+
+                if (!hasProject) {
+                    this.setProject(null);
+                }
+
+                if (postfix.isEmpty()) {
+                    postfix = prevpostfix;
+                }
+            } catch (IllegalArgumentException e) {
+                log.error("Error processing location " + l.getTitle(), e);
             }
 
         }
         return locations;
     }
     
-    private boolean isProjectReady(String project){
-        return true;
+    private boolean isProjectReady(Project project, Connection con) throws NamingException, SQLException, IllegalArgumentException{
+        if(project.getStatus() == null){
+            ResultSetHandler<List<Project>> handler = new BeanListHandler(Project.class);
+            List<Project> projects = DB.qr().query(con,"SELECT id,cronexpressie,type_,username,password,name,log,lastrun,mailaddress,baseurl, status from " + DB.PROJECT_TABLE + " WHERE name = ?", handler, project.getName());
+            if(projects.size() == 1){
+                project = projects.get(0);
+            }else if(projects.isEmpty()){
+                throw new IllegalArgumentException( "Speelplek heeft geen geconfigureerd project voor " + project.getName());
+            }else{
+                throw new IllegalArgumentException( "Speelplek heeft meer dan 1 (" + projects.size() +") geconfigureerd project voor " + project.getName());
+            }
+        }
+      
+        return project.getStatus() == ProjectStatus.PUBLISHED;
     }
 
     protected void processLocation(Location location, JSONObject obj, ImportReport report, Connection con) throws NamingException, SQLException {
@@ -172,7 +194,7 @@ public class PlayadvisorImporter extends Importer {
         }
         loc.setPa_id("" + obj.getInt("PlayadvisorID"));
         loc.setMunicipality(obj.getString("Plaats"));
-        loc.setProject(this.getProject());
+        loc.setProject(this.getProject().getName());
         loc.setCountry(obj.getString("Land"));
         loc.setStreet(obj.optString("Straat"));
         loc.setEmail(obj.optString("Email"));

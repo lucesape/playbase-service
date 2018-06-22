@@ -39,6 +39,7 @@ import nl.b3p.playbase.PlayadvisorImporter;
 import nl.b3p.playbase.PlaymappingImporter;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.Location;
+import nl.b3p.playbase.entities.Project;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -128,7 +129,7 @@ public class PlayadvisorRESTAPIActionBean implements ActionBean {
                 if (loc != null) {
                     loc.setRemovedfromplayadvisor(true);
 
-                    Importer imp = new PlaymappingImporter(loc.getProject());
+                    Importer imp = new PlaymappingImporter(new Project(loc.getProject()));
                     ImportReport report = new ImportReport();
                     imp.saveLocation(loc, report);
                     List<String> errors = report.getErrors();

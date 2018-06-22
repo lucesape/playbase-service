@@ -67,7 +67,7 @@ public class PlaybaseJob implements Job {
 
     public void importPlaymapping(Project job) {
 
-        PlaymappingImporter pi = new PlaymappingImporter(job.getName());
+        PlaymappingImporter pi = new PlaymappingImporter(job);
 
         ImportReport locationReport = new ImportReport();
         ImportReport assetsReport = new ImportReport();

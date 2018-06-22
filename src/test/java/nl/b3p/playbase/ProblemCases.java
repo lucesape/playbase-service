@@ -17,6 +17,7 @@
 package nl.b3p.playbase;
 
 import nl.b3p.playbase.db.TestUtil;
+import nl.b3p.playbase.entities.Project;
 
 /**
  *
@@ -28,7 +29,7 @@ public class ProblemCases extends TestUtil{
     private PlayadvisorImporter paInstance;
 
     public ProblemCases() {
-        paInstance = new PlayadvisorImporter("test");
+        paInstance = new PlayadvisorImporter(new Project("test"));
     }
     
    /* @Test(expected = IllegalArgumentException.class)
