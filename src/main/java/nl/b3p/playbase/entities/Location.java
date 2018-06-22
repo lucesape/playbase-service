@@ -61,6 +61,7 @@ public class Location {
     private Date lastexported;
     private Boolean removedfromplayadvisor;
     private Boolean removedfromplaymapping;
+    private Status status;
     
     public Integer getId() {
         return id;
@@ -309,6 +310,14 @@ public class Location {
     public void setRemovedfromplaymapping(Boolean removedfromplaymapping) {
         this.removedfromplaymapping = removedfromplaymapping;
     }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
     
     public JSONObject toPlayadvisorJSON() {
         JSONObject obj = new JSONObject();
@@ -349,4 +358,5 @@ public class Location {
         return obj;
     }
 
+    
 }

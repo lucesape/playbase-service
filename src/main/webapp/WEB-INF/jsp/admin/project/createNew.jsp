@@ -35,6 +35,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     <tr id="username"><td>Playmapping username</td><td><stripes:text name="project.username"/></td></tr>
                     <tr id="password"><td>Playmapping Password</td><td><stripes:text name="project.password"/></td></tr>
                     <tr id="exporthash"><td>Authentication key playadvisor</td><td><stripes:text name="project.authkey"/></td></tr>
+                    <tr><td>Pad voor plaatjes</td><td><stripes:text name="project.imagepath"/></td></tr>
                     <tr id="baseurl"><td>Base url playadvisor</td><td><stripes:text name="project.baseurl"/></td></tr>
                     <tr><td>Gemeentenaam</td><td><stripes:text name="project.name"/></td></tr>
                     <tr ><td>Mail adres</td><td><stripes:text name="project.mailaddress"/></td></tr>

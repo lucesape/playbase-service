@@ -27,7 +27,7 @@ import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.Asset;
 import nl.b3p.playbase.entities.Project;
 import nl.b3p.playbase.entities.Location;
-import nl.b3p.playbase.entities.ProjectStatus;
+import nl.b3p.playbase.entities.Status;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
@@ -100,9 +100,6 @@ public class PlayadvisorImporter extends Importer {
             String prevpostfix = postfix;
             Location l = parseLocation(obj,con);
             try {
-               /* if (!hasProject) {
-                    this.setProject(getProject(l.getMunicipality().toLowerCase(), con));
-                }*/
                 if (isProjectReady(this.getProject(), con) || isPlaygroundAlreadyMerged(l,con)) {
                     postfix = "";
                 }
@@ -138,11 +135,17 @@ public class PlayadvisorImporter extends Importer {
             }
         }
       
-        return project.getStatus() == ProjectStatus.PUBLISHED;
+        return project.getStatus() == Status.PUBLISHED;
     }
 
     private boolean isPlaygroundAlreadyMerged(Location loc, Connection con) throws NamingException, SQLException, IllegalArgumentException {
-        return false;
+        Status s = loc.getStatus();
+        if(s == null || s == Status.UNDER_REVIEW || s == Status.UNPUBLISHED){
+            return false;
+        }else{
+            // merge location to main table when status is "PUBLISHED"
+            return true;
+        }
     }
        
     protected void processLocation(Location location, JSONObject obj, ImportReport report, Connection con) throws NamingException, SQLException {

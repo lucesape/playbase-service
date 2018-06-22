@@ -40,6 +40,7 @@ import nl.b3p.playbase.entities.Asset;
 import nl.b3p.playbase.entities.Comment;
 import nl.b3p.playbase.entities.Location;
 import nl.b3p.playbase.entities.Project;
+import nl.b3p.playbase.entities.Status;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ArrayListHandler;
@@ -223,6 +224,9 @@ public abstract class Importer {
         Location savedLocation;
         Integer id;
         if (!exists) {
+            if(location.getStatus() == null){
+                location.setStatus(Status.UNPUBLISHED);
+            }
             sb.append("INSERT ");
             sb.append("INTO ");
             sb.append(DB.LOCATION_TABLE).append(postfix);
@@ -245,15 +249,16 @@ public abstract class Importer {
             sb.append("project,");
             sb.append("removedfromplayadvisor,");
             sb.append("removedfromplaymapping,");
+            sb.append("status,");
             sb.append("pm_guid) ");
-            sb.append("VALUES( ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);");
+            sb.append("VALUES( ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);");
 
             savedLocation = DB.qr().insert(sb.toString(), locationHandler, location.getTitle(), location.getLatitude(), location.getLongitude(), geom, 
                     location.getAveragerating() != null ? location.getAveragerating() : 0, location.getPa_content(), location.getPm_content(), 
                     location.getMunicipality(), location.getCountry(),
                    location.getStreet(), location.getPostalcode(), location.getParking(), location.getPhone(), location.getWebsite(), 
                    location.getPa_id(), location.getPa_title(),
-                   project.getId(),location.getRemovedfromplayadvisor(),location.getRemovedfromplaymapping(),location.getPm_guid());
+                   project.getId(),location.getRemovedfromplayadvisor(),location.getRemovedfromplaymapping(),location.getStatus().name(),location.getPm_guid());
             id = savedLocation.getId();
             report.increaseInserted(ImportType.LOCATION);
             List<Map<String, Object>> images = location.getImages();
@@ -284,13 +289,15 @@ public abstract class Importer {
             sb.append("project = ?,");
             sb.append("removedfromplayadvisor = ?,");
             sb.append("removedfromplaymapping = ?,");
+            sb.append("status= ?,");
             sb.append("pm_guid = ?");
             sb.append("where id = ?;");
 
             DB.qr().update(sb.toString(), location.getTitle(), location.getLatitude(), location.getLongitude(), geom, 
                     location.getAveragerating() != null ? location.getAveragerating() : 0, location.getPa_content(),location.getPm_content(), location.getMunicipality(), location.getCountry(),
                     location.getStreet(), location.getPostalcode(), location.getParking(), location.getPhone(), location.getWebsite(), 
-                    location.getPa_id(), location.getPa_title(), project.getId(), location.getRemovedfromplayadvisor(),location.getRemovedfromplaymapping(), location.getPm_guid(), id);
+                    location.getPa_id(), location.getPa_title(), project.getId(), location.getRemovedfromplayadvisor(),location.getRemovedfromplaymapping(),
+                    location.getStatus().name(),location.getPm_guid(), id);
             report.increaseUpdated(ImportType.LOCATION);
             List<Map<String,Object>> images = location.getImages();
             saveImagesAndWords(images, null, id, DB.IMAGES_TABLE + postfix, true,  location);

@@ -108,3 +108,13 @@ ALTER TABLE public.cronjob
 ALTER TABLE public.cronjob
   RENAME TO project;
 ALTER TABLE public.project RENAME project  TO name;
+
+
+ALTER TABLE public.playservice_locations
+  ADD COLUMN status character varying(255);
+ALTER TABLE public.playservice_locations_playadvisor
+  ADD COLUMN status character varying(255);
+
+  
+ALTER TABLE public.project
+  ADD COLUMN imagepath character varying(255);

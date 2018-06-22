@@ -31,11 +31,12 @@ public class Project {
     private String name;
     private String authkey;
     private String baseurl;
+    private String imagepath;
     private Date lastrun;
     private String log;
     private String importedstring;
     private String mailaddress;
-    private ProjectStatus status;
+    private Status status;
 
     public Project() {
     }
@@ -143,11 +144,19 @@ public class Project {
         this.authkey = authkey;
     }
 
-    public ProjectStatus getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(ProjectStatus status) {
+    public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public String getImagepath() {
+        return imagepath;
+    }
+
+    public void setImagepath(String imagepath) {
+        this.imagepath = imagepath;
     }
 }

@@ -22,16 +22,18 @@ import com.google.gson.annotations.SerializedName;
  *
  * @author Meine Toonen
  */
-public enum ProjectStatus {
+public enum Status {
     
     @SerializedName("Gepubliceerd")
     PUBLISHED("Gepubliceerd"),
     @SerializedName("In behandeling")
-    UNDER_REVIEW("In behandeling");
+    UNDER_REVIEW("In behandeling"),
+    @SerializedName("Niet gepubliceerd")
+    UNPUBLISHED("Niet gepubliceerd");
     
     private String type;
     
-    ProjectStatus(String type) {
+    Status(String type) {
         this.type = type;
     }
     

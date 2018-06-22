@@ -44,7 +44,7 @@ import nl.b3p.playbase.cron.CronListener;
 import nl.b3p.playbase.entities.ProjectType;
 import nl.b3p.playbase.db.DB;
 import nl.b3p.playbase.entities.Project;
-import nl.b3p.playbase.entities.ProjectStatus;
+import nl.b3p.playbase.entities.Status;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
@@ -85,6 +85,7 @@ public class ProjectActionBean implements ActionBean {
         @Validate(field = "mailaddress"),
         @Validate(field = "authkey"),
         @Validate(field = "baseurl"),
+        @Validate(field = "imagepath"),
         @Validate(field = "name"),
         @Validate(field = "id"),
         @Validate(field = "type_", converter = EnumeratedTypeConverter.class, required = true, on = "save"),
@@ -96,7 +97,7 @@ public class ProjectActionBean implements ActionBean {
     public Resolution view() {
         if (projectid != null) {
             try {
-                project = DB.qr().query("SELECT id,cronexpressie,type_,username,password,name,log,lastrun,mailaddress,baseurl, status,authkey from " + DB.PROJECT_TABLE + " WHERE id = ?", projectHandler, projectid);
+                project = DB.qr().query("SELECT id,cronexpressie,type_,username,password,name,log,lastrun,mailaddress,baseurl, status,authkey,imagepath from " + DB.PROJECT_TABLE + " WHERE id = ?", projectHandler, projectid);
             } catch (NamingException | SQLException ex) {
                 log.error("Cannot load cronjob", ex);
             }
@@ -147,7 +148,7 @@ public class ProjectActionBean implements ActionBean {
     }
 
     public Resolution saveNew() {
-        project.setStatus(ProjectStatus.UNDER_REVIEW);
+        project.setStatus(Status.UNDER_REVIEW);
         Resolution r = save();
         if (context.getValidationErrors().size() > 0) {
             return nieuw();
@@ -215,11 +216,12 @@ public class ProjectActionBean implements ActionBean {
                 sb.append("authkey,");
                 sb.append("mailaddress,");
                 sb.append("status,");
+                sb.append("imagepath,");
                 sb.append("cronexpressie) ");
-                sb.append("VALUES(  ?,?,?,?,?,?,?,?,?);");
+                sb.append("VALUES(  ?,?,?,?,?,?,?,?,?,?);");
 
                 project = DB.qr().insert(con, sb.toString(), projectHandler, project.getUsername(), project.getPassword(), project.getName(), project.getType_().name(),
-                        project.getBaseurl(), project.getAuthkey(), project.getMailaddress(), project.getStatus().name(), project.getCronexpressie());
+                        project.getBaseurl(), project.getAuthkey(), project.getMailaddress(), project.getStatus().name(),project.getImagepath(), project.getCronexpressie());
                 CronListener.scheduleJob(project);
             } else {
                 sb.append("update ");
@@ -233,11 +235,13 @@ public class ProjectActionBean implements ActionBean {
                 sb.append("authkey= ?,");
                 sb.append("status= ?,");
                 sb.append("type_= ?,");
+                sb.append("imagepath= ?,");
                 sb.append("cronexpressie = ?");
                 sb.append(" where id = ?");
 
                 DB.qr().update(con, sb.toString(), project.getUsername(), project.getPassword(), project.getName(),
-                        project.getMailaddress(), project.getBaseurl(), project.getAuthkey(), project.getStatus().name(), project.getType_().name(), project.getCronexpressie(), project.getId());
+                        project.getMailaddress(), project.getBaseurl(), project.getAuthkey(), project.getStatus().name(), project.getType_().name(),project.getImagepath(),
+                        project.getCronexpressie(), project.getId());
                 CronListener.rescheduleJob(project);
             }
         } catch (NamingException | SQLException | SchedulerException ex) {
