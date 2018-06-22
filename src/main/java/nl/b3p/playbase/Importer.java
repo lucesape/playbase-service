@@ -324,7 +324,6 @@ public abstract class Importer {
     }
     
     public void saveLocationTypes(Set<Integer> types, Integer locationId) throws NamingException, SQLException{
-        
         ArrayListHandler rsh = new ArrayListHandler();
         List<Object[]> o = DB.qr().query("SELECT category from " + DB.LOCATION_CATEGORY_TABLE + " WHERE location = ?", rsh, locationId);
         
@@ -337,7 +336,6 @@ public abstract class Importer {
                 saveLocationType(type, locationId, null);
             }
         }
-        
     }
     
     private void saveLocationType(Integer categoryId, Location location) throws NamingException, SQLException, UnsupportedEncodingException {

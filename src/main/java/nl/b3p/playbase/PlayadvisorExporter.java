@@ -75,11 +75,11 @@ public class PlayadvisorExporter {
 
     }
 
-    public void pushLocation(Location loc, Connection con, Project job) throws IOException, SQLException, NamingException {
-        pushLocation(createLocationJSON(loc, con), loc.getId(),job);
+    public String pushLocation(Location loc, Connection con, Project job) throws IOException, SQLException, NamingException {
+        return pushLocation(createLocationJSON(loc, con), loc.getId(),job);
     }
 
-    public void pushLocation(JSONObject location, Integer id, Project job) throws IOException {
+    public String pushLocation(JSONObject location, Integer id, Project job) throws IOException {
         String url = job.getBaseurl() + "/wp-json/b3p/v1/playbase/" + id;
         HttpClient httpClient = HttpClientBuilder.create().build();
 
@@ -101,6 +101,7 @@ public class PlayadvisorExporter {
         } else {
             String stringResult = EntityUtils.toString(entity);
             log.debug("Result: " + stringResult);
+            return stringResult;
         }
     }
 

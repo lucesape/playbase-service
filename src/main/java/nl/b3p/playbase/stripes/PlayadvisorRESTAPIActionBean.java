@@ -30,6 +30,7 @@ import net.sourceforge.stripes.action.ForwardResolution;
 import net.sourceforge.stripes.action.JsonResolution;
 import net.sourceforge.stripes.action.Resolution;
 import net.sourceforge.stripes.action.RestActionBean;
+import net.sourceforge.stripes.action.SimpleMessage;
 import net.sourceforge.stripes.action.UrlBinding;
 import net.sourceforge.stripes.validation.SimpleError;
 import net.sourceforge.stripes.validation.Validate;
@@ -177,7 +178,8 @@ public class PlayadvisorRESTAPIActionBean implements ActionBean {
                 loc = DB.qr().query(sb.toString(), locationHandler);
 
                 PlayadvisorExporter pe = new PlayadvisorExporter();
-                pe.pushLocation(loc, con, getProject(loc.getProject(), con));
+                String result = pe.pushLocation(loc, con, getProject(loc.getProject(), con));
+                context.getMessages().add(new SimpleMessage(result));
             } catch (NamingException | SQLException | IOException ex) {
                 log.error("Error updating locations", ex);
             }

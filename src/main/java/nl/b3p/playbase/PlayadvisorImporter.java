@@ -100,10 +100,10 @@ public class PlayadvisorImporter extends Importer {
             String prevpostfix = postfix;
             Location l = parseLocation(obj,con);
             try {
-                if (!hasProject) {
+               /* if (!hasProject) {
                     this.setProject(getProject(l.getMunicipality().toLowerCase(), con));
-                }
-                if (isProjectReady(this.getProject(), con)) {
+                }*/
+                if (isProjectReady(this.getProject(), con) || isPlaygroundAlreadyMerged(l,con)) {
                     postfix = "";
                 }
 
@@ -141,6 +141,10 @@ public class PlayadvisorImporter extends Importer {
         return project.getStatus() == ProjectStatus.PUBLISHED;
     }
 
+    private boolean isPlaygroundAlreadyMerged(Location loc, Connection con) throws NamingException, SQLException, IllegalArgumentException {
+        return false;
+    }
+       
     protected void processLocation(Location location, JSONObject obj, ImportReport report, Connection con) throws NamingException, SQLException {
         int id = saveLocation(location, report);
         List<Asset> assets = parseAssets(location, obj.getJSONArray("Assets"), report, false, con);
@@ -193,7 +197,13 @@ public class PlayadvisorImporter extends Importer {
         }
         loc.setPa_id("" + obj.getInt("PlayadvisorID"));
         loc.setMunicipality(obj.getString("Plaats"));
-        loc.setProject(this.getProject().getId());
+        if(this.getProject() == null){
+            Project p =this.getProject(loc.getMunicipality(), con);
+            this.setProject(p);
+            loc.setProject(p.getId());
+        }else{
+            loc.setProject(this.getProject().getId());
+        }
         loc.setCountry(obj.getString("Land"));
         loc.setStreet(obj.optString("Straat"));
         loc.setEmail(obj.optString("Email"));
