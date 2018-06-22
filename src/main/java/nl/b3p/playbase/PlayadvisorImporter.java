@@ -50,7 +50,6 @@ import org.json.JSONObject;
 public class PlayadvisorImporter extends Importer {
 
     private static final Log log = LogFactory.getLog(PlayadvisorImporter.class);
-    private final ResultSetHandler<Project> projectHandler = new BeanHandler(Project.class);
 
     public PlayadvisorImporter(Project project) {
         super(project);
@@ -64,7 +63,7 @@ public class PlayadvisorImporter extends Importer {
             // Bij nieuwe plekken, mail monique
 
             // Na merge: Stuur lijstje van ids van playbaseID vs playadvisor id terug naar playadvisor
-            String url = job.getBaseurl() + "/wp-json/b3p/v1/playbase/" + this.getProject();
+            String url = job.getBaseurl() + "/wp-json/b3p/v1/playbase/" + this.getProject().getName().toLowerCase() + "?" + System.nanoTime();
             HttpClient httpClient = HttpClientBuilder.create().build();
 
             HttpGet request = new HttpGet(url);
@@ -99,10 +98,10 @@ public class PlayadvisorImporter extends Importer {
             JSONObject obj = (JSONObject) iterator.next();
             boolean hasProject = this.getProject() != null;
             String prevpostfix = postfix;
-            Location l = parseLocation(obj);
+            Location l = parseLocation(obj,con);
             try {
                 if (!hasProject) {
-                    this.setProject(new Project(l.getMunicipality().toLowerCase()));
+                    this.setProject(getProject(l.getMunicipality().toLowerCase(), con));
                 }
                 if (isProjectReady(this.getProject(), con)) {
                     postfix = "";
@@ -178,7 +177,7 @@ public class PlayadvisorImporter extends Importer {
          */
     }
 
-    protected Location parseLocation(JSONObject obj) {
+    protected Location parseLocation(JSONObject obj, Connection con) throws NamingException, SQLException {
         Location loc = new Location();
 
         loc.setPa_title(obj.optString("Titel"));
@@ -194,7 +193,7 @@ public class PlayadvisorImporter extends Importer {
         }
         loc.setPa_id("" + obj.getInt("PlayadvisorID"));
         loc.setMunicipality(obj.getString("Plaats"));
-        loc.setProject(this.getProject().getName());
+        loc.setProject(this.getProject().getId());
         loc.setCountry(obj.getString("Land"));
         loc.setStreet(obj.optString("Straat"));
         loc.setEmail(obj.optString("Email"));

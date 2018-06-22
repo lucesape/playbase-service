@@ -70,6 +70,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     <tr ><td>Mail adres</td><td><stripes:text name="project.mailaddress"/></td></tr>
                     <tr><td><stripes:submit name="save" class="btn btn-primary">Opslaan</stripes:submit></td>
                         <td><c:if test="${not empty actionBean.project.id}"><stripes:submit name="removeCron" class="btn btn-danger">Verwijder</stripes:submit>
+                        <td><stripes:submit name="doInitialLoad" class="btn btn-danger">doInitialLoad</stripes:submit>
                         <stripes:submit name="downloadString" class="btn btn-default">Download</stripes:submit></c:if></td>
                     </tr>
                     <tr>

@@ -317,7 +317,8 @@ public class MatchActionBean implements ActionBean {
             }else{
                 throw new IllegalArgumentException("Location to save is null.");
             }
-            Project p = new Project(toSave.getProject());
+            Project p = importer.getProject(toSave.getProject(), con);
+            
             importer.setProject(p);
             Integer locationId = importer.saveLocation(toSave, new ImportReport());
             if(method.equals("add") || useImagesFromPlayadvisor){

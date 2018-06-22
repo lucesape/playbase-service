@@ -128,8 +128,8 @@ public class PlayadvisorRESTAPIActionBean implements ActionBean {
                 loc = DB.qr().query(con, sb.toString(), locationHandler);
                 if (loc != null) {
                     loc.setRemovedfromplayadvisor(true);
-
-                    Importer imp = new PlaymappingImporter(new Project(loc.getProject()));
+                    Project p = getProject(loc.getProject(), con);
+                    Importer imp = new PlaymappingImporter(p);
                     ImportReport report = new ImportReport();
                     imp.saveLocation(loc, report);
                     List<String> errors = report.getErrors();
@@ -177,4 +177,17 @@ public class PlayadvisorRESTAPIActionBean implements ActionBean {
         }
         return new ForwardResolution(JSP);
     }
+    
+        
+    protected final ResultSetHandler<Project> projectHandler = new BeanHandler(Project.class); 
+    protected Project getProject (String gemeente, Connection con) throws NamingException, SQLException{
+        Project p = DB.qr().query(con, "SELECT id,cronexpressie,type_,username,password,name,log,lastrun,mailaddress,baseurl, status from " + DB.PROJECT_TABLE + " WHERE name = ?", projectHandler, gemeente);
+        return p;
+    }
+    
+    protected Project getProject (Integer projectID, Connection con) throws NamingException, SQLException{
+        Project p = DB.qr().query(con, "SELECT id,cronexpressie,type_,username,password,name,log,lastrun,mailaddress,baseurl, status from " + DB.PROJECT_TABLE + " WHERE id = ?", projectHandler, projectID);
+        return p;
+    }
+    
 }

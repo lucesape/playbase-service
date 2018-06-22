@@ -82,6 +82,7 @@ public abstract class Importer {
     protected ResultSetHandler<Location> locationHandler;
     protected ResultSetHandler<Asset> assHandler;
     protected ResultSetHandler<List<Asset>> assListHandler;
+    protected final ResultSetHandler<Project> projectHandler = new BeanHandler(Project.class); 
 
     private Map<String, Integer> assetTypes;
     protected Map<String, Integer> equipmentTypes;
@@ -248,9 +249,11 @@ public abstract class Importer {
             sb.append("VALUES( ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);");
 
             savedLocation = DB.qr().insert(sb.toString(), locationHandler, location.getTitle(), location.getLatitude(), location.getLongitude(), geom, 
-                    location.getAveragerating() != null ? location.getAveragerating() : 0, location.getPa_content(), location.getPm_content(), location.getMunicipality(), location.getCountry(),
-                   location.getStreet(), location.getPostalcode(), location.getParking(), location.getPhone(), location.getWebsite(), location.getPa_id(), location.getPa_title(),
-                   project,location.getRemovedfromplayadvisor(),location.getRemovedfromplaymapping(),location.getPm_guid());
+                    location.getAveragerating() != null ? location.getAveragerating() : 0, location.getPa_content(), location.getPm_content(), 
+                    location.getMunicipality(), location.getCountry(),
+                   location.getStreet(), location.getPostalcode(), location.getParking(), location.getPhone(), location.getWebsite(), 
+                   location.getPa_id(), location.getPa_title(),
+                   project.getId(),location.getRemovedfromplayadvisor(),location.getRemovedfromplaymapping(),location.getPm_guid());
             id = savedLocation.getId();
             report.increaseInserted(ImportType.LOCATION);
             List<Map<String, Object>> images = location.getImages();
@@ -287,7 +290,7 @@ public abstract class Importer {
             DB.qr().update(sb.toString(), location.getTitle(), location.getLatitude(), location.getLongitude(), geom, 
                     location.getAveragerating() != null ? location.getAveragerating() : 0, location.getPa_content(),location.getPm_content(), location.getMunicipality(), location.getCountry(),
                     location.getStreet(), location.getPostalcode(), location.getParking(), location.getPhone(), location.getWebsite(), 
-                    location.getPa_id(), location.getPa_title(), project, location.getRemovedfromplayadvisor(),location.getRemovedfromplaymapping(), location.getPm_guid(), id);
+                    location.getPa_id(), location.getPa_title(), project.getId(), location.getRemovedfromplayadvisor(),location.getRemovedfromplaymapping(), location.getPm_guid(), id);
             report.increaseUpdated(ImportType.LOCATION);
             List<Map<String,Object>> images = location.getImages();
             saveImagesAndWords(images, null, id, DB.IMAGES_TABLE + postfix, true,  location);
@@ -672,6 +675,23 @@ public abstract class Importer {
     // </editor-fold>
     
     // <editor-fold desc="Helpers" defaultstate="collapsed">
+    
+    public Project getProject (String gemeente, Connection con) throws NamingException, SQLException{
+        if(getProject() != null){
+            return getProject();
+        }
+        Project p = DB.qr().query(con, "SELECT id,cronexpressie,type_,username,password,name,log,lastrun,mailaddress,baseurl, status from " + DB.PROJECT_TABLE + " WHERE name = ?", projectHandler, gemeente);
+        return p;
+    }
+    
+    public Project getProject (Integer projectID, Connection con) throws NamingException, SQLException{
+        if(getProject() != null){
+            return getProject();
+        }
+        Project p = DB.qr().query(con, "SELECT id,cronexpressie,type_,username,password,name,log,lastrun,mailaddress,baseurl, status from " + DB.PROJECT_TABLE + " WHERE id = ?", projectHandler, projectID);
+        return p;
+    }
+    
     protected Integer getAssetType(String type) {
         Integer id = assetTypes.get(type);
         if(id == null){

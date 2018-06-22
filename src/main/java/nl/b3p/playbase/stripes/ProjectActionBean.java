@@ -96,7 +96,7 @@ public class ProjectActionBean implements ActionBean {
     public Resolution view() {
         if (projectid != null) {
             try {
-                project = DB.qr().query("SELECT id,cronexpressie,type_,username,password,name,log,lastrun,mailaddress,baseurl, status from " + DB.PROJECT_TABLE + " WHERE id = ?", projectHandler, projectid);
+                project = DB.qr().query("SELECT id,cronexpressie,type_,username,password,name,log,lastrun,mailaddress,baseurl, status,authkey from " + DB.PROJECT_TABLE + " WHERE id = ?", projectHandler, projectid);
             } catch (NamingException | SQLException ex) {
                 log.error("Cannot load cronjob", ex);
             }
@@ -152,7 +152,11 @@ public class ProjectActionBean implements ActionBean {
         if (context.getValidationErrors().size() > 0) {
             return nieuw();
         }
-        String logString;
+        return doInitialLoad();
+    }
+
+    public Resolution doInitialLoad(){
+         String logString;
         try (Connection con = DB.getConnection()) {
             ImportReport report = new ImportReport();
             PlayadvisorImporter paimporter = new PlayadvisorImporter(project);
@@ -187,10 +191,9 @@ public class ProjectActionBean implements ActionBean {
         }
 
         project.setLog(logString);
-
         return new ForwardResolution(WIZARD_AFTER_INITIAL_IMPORT);
     }
-
+    
     public Resolution save() {
 
         if (project.getCronexpressie() == null || !CronExpression.isValidExpression(project.getCronexpressie())) {
@@ -254,7 +257,7 @@ public class ProjectActionBean implements ActionBean {
         try {
 
             ResultSetHandler<List<Project>> handler = new BeanListHandler(Project.class);
-            String sql = "select id,cronexpressie,type_,username,password,name,log,lastrun, status from " + DB.PROJECT_TABLE;
+            String sql = "select id,cronexpressie,type_,username,password,name,log,lastrun, status, authkey from " + DB.PROJECT_TABLE;
             List<Project> jobs = DB.qr().query(sql, handler);
             JSONArray ar = new JSONArray();
             for (Project job : jobs) {
@@ -264,6 +267,7 @@ public class ProjectActionBean implements ActionBean {
                 obj.put("next_fire_time", formattedDate);
                 obj.put("lastrun", obj.optString("lastrun", " - "));
                 obj.put("type_", obj.optString("type_", " - "));
+                obj.put("authkey", obj.optString("authkey", " - "));
                 ar.put(obj);
             }
             result.put("data", ar);
