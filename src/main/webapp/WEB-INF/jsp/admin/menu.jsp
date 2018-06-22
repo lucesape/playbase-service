@@ -16,4 +16,7 @@
     <li${menuitem == 'planner' ? ' class="active"' : ''}>
         <stripes:link beanclass="nl.b3p.playbase.stripes.ProjectActionBean">Project</stripes:link>
     </li>
+    <li${menuitem == 'pushy' ? ' class="active"' : ''}>
+        <stripes:link beanclass="nl.b3p.playbase.stripes.PlayadvisorRESTAPIActionBean" event="view">Pushit</stripes:link>
+    </li>
 </ul>

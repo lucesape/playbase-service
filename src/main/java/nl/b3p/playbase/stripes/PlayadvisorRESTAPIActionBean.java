@@ -20,9 +20,12 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.naming.NamingException;
 import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
+import net.sourceforge.stripes.action.DefaultHandler;
 import net.sourceforge.stripes.action.ForwardResolution;
 import net.sourceforge.stripes.action.JsonResolution;
 import net.sourceforge.stripes.action.Resolution;
@@ -35,6 +38,7 @@ import nl.b3p.loader.jdbc.GeometryJdbcConverterFactory;
 import nl.b3p.loader.util.DbUtilsGeometryColumnConverter;
 import nl.b3p.playbase.ImportReport;
 import nl.b3p.playbase.Importer;
+import nl.b3p.playbase.PlayadvisorExporter;
 import nl.b3p.playbase.PlayadvisorImporter;
 import nl.b3p.playbase.PlaymappingImporter;
 import nl.b3p.playbase.db.DB;
@@ -61,7 +65,7 @@ public class PlayadvisorRESTAPIActionBean implements ActionBean {
 
     private static final String JSP = "/WEB-INF/jsp/admin/playadvisor/view.jsp";
     protected ResultSetHandler<Location> locationHandler;
-    
+
     private ActionBeanContext context;
 
     @Validate
@@ -87,17 +91,21 @@ public class PlayadvisorRESTAPIActionBean implements ActionBean {
     }
 
     // </editor-fold>
-        
+    @DefaultHandler
+    public Resolution view() {
+        return new ForwardResolution(JSP);
+    }
+
     public Resolution post() {
         String logString = "";
         try (Connection con = DB.getConnection()) {
             ImportReport report = new ImportReport();
-            String locationString =  IOUtils.toString(context.getRequest().getInputStream(), "UTF-8");
+            String locationString = IOUtils.toString(context.getRequest().getInputStream(), "UTF-8");
             PlayadvisorImporter paimporter = new PlayadvisorImporter(null);
-            
+
             JSONArray ar = new JSONArray();
-            ar.put(new JSONObject (locationString));
-            
+            ar.put(new JSONObject(locationString));
+
             List<Location> loc = paimporter.processLocations(ar.toString(), report, con);
             logString = "Playadvisor:  " + System.lineSeparator() + report.toLog();
         } catch (NamingException | SQLException | IOException ex) {
@@ -109,7 +117,6 @@ public class PlayadvisorRESTAPIActionBean implements ActionBean {
         return new JsonResolution(logString);
     }
 
-    
     public Resolution delete() {
         if (location != null) {
             try (Connection con = DB.getConnection()) {
@@ -139,9 +146,9 @@ public class PlayadvisorRESTAPIActionBean implements ActionBean {
                     } else {
                         return new JsonResolution(report.getAllErrors());
                     }
-                }else{
-                        return new JsonResolution("Error: invalid id given");
-                    
+                } else {
+                    return new JsonResolution("Error: invalid id given");
+
                 }
 
             } catch (NamingException | SQLException ex) {
@@ -169,25 +176,25 @@ public class PlayadvisorRESTAPIActionBean implements ActionBean {
                 sb.append("';");
                 loc = DB.qr().query(sb.toString(), locationHandler);
 
-                /*  PlayadvisorExporter pe = new PlayadvisorExporter();
-                pe.pushLocation(loc,con);*/
-            } catch (NamingException | SQLException ex) {
+                PlayadvisorExporter pe = new PlayadvisorExporter();
+                pe.pushLocation(loc, con, getProject(loc.getProject(), con));
+            } catch (NamingException | SQLException | IOException ex) {
                 log.error("Error updating locations", ex);
             }
         }
         return new ForwardResolution(JSP);
     }
-    
-        
-    protected final ResultSetHandler<Project> projectHandler = new BeanHandler(Project.class); 
-    protected Project getProject (String gemeente, Connection con) throws NamingException, SQLException{
-        Project p = DB.qr().query(con, "SELECT id,cronexpressie,type_,username,password,name,log,lastrun,mailaddress,baseurl, status from " + DB.PROJECT_TABLE + " WHERE name = ?", projectHandler, gemeente);
+
+    protected final ResultSetHandler<Project> projectHandler = new BeanHandler(Project.class);
+
+    protected Project getProject(String gemeente, Connection con) throws NamingException, SQLException {
+        Project p = DB.qr().query(con, "SELECT id,cronexpressie,type_,username,password,name,log,lastrun,mailaddress,baseurl, status, authkey from " + DB.PROJECT_TABLE + " WHERE name = ?", projectHandler, gemeente);
         return p;
     }
-    
-    protected Project getProject (Integer projectID, Connection con) throws NamingException, SQLException{
-        Project p = DB.qr().query(con, "SELECT id,cronexpressie,type_,username,password,name,log,lastrun,mailaddress,baseurl, status from " + DB.PROJECT_TABLE + " WHERE id = ?", projectHandler, projectID);
+
+    protected Project getProject(Integer projectID, Connection con) throws NamingException, SQLException {
+        Project p = DB.qr().query(con, "SELECT id,cronexpressie,type_,username,password,name,log,lastrun,mailaddress,baseurl, status, authkey from " + DB.PROJECT_TABLE + " WHERE id = ?", projectHandler, projectID);
         return p;
     }
-    
+
 }

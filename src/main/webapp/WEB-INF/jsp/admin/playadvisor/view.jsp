@@ -17,14 +17,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <%@include file="/WEB-INF/jsp/taglibs.jsp"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 
-<stripes:layout-render name="/WEB-INF/jsp/templates/admin.jsp" pageTitle="Push naar playadvisor" menuitem="pushplayadvisor">
+<stripes:layout-render name="/WEB-INF/jsp/templates/admin.jsp" pageTitle="Push naar playadvisor" menuitem="pushy">
     <stripes:layout-component name="content">
 
         <h1>Push naar Playadvisor</h1>
 
         <jsp:include page="/WEB-INF/jsp/common/messages.jsp"/>
         
-        <stripes:form beanclass="nl.b3p.playbase.stripes.PlayadvisorActionBean" class="form-horizontal">
+        <stripes:form beanclass="nl.b3p.playbase.stripes.PlayadvisorRESTAPIActionBean" class="form-horizontal">
             Locatie id <stripes:text name="location"/> <br/>
             <stripes:submit name="updateLocation" class="btn btn-primary">Export</stripes:submit>
         </stripes:form>
