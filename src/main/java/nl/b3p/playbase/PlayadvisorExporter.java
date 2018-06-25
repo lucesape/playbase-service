@@ -80,13 +80,21 @@ public class PlayadvisorExporter {
     }
 
     public String pushLocation(JSONObject location, Integer id, Project job) throws IOException {
-        String url = job.getBaseurl() + "/wp-json/b3p/v1/playbase/" + id;
+        String url;
+
+        if (job == null) {
+          url = new Project().getBaseurl() + "/wp-json/b3p/v1/playbase/" + id;
+        } else {
+          url = job.getBaseurl() + "/wp-json/b3p/v1/playbase/" + id;
+        }
         HttpClient httpClient = HttpClientBuilder.create().build();
 
         HttpPost request = new HttpPost(url);
         StringEntity params = new StringEntity(location.toString(), ContentType.APPLICATION_JSON);
         request.addHeader("content-type", "application/json");
-        request.addHeader("Authorization", "Basic " + job.getAuthkey());
+        if (job != null) {
+          request.addHeader("Authorization", "Basic " + job.getAuthkey());
+        }
         request.setEntity(params);
         HttpResponse response = httpClient.execute(request);
         StatusLine sl = response.getStatusLine();
@@ -134,7 +142,7 @@ public class PlayadvisorExporter {
 
         return obj;
     }
-    
+
     protected void retrieveImages(Integer id,  JSONObject location, Connection con) throws NamingException, SQLException {
         ArrayListHandler rsh = new ArrayListHandler();
 
@@ -147,7 +155,7 @@ public class PlayadvisorExporter {
             if (url.isEmpty()) {
                 continue;
             }
-        
+
             String imageName = url.substring(url.lastIndexOf("/") + 1);
             if (imageName.contains("GetImage.ashx")) {
                 imageName = "Image" + id + "-" + index + ".jpg";
@@ -163,7 +171,7 @@ public class PlayadvisorExporter {
         location.put("Images",imgs);
     }
 
-    
+
     private void retrieveAssets(Integer id, JSONObject location, Connection con) throws NamingException, SQLException {
         GeometryJdbcConverter geometryConverter = GeometryJdbcConverterFactory.getGeometryJdbcConverter(con);
         ResultSetHandler<List<Asset>> assHandler = new BeanListHandler(Asset.class, new BasicRowProcessor(new DbUtilsGeometryColumnConverter(geometryConverter)));
@@ -262,7 +270,7 @@ public class PlayadvisorExporter {
 
     }
 
-    
+
     private Object valueOrEmptyString(Object value) {
         return value == null ? "" : value;
     }
